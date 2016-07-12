@@ -188,6 +188,9 @@ def selectOne(iy, curyvalue, lendict, y_index1, indexes, x):
 	y_index2a = indexes[iy.index(curyvalue)];
 	iy.reverse();
 	y_index2b = indexes[len(iy) - iy.index(curyvalue) - 1]
+
+	if y_index2a==y_index1: return y_index2b
+	elif y_index2b==y_index1: return y_index2a
 	
 	return selectFromTwo(y_index2a, y_index2b, lendict, y_index1, x)
 
