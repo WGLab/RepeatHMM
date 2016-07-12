@@ -104,7 +104,9 @@ if __name__=='__main__':
 	print ''
 	match=10; mismatch=-9; gap_in_perf=-2; gap_in_read=-13; gap_before_after = -1;
 	perf = pat*(int(len(querystr)/2))
-	print UnsymmetricPairAlignment.unsymmetricPairWiseAlignment(perf, len(perf), querystr, len(querystr), match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, 1)
+	mnewstr = UnsymmetricPairAlignment.unsymmetricPairWiseAlignment(perf, len(perf), querystr, len(querystr), match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, 1)
+	print mnewstr;
+	del mnewstr
 
 
 	print '\n', myUnsymmetricPairAlignment(pat, querystr, forw_rerv, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, 1)
