@@ -12,7 +12,7 @@ from argparse import RawTextHelpFormatter
 
 import logging
 
-import findTrinucleotideRepeats
+from scripts import findTrinucleotideRepeats
 
 from myheader import *
 

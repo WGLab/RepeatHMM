@@ -4,7 +4,7 @@ import sys;
 import math;
 import numpy as np
 
-import trinucleotideRepeatRealSimulation
+from scripts import trinucleotideRepeatRealSimulation
 
 if __name__=='__main__':
 	glk = 'atxn3'; randtimes = 100;

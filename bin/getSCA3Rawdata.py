@@ -5,7 +5,7 @@ import sys;
 
 import string;
 
-import trinucleotideRepeatRealSimulation
+from scripts import trinucleotideRepeatRealSimulation
 
 def getMean_N50(lenlist, totbase):
 	lenlist.sort();

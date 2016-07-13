@@ -2,7 +2,7 @@
 import os;
 import sys
 
-import findTrinucleotideRepeats
+from scripts import findTrinucleotideRepeats
 
 
 gLoc = findTrinucleotideRepeats.getDiseseGeneInRefGenomeLocation('')

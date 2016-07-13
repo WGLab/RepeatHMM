@@ -4,7 +4,7 @@ import string
 
 import sys
 #sys.path.append('/home/qianliu/project/HTT_CAG_repeat/UnsymmetricPairAlignment')
-import UnsymmetricPairAlignment; 
+from UnsymmetricPairAlignment import UnsymmetricPairAlignment; 
 #from UnsymmetricPairAlignment import *
 
 from myheader import *

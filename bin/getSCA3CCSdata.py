@@ -3,9 +3,9 @@
 import os;
 import sys;
 
-import trinucleotideRepeatRealSimulation
+from scripts import trinucleotideRepeatRealSimulation
 
-import getAlignment
+from scripts import getAlignment
 
 if __name__=="__main__":
 	ccsdatafolder = "atxn3_data/ccsdata/"

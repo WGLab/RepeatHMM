@@ -13,7 +13,7 @@ import logging
 
 import findTrinucleotideRepeats
 import getAlignment
-import UnsymmetricPairAlignment
+from UnsymmetricPairAlignment import UnsymmetricPairAlignment
 from myheader import *
 import myHMM
 
