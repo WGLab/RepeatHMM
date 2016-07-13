@@ -13,10 +13,10 @@ import logging
 
 from argparse import RawTextHelpFormatter
 
-import trinucleotideRepeatRealSimulation
-import findTrinucleotideRepeats
+from scripts import trinucleotideRepeatRealSimulation
+from scripts import findTrinucleotideRepeats
 
-from myheader import *
+from scripts.myheader import *
 
 
 def non_negative(i, mstr):
