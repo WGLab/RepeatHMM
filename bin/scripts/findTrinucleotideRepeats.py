@@ -106,9 +106,11 @@ def getValues(mdict):
                 valdict[mdict[mdk]] += 1;
         valkeys = valdict.keys(); valkeys.sort();
         more = []
-        for i in range(1, len(valkeys)*2/3+1):
+        #for i in range(1, len(valkeys)*2/3+1):
+        for i in range(1, len(valkeys)+1):
+                if valkeys[-i]<4: continue;
                 #print -i, valkeys[-i], valdict[valkeys[-i]]
-                if valdict[valkeys[-i]]>2: more.append(valkeys[-i])
+                if valdict[valkeys[-i]]>=2: more.append(valkeys[-i])
         return more;
 
 def findSameValues(mdict, v, mdkeys):
@@ -295,12 +297,53 @@ def getPeaks2(x, y, lendict, mm, mdebug):
 	return peak2	
 
 def get2Peaks(lengd):
-	#print lengd
+	#prnucleotideRepeats.pyint lengd
 
 	pvalue = 0.05; ratio = 0.4;
 
 	mdebug = True; mdebug = False;
+	
+	lendict = {};
+	for l in lengd:
+		l = int(l+0.5)
+		if not lendict.has_key(l): lendict[l] = 0;
+		lendict[l] += 1;
 
+	ldkeys = lendict.keys(); ldkeys.sort();
+	
+	allocr = '';
+	for ldk in ldkeys:
+		allocr += ('%d:%d, ' % (ldk, lendict[ldk]))
+	logging.info(allocr)
+
+	if len(ldkeys)<1: return [[0], allocr]
+	elif len(ldkeys)<2: return [[yo[1]], allocr]
+
+
+	len3dict = {}
+	for i in range(len(ldkeys)):
+                if i==0:
+	                if ldkeys[i]==0: len3dict[ldkeys[i]] = 0; #lendict[ldkeys[i]]
+                        else: len3dict[ldkeys[i]] = lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
+                elif i==len(ldkeys)-1:
+                        if ldkeys[i-1]==0: len3dict[ldkeys[i]] = lendict[ldkeys[i]]
+                        else: len3dict[ldkeys[i]] = lendict[ldkeys[i]] + lendict[ldkeys[i-1]]
+                else:
+                        if ldkeys[i-1]==0: len3dict[ldkeys[i]] = lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
+                        else: len3dict[ldkeys[i]] = lendict[ldkeys[i-1]] + lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
+
+	
+	len3dict = reviseDictAccordingV(len3dict)
+	
+	x = []; yo = [];
+	for ldk in ldkeys:
+		x.append(ldk); 
+		yo.append(len3dict[ldk]);
+
+	peak2 = getPeaks2(x, yo, lendict, 0, mdebug)	
+
+
+	'''
 	lendict = {};
 	for l in lengd:
 		l = int(l+0.5)
@@ -370,6 +413,7 @@ def get2Peaks(lengd):
 			if not has_insert: pea1k2.append(p2)
 
 	peak2 = pea1k2
+	'''
 	if len(peak2)>2: peak2 = peak2[:2]
 
 	if mdebug:
@@ -381,7 +425,6 @@ def get2Peaks(lengd):
 		print 'yF =',
 		for i in range(len(x)): print ('%3d' % lendict[x[i]]),
 		print ''
-
 
 	ally = [lendict[ldkeys[0]], lendict[ldkeys[-1]]]
 	if len(ldkeys)>1: last2 = -2;
@@ -407,7 +450,7 @@ def get2Peaks(lengd):
 		if not lendict.has_key(peak2[0]): mstr += (' No %d' % peak2[0]);
 		elif not lendict.has_key(peak2[1]): mstr += (' No %d' % peak2[1]);
 		else:  mstr += (' ratio=%.3f(%d/%d)' % (lendict[peak2[1]]/float(lendict[peak2[0]]), lendict[peak2[1]], lendict[peak2[0]]))
-		logging.info(mstr)
+		#logging.info(mstr)
 
 		if mdebug: 
 			print ('%.3f=%d/%d: ' % (lendict[peak2[1]]/float(lendict[peak2[0]]), lendict[peak2[1]], lendict[peak2[0]]) ), 
@@ -420,8 +463,29 @@ def get2Peaks(lengd):
 		if lendict.has_key(peak2[0]+1) and lendict.has_key(peak2[1]+1):
 			sum3_0 += lendict[peak2[0]+1]
 			sum3_1 += lendict[peak2[1]+1]
+		
+		mstr += (' >>> %.3f(%d/%d)' % (sum3_1*peak2[1]/float(sum3_0*peak2[0]), sum3_1*peak2[1], sum3_0*peak2[0]))
+		logging.info(mstr)
+		
 		if sum3_1*peak2[1]/float(sum3_0*peak2[0])<0.1: 
 			peak2 = peak2[:1]
+
+	for curp_ind in range(len(peak2)):
+                curp = peak2[curp_ind]
+                pin = ldkeys.index(curp)
+                nb3 = [curp]
+                if pin-1>0: nb3.append(ldkeys[pin-1])
+                if pin+1<len(ldkeys): nb3.append(ldkeys[pin+1])
+                curmx = nb3[-1]
+                for curi in nb3:
+                        if lendict[curi]>lendict[curmx]: curmx = curi
+                peak2[curp_ind] = curmx
+
+	peak2.sort();
+	if len(peak2)>1:
+                if len3dict[peak2[0]]<len3dict[peak2[1]]*0.6:
+                        peak2 = [peak2[1], peak2[1]]
+
 
 	if mdebug: print 'mPeak', peak2
 
