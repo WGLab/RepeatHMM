@@ -322,6 +322,32 @@ def get2Peaks(lengd):
 
 	len3dict = {}
 	for i in range(len(ldkeys)):
+                curlk = ldkeys[i]
+                if i==0:
+                        if curlk==0: len3dict[curlk] = 0
+                        else:
+                                len3dict[curlk] = lendict[curlk]
+                                if lendict.has_key(curlk+1): len3dict[curlk] += lendict[curlk+1]
+                                else: len3dict[curlk+1] = 0
+                elif i==len(ldkeys)-1:
+                        if curlk-1==0: len3dict[curlk] = lendict[curlk]
+                        else:
+                                len3dict[curlk] = lendict[curlk]
+                                if lendict.has_key(curlk-1): len3dict[curlk] += lendict[curlk-1]
+                                else: len3dict[curlk-1] = 0
+                else:
+                        if curlk-1==0:
+                                len3dict[curlk] = lendict[curlk]
+                                if lendict.has_key(curlk+1): len3dict[curlk] += lendict[curlk+1]
+                                else: len3dict[curlk+1] = 0
+                        else:
+                                len3dict[curlk] = lendict[curlk]
+                                if lendict.has_key(curlk-1): len3dict[curlk] += lendict[curlk-1]
+                                else: len3dict[curlk-1] = 0
+                                if lendict.has_key(curlk+1): len3dict[curlk] += lendict[curlk+1]
+                                else: len3dict[curlk+1] = 0
+	'''
+	for i in range(len(ldkeys)):
                 if i==0:
 	                if ldkeys[i]==0: len3dict[ldkeys[i]] = 0; #lendict[ldkeys[i]]
                         else: len3dict[ldkeys[i]] = lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
@@ -331,7 +357,7 @@ def get2Peaks(lengd):
                 else:
                         if ldkeys[i-1]==0: len3dict[ldkeys[i]] = lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
                         else: len3dict[ldkeys[i]] = lendict[ldkeys[i-1]] + lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
-
+	'''
 	
 	len3dict = reviseDictAccordingV(len3dict)
 	
