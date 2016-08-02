@@ -116,6 +116,7 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 				logging.warning("Partial cover: after="+alignres[1][end_repeat_loc+1:])
 				end_repeat_loc = -1
 
+
 			if end_repeat_loc<len(upstreamstr)+len(repregion)+1:
 				logging.warning("Could not cover the whole repeat regions %d" % end_repeat_loc);
 	
