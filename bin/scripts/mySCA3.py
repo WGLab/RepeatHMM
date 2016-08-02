@@ -13,7 +13,7 @@ import logging
 import trinucleotideRepeatRealSimulation
 import findTrinucleotideRepeats
 import getAlignment
-from UnsymmetricPairAlignment import UnsymmetricPairAlignment
+import UnsymmetricPairAlignment
 from myheader import *
 import myHMM
 
@@ -83,6 +83,7 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 			end_repeat_loc = -1;
 			temp_loc_start = [start_loc, 0, 0]; 
 			consider3 = [upstreamstr, repregion, downstreamstr]
+			beforenum = 0; afternum = 0;
 			for i in range(len(temp_loc_start)):
 				temp_i = temp_loc_start[i]
 				curstreamstr = consider3[i]
@@ -101,6 +102,20 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 						start_repeat_loc = query_i
 					elif i==1 or (i==2 and temp_i<toleratebeforeafter):
 						end_repeat_loc = query_i
+					if align_temp_i<len(alignres[0]) and (not (alignres[0][align_temp_i]=='-') ):
+						if i==0: beforenum += 1
+						if i==2: afternum += 1
+			if  beforenum<isupdown or afternum<isupdown:
+                                logging.warning("Partial cover: orignal [start_repeat_loc, end_repeat_loc]=[%d, %d], [beforenum, afternum]=[%d, %d]< %d" % (start_repeat_loc, end_repeat_loc, beforenum, afternum, isupdown))
+                                logging.warning("Partial cover: query="+alignres[0][start_repeat_loc:end_repeat_loc+1])
+                                logging.warning("Partial cover: templ="+alignres[1][start_repeat_loc:end_repeat_loc+1])
+			if beforenum<isupdown: 
+				logging.warning("Partial cover: befor="+alignres[1][:start_repeat_loc])
+				start_repeat_loc = -1
+			if afternum<isupdown: 
+				logging.warning("Partial cover: after="+alignres[1][end_repeat_loc+1:])
+				end_repeat_loc = -1
+
 			if end_repeat_loc<len(upstreamstr)+len(repregion)+1:
 				logging.warning("Could not cover the whole repeat regions %d" % end_repeat_loc);
 	
