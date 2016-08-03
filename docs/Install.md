@@ -16,11 +16,11 @@
 	* on your SCA3 data
 	   + mySCA3qsub.py: qsub all jobs to SGE
 	   + mySCA3_main.py
-		
+	
 	* for simulation	
 	   + trinucleotideRepeatRealSimulation_main.py
 		
-	
+	For how to use them, please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md)
 	
 
 
