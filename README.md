@@ -2,6 +2,12 @@
 
 RepeatHMM is a novel computational tool to detect trinucleotide repeats and trinucleotide repeat disorders (TRD) from given long reads for a subject of interests. It is able to accurately estimate estimate expansion counts according to the evaluation performance on both simulation data and real data. It is user friendly and easy to install and use.
 
+## Features
+
+* More than 10 genes which have trinucleotide repeats: AFF2, AR, ATN1, ATXN1, ATXN2, ATXN3, ATXN7, ATXN8OS, CACNA1A, DMPK, FMR1, FXN, HTT, PPP2R2B, TBP
+
+* Easy to install and use
+
 ## Methodology of RepeatHMM
 
 RepeatHMM takes long reads from a subject as input, and uses a novel unsymmetrical sequence alignment (UnsymSeqAlg) to map all reads to a specific gene of interest in a reference genome (hg38 here), and then, employs UnsymSeqAlg for optional error correction of repeat regions. After that, It uses a hidden Markov model (HMM) method to estimate the repeat count for each of long reads with higher coverage. Lastly, it will detect one or two peaks of expansion counts for the subject of interest. 
