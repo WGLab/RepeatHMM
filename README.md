@@ -8,6 +8,8 @@ RepeatHMM is a novel computational tool to detect trinucleotide repeats and trin
 
 * Easy to install and use
 
+* Accurate and efficient estimation
+
 ## Methodology of RepeatHMM
 
 RepeatHMM takes long reads from a subject as input, and uses a novel unsymmetrical sequence alignment (UnsymSeqAlg) to map all reads to a specific gene of interest in a reference genome (hg38 here), and then, employs UnsymSeqAlg for optional error correction of repeat regions. After that, It uses a hidden Markov model (HMM) method to estimate the repeat count for each of long reads with higher coverage. Lastly, it will detect one or two peaks of expansion counts for the subject of interest. 
