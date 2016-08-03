@@ -26,7 +26,7 @@ Please refer to how to use RepeatHMM.
 
 ## Revision History
 
-For release history, please visit [here](https://github.com/WGLab/RepeatHMM/releases). For details, please go [here](https://github.com/WangGenomicsLab/RepeatHMM/commits/master).
+For release history, please visit [here](https://github.com/WGLab/RepeatHMM/releases). For details, please go [here](https://github.com/WangGenomicsLab/RepeatHMM/blob/master).
 
 ## Contact
 
