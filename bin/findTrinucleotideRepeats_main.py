@@ -14,7 +14,7 @@ import logging
 
 from scripts import findTrinucleotideRepeats
 
-from myheader import *
+from scripts.myheader import *
 
 def non_negative(i, mstr):
 	if i<0: 
@@ -23,23 +23,28 @@ def non_negative(i, mstr):
 
 
 
-parser = argparse.ArgumentParser(description='''Find trinucleotide or hexanucleotide 7+ repeats for (a) gene(s) of interests or for all genes in the test genome of the BAM file (for hg38!!!!!!!!).''', epilog="For example, \n \
-\tpython %(prog)s freeze4-all-merge.sort.bam; \n \
-\tpython %(prog)s freeze4-all-merge.sort.bam -repeatgene HTT; \n \
-\tpython %(prog)s freeze4-all-merge.sort.bam -repeatgene ATXN3 --align 1 --updown 18 --extend 0; \n \
-OR \tpython %(prog)s freeze4-all-merge.sort.bam -repeatgene all; \n \
+parser = argparse.ArgumentParser(description='''Find trinucleotide repeats for (a) gene(s) of interests or for all genes in the test genome of the BAM file (for hg38!!!!!!!!).''', epilog="For example, \n \
+\tpython %(prog)s -bamfile freeze4-all-merge.sort.bam; \n \
+\tpython %(prog)s -bamfile freeze4-all-merge.sort.bam -repeatgene HTT; \n \
+\tpython %(prog)s -bamfile freeze4-all-merge.sort.bam -repeatgene ATXN3 --align 1 --updown 18 --extend 0; \n \
+OR \tpython %(prog)s -bamfile freeze4-all-merge.sort.bam -repeatgene all; \n \
 Final results was stored in TrinRepDis.log", formatter_class=RawTextHelpFormatter);
-parser.add_argument("bamfile", help="A BAM file storing all alignments");
+parser.add_argument("-bamfile", default=None, help="A BAM file storing all alignments");
 parser.add_argument("-hg", default='hg38', help="The reference genome is used. Currently, only hg38 is supported");
-parser.add_argument("--align", type=int, default=1, help="Is unsymmetrical alignment used for error correction. 1: yes, 0: no");
-parser.add_argument("--updown", type=int, default=18, help="Is upstream/downstream used for repeat length inference. non-0: yes, 0: no");
-parser.add_argument("--extend", type=int, default=0, help="Is upstream/downstream extended as repeat region. non-0: yes, 0: no");
-parser.add_argument("-repeatgene", help="A gene name which you want to analyze, such as HTT for huntington's disease. \
+parser.add_argument("--align", type=int, default=1, help="Is unsymmetrical alignment used for error correction. 1: yes(Default), 0: no");
+parser.add_argument("--updown", type=int, default=18, help="Is upstream/downstream used for repeat length inference. non-0: yes(Default: 18), 0: no");
+parser.add_argument("--extend", type=int, default=0, help="Is upstream/downstream extended as repeat region. non-0: yes, 0: no(Default )");
+parser.add_argument("-repeatgene", default=None, help="A gene name which you want to analyze(Default: None), such as HTT for huntington's disease. \
                                         'all': all known genes associated with trinucleotide repeat disorders will be analyzed;");
 
 #LOG_FILENAME = 'TrinRepDis.log'
 
 args = parser.parse_args();
+
+if args.repeatgene==None or args.bamfile==None:
+        parser.print_help()
+        sys.exit(140)
+
 
 logfolder = 'log/'
 

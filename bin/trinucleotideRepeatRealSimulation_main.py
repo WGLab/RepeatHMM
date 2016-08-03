@@ -35,29 +35,35 @@ parser = argparse.ArgumentParser(description='''Simulate Trinucleotide repeat fo
 \tpython %(prog)s ; \n \
 \tpython %(prog)s -repeatgene HTT; \n \
 \tpython %(prog)s -repeatgene ATXN3 --align 1 --updown 18 --extend 0; \n \
-\tpython %(prog)s -repeatgene ATXN3 --align 0 --updown 0 --extend 3 --coverage 100 --randTimes 100 -UserDefinedGene >92070888>92072403>>>>> --UserDefinedGeneName PCR1; \n \
+\tpython %(prog)s -repeatgene ATXN3 --align 1 --updown 18 --extend 0 --coverage 100 --randTimes 100 -UserDefinedGene /92070888/92072403///// --UserDefinedGeneName PCR1; \n \
 OR \tpython %(prog)s -repeatgene all;\n \
 Final results was stored in logsim/TrinRepSim*.log", formatter_class=RawTextHelpFormatter);
 parser.add_argument("-hg", default='hg38', help="The reference genome is used. Currently, only hg38 is supported");
-parser.add_argument("--align", type=int, default=1, help="Is unsymmetrical alignment used for error correction. 1: yes, 0: no");
-parser.add_argument("--updown", type=int, default=90, help="Is upstream/downstream used for repeat length inference. non-0: yes, 0: no");
-parser.add_argument("--extend", type=int, default=0, help="Is upstream/downstream extended as repeat region. non-0: yes, 0: no");
+parser.add_argument("--align", type=int, default=1, help="Is unsymmetrical alignment used for error correction. 1: yes(Default), 0: no");
+parser.add_argument("--updown", type=int, default=18, help="Is upstream/downstream used for repeat length inference. non-0: yes(Default: 18), 0: no");
+parser.add_argument("--extend", type=int, default=0, help="Is upstream/downstream extended as repeat region. non-0: yes, 0: no(Default)");
 
-parser.add_argument("-repeatgene", default=None, help="A gene name which you want to analyze, such as HTT for huntington's disease. \
+parser.add_argument("-repeatgene", default=None, help="A gene name which you want to analyze(Default: None), such as HTT for huntington's disease. \
                                         'all': all known genes associated with trinucleotide repeat disorders will be analyzed;");
 
-parser.add_argument("--insert_rate", type=float, default=0.12, help="Insert error rate. Default is 0.12");
-parser.add_argument("--del_rate", type=float, default=0.02, help="Deletion error rate. Default is 0.02");
-parser.add_argument("--sub_rate", type=float, default=0.02, help="Substitution error rate. Default is 0.02");
-parser.add_argument("--coverage", type=int, default=300, help="The number of reads produced after mutations. Default is 300");
+parser.add_argument("--insert_rate", type=float, default=0.12, help="Insert error rate. Default: 0.12");
+parser.add_argument("--del_rate", type=float, default=0.02, help="Deletion error rate. Default: 0.02");
+parser.add_argument("--sub_rate", type=float, default=0.02, help="Substitution error rate. Default: 0.02");
+parser.add_argument("--coverage", type=int, default=300, help="The number of reads produced after mutations. Default: 300");
 
-parser.add_argument("--randTimes", type=int, default=100, help="The number of simulation times. Default is 500");
-parser.add_argument("--UserDefinedGene", default=UserDefinedGenedefault, help="The gene information defined by users. If this option is given, the default gene information will be revised.");
-parser.add_argument("--UserDefinedGeneName", default="Pcr1", help="The name for storing results");
-parser.add_argument("--UnsymAlign", type=int, default=0, help="Whether unsymmetrical alignment rather than bwa mem would be used");
+parser.add_argument("--randTimes", type=int, default=100, help="The number of simulation times. Default: 100");
+parser.add_argument("--UserDefinedGene", default=UserDefinedGenedefault, help="The gene information defined by users. If this option is given, the default gene information will be revised. Default: ///////");
+parser.add_argument("--UserDefinedGeneName", default="Pcr1", help="The name for storing results. Default: Pcr1");
+parser.add_argument("--UnsymAlign", type=int, default=1, help="Whether unsymmetrical alignment (Default: 1) rather than bwa mem (0) would be used");
 
 
 args = parser.parse_args();
+
+
+if args.repeatgene==None:
+        parser.print_help()
+        sys.exit(140)
+
 
 logfolder = 'logsim/'
 
