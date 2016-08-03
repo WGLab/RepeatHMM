@@ -20,7 +20,7 @@
 	* for simulation	
 	   + trinucleotideRepeatRealSimulation_main.py
 		
-	For how to use them, please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md)
+	For how to use them, please refer to (Usage)[https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md]
 	
 
 
