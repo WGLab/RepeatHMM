@@ -114,19 +114,19 @@ struct AlignRes _unsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRe
 				alignmentMatrix[i][j] = up;
 				ij[i][j].i = i-1; ij[i][j].j = j;
 				
-				if (up>=maxscore){
+				//if (up>=maxscore){
 					maxscore = up;
 					maxscoreij.i = i; maxscoreij.j = j;
-				}
+				//}
 			}else 
 			  if (diagonal >= up && diagonal >= left){
 				alignmentMatrix[i][j] = diagonal;
 				ij[i][j].i = i-1; ij[i][j].j = j-1;
 				
-				if (diagonal>=maxscore){
+				//if (diagonal>=maxscore){
 					maxscore = diagonal;
 					maxscoreij.i = i; maxscoreij.j = j;
-				} 
+				//} 
 			}else 
 			  /*if (up >= diagonal && up >= left){
 				alignmentMatrix[i][j] = up;
@@ -136,10 +136,10 @@ struct AlignRes _unsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRe
 				alignmentMatrix[i][j] = left;
 				ij[i][j].i = i; ij[i][j].j = j-1;
 				
-				if (left>=maxscore){
+				//if (left>=maxscore){
 					maxscore = left;
 					maxscoreij.i = i; maxscoreij.j = j;
-				}
+				//}
 			}else{
 				printf("Error no largest vaues among (diagonal=%d, up=%d, left=%d) at (row=%d, column=%d)", diagonal, up, left, i,j);
 			}
@@ -213,11 +213,14 @@ struct AlignRes _unsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRe
 char * unsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRep, char* read, int lenRead, int match, int mismatch, int gap_in_perf, int gap_in_read, int gap_before_after, int bandWidth, int isprint){
 	int j;
 	char * returnstr;
+	char * scorestr;
 	returnstr = NULL;
 	
 	struct AlignRes ar = _unsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint);
 
-	returnstr = malloc(sizeof(char) * ((lenPerfRep+lenRead+2)*2));
+	returnstr = malloc(sizeof(char) * ((lenPerfRep+lenRead+2)*2+11));
+	scorestr = malloc(sizeof(char) * 11);
+	sprintf(scorestr, "%d",  ar.score);
 
 	for(j=0; j<ar.size; j++){
                 if (ar.correctedRead[j]=='\0'){
@@ -226,13 +229,16 @@ char * unsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRep, char* r
                         returnstr[j] = ar.correctedRead[j];
                 }
                 if (ar.perfRep[j]=='\0'){
-                        returnstr[j+ar.size] = '\0';
+                        //returnstr[j+ar.size] = '\0';
+			returnstr[j+ar.size] = ';';
                 }else{
                         returnstr[j+ar.size] = ar.perfRep[j];
                 }
         }
 
-	
+	for(j=0; j<11; j++){
+		returnstr[j+2*ar.size] = scorestr[j];
+	}
 
         if (isprint) {
 		printf("In unsymmetricPairWiseAlignment: Correct=%s\nPerfect=%s\n", ar.correctedRead, ar.perfRep);
@@ -241,6 +247,7 @@ char * unsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRep, char* r
 
         free(ar.correctedRead);
         free(ar.perfRep);
+	free(scorestr);
 
 	return returnstr;
 }

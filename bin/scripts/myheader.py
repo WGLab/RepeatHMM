@@ -15,7 +15,18 @@ gap_in_perf      = -2;
 gap_in_read      = -12;
 gap_before_after = -3;
 
+match            =  1;
+mismatch         = -1;
+gap_in_perf      = -1;
+gap_in_read      = -10;
+gap_before_after = -1
+
+
+
+
 #simulation_file_id = 'mySimulationDefault'
 #analysis_file_id = 'myAnalysisDefault'
 
+hg38_reference_and_index = 'hg38_reference_and_index/'
+hg38_reference_and_index = 'mhg38/'
 

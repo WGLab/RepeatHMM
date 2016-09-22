@@ -134,7 +134,7 @@ else:
 for r1 in res:
 	if not isUnsymAlign:
 		logging.info('%s, %s<<<True<<<>>>Pred>>>%s, %s \t\t#wrongAlign %s' % (str(r1[0][0]), str(r1[0][1]), str(r1[1][0]), str(r1[1][1]), str(r1[2])));
-	else: logging.info('%s, %s<<<True<<<>>>Pred>>>%s, %s ' % (str(r1[0][0]), str(r1[0][1]), str(r1[1][0]), str(r1[1][1])));
+	else: logging.info('%s, %s<<<True<<<>>>Pred>>>%s, %s bwa:%s %s' % (str(r1[0][0]), str(r1[0][1]), str(r1[1][0]), str(r1[1][1]), str(r1[2][0]), str(r1[2][1])));
 	#print r1[0][0], r1[0][1], '<<<True<<<>>>Pred>>>', r1[1][0], r1[1][1], '\t\t#wrongAlign', r1[2];
 
 simresfolder = 'sim_res/'
@@ -147,6 +147,8 @@ for r1 in res:
 	curstr = ('%s %s %s' % (str(r1[0][0]), str(r1[0][1]), str(r1[1][0])))
 	if len(r1[1])>1 and (not string.strip(str(r1[1][1]))==''): curstr += (' %s' % str(r1[1][1]))
 	else: curstr += (' %s' % str(r1[1][0]))
+	if isUnsymAlign:
+		curstr += (' %s %s' % (str(r1[2][0]), str(r1[2][1])))
 	curres.append(curstr)
 findTrinucleotideRepeats.myWriteTxtFile(curres, curfilename);
 

@@ -100,6 +100,7 @@ res = mySCA3.getSCA3forKnownGeneWithPartialRev(gLoc, fastafile, isUnsymAlign, un
 
 
 for r1 in res:
-	print r1;
+	print r1
+	#print r1[:2], r1[2];
 
 

@@ -35,6 +35,7 @@ def getPattern(na3, forw_rerv):
 
 def getPerfRep(querystr, na3):
 	t = int(len(querystr)/2);
+	t = int(len(querystr)*1.2/3)
 	return na3*t
 
 
@@ -56,7 +57,7 @@ def correctSeq(na3, querystr, forw_rerv, match=2, mismatch=-10, gap=-1, gap_exte
 		#if len(newstr)<len(q): newstr = q;
 		#if score<s: score = s; print score, len(newstr);
 
-	return q;
+	return newstr; #q;
 
 #def myUnsymmetricPairAlignment(na3, querystr, forw_rerv, match=10, mismatch=-9, gap_in_perf=-2, gap_in_read=-13, gap_before_after = -1, bandw=1000, isprint=0):
 def myUnsymmetricPairAlignment(na3, querystr, forw_rerv, match=2, mismatch=-2, gap_in_perf=-2, gap_in_read=-12, gap_before_after = -3, bandw=1000, isprint=0):
@@ -99,8 +100,10 @@ if __name__=='__main__':
 	print pat*(int(len(querystr)/2))
 	print newstr;
 	print querystr
+	
+	print '\n', myUnsymmetricPairAlignment(pat, querystr, forw_rerv, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, 0)
 
-
+'''
 	print ''
 	match=10; mismatch=-9; gap_in_perf=-2; gap_in_read=-13; gap_before_after = -1;
 	perf = pat*(int(len(querystr)/2))
@@ -110,4 +113,4 @@ if __name__=='__main__':
 
 
 	print '\n', myUnsymmetricPairAlignment(pat, querystr, forw_rerv, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, 1)
-
+'''

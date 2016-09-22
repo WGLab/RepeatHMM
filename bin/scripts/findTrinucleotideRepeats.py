@@ -64,7 +64,7 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         gLoc['atxn2'] = ['chr12', '111452214', '111599676', '111598951', '111599019', 'CAG', '-13', '14-32:33-77'] # 10Q  (CAG)*
         #atxn3: chr:start-end for RefSeq is chr14:92058552-92106621. chr:start-end for UCSC is chr14:92038652-92106610
         #ATXN3 at chr14:92058552-92106621 
-        gLoc['atxn3'] = ['chr14', '92038652', '92106610', '92071011', '92071052', 'CAG', '-', '12-40:55-86']       # (CAG)* + CTGTTGCTGCTTTTGCTGCTG
+        gLoc['atxn3'] = ['chr14', '92038652', '92106610', '92071011', '92071052', 'CAG', '-14', '12-40:55-86']       # (CAG)* + CTGTTGCTGCTTTTGCTGCTG
         #CACNA1A at chr19:13206443-13506460 
         gLoc['cacna1a'] = ['chr19', '13206443', '13506460', '13207859', '13207897', 'CAG', '-', '4-18:21-30']     #y
         #ATXN7 at chr3:63864557-64003460 
@@ -317,7 +317,7 @@ def get2Peaks(lengd):
 	logging.info(allocr)
 
 	if len(ldkeys)<1: return [[0], allocr]
-	elif len(ldkeys)<2: return [[yo[1]], allocr]
+	elif len(ldkeys)<2: return [[ldkeys[0]], allocr]
 
 
 	len3dict = {}
@@ -528,13 +528,15 @@ def getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, queryrep):
 
 def getGene(repeatgene, chr, gene_start_end, unique_file_id, analysis_file_id):
         alignfolder = 'align/'
+	if not os.path.isdir(alignfolder): os.system('mkdir '+alignfolder)
 
         #unique_file_id = simulation_file_id + analysis_file_id
 
         fastafile = alignfolder + repeatgene + unique_file_id +'.fasta'
         #get_alg_cmd = 'samtools faidx ./hg38/Homo_sapiens_assembly38.fasta '+ chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+fastafile
 
-        get_alg_cmd = 'samtools faidx hg38_reference_and_index/hg38.fa '+ chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+fastafile
+        get_alg_cmd = 'samtools faidx '+hg38_reference_and_index+'/hg38.fa '+ chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+fastafile
+        print get_alg_cmd
 
         os.system(get_alg_cmd)
         if not os.path.isfile(fastafile):
@@ -550,6 +552,244 @@ def getGene(repeatgene, chr, gene_start_end, unique_file_id, analysis_file_id):
 	os.system('rm '+fastafile)
 
 	return mfadata.upper()
+
+def getRepeatForGivenGene2(chr, repeatgene, gene_start_end, repeat_orig_start_end, bamfile, repPat, forw_rerv, isAlign, isupdown, isExtend, unique_file_id, analysis_file_id):
+        #print repeatgene,
+        alignfolder = 'align/'
+        if not os.path.isdir(alignfolder): os.system('mkdir '+alignfolder)
+
+        ref_repeat = (repeat_orig_start_end[1]-repeat_orig_start_end[0]+1)/3.0
+        alignfile = alignfolder + repeatgene + unique_file_id +'.alignment.txt'
+        get_alg_cmd = 'samtools view '+bamfile+' ' + chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+alignfile
+        logging.info('Running '+get_alg_cmd)
+        os.system(get_alg_cmd);
+        logging.info('Produced ' + alignfile + ' done!');
+
+        if not os.path.isfile(alignfile):
+                logging.error('Cannot produce '+alignfile+' for '+repeatgene)
+                sys.exit(1)
+        aligndata = myReadTxtFile(alignfile)
+        os.system('rm '+alignfile)
+
+        mfadata = getGene(repeatgene, chr, gene_start_end, unique_file_id, analysis_file_id)
+
+        covermorebeforeafter = 30
+        repregion_len_threhold = 3;
+        repeatbeforeafter = isupdown - isExtend
+        repeat_start_end = [repeat_orig_start_end[0], repeat_orig_start_end[1]]
+        #repeat_start_end[0] -= isExtend; repeat_start_end[1] += isExtend;
+        #if isExtend>0 and repeat_start_end[0]<1: repeat_start_end[0]=1
+	
+        simplebeforeafter = 3;
+
+        check = False; #True;
+        wrongalign = 0;
+        if check: repeat_beforeafter = [];
+
+        repeats = [];
+        for line in aligndata:
+                if check:
+                   beforematch = {}; aftermatch = {}; inmatch = 0; allmatch = 0; neighbeforeafter = 200;
+                   beforematch[50] = 0; aftermatch[50] = 0
+                   beforematch[100] = 0; aftermatch[100] = 0
+                   beforematch[150] = 0; aftermatch[150] = 0
+                   beforematch[200] = 0; aftermatch[200] = 0
+                   beforematch[250] = 0; aftermatch[250] = 0
+                   beforematch[300] = 0; aftermatch[300] = 0
+
+                lsp = line.split('\t')
+                cchr = lsp[2]
+                pos = int(lsp[3])
+                aligninfo = lsp[5]
+                aainfo = lsp[9]
+                #qualifyinfo = lsp[12]
+                #print 'qualifyinfo', qualifyinfo[:100]
+
+                if pos > repeat_start_end[0] - covermorebeforeafter:
+                        wrongalign += 1;
+                        continue;
+                        #logging.error('The start pos in ref Genome is greater than the start position of repeats' + str(pos) +' ' + str(repeat_start_end[0]));
+                if not cchr==chr:  logging.error('Not same ' + cchr +' ' + chr); continue;
+
+                numreg = re.compile('\d+')
+                numinfo = numreg.findall(aligninfo)
+
+                mdireg = re.compile('[MIDNSHPX=]{1}')
+                mdiinfo = mdireg.findall(aligninfo)
+
+                if not len(numinfo)==len(mdiinfo):
+                        logging.error('Num is equal to mid' +str(len(numinfo)) + ' '+ str(len(mdiinfo))); continue;
+
+                queryind = 0;
+                queryrep = '';
+                longer = False;
+                if check:
+                   totalbefore = 0; totalafter = 0;  matchinfo = '';
+                   neighmatch = 0; neighref=''; neightest = ''
+
+                for n1ind in range(len(numinfo)):
+                        n1 = int(numinfo[n1ind])
+                        mdi = mdiinfo[n1ind];
+
+                        for n1i in range(n1):
+                                if check:
+                                   if totalbefore<repeat_start_end[0]-pos:
+                                      totalbefore=repeat_start_end[0]-pos;
+                                   if totalafter<pos-repeat_start_end[1]:
+                                      totalafter=pos-repeat_start_end[1]
+
+                                qrepadd = False;
+                                if mdi=='M':
+                                        if check:
+                                           faind = pos - (repeat_start_end[0] -  neighbeforeafter)
+                                           if (faind>=0 and pos-repeat_start_end[0]<0) or \
+                                              (pos-repeat_start_end[1]>=0 and pos-(repeat_start_end[1]+neighbeforeafter)<=0):
+                                                if mfadata[faind] == aainfo[queryind]: neighmatch += 1;
+                                                neighref = neighref + mfadata[faind]
+                                                neightest = neightest + aainfo[queryind]
+
+                                        pos = pos + 1;
+                                        queryind = queryind + 1;
+                                        qrepadd = True;
+
+                                        if check:
+                                           allmatch += 1;
+                                           if pos-1 < repeat_start_end[0]:
+                                                bef = repeat_start_end[0] - pos + 1
+                                                bmkeys = beforematch.keys(); bmkeys.sort();
+                                                for bmk in bmkeys:
+                                                    if bmk>=bef: beforematch[bmk] += 1;
+                                           elif pos-1 > repeat_start_end[1]:
+                                                aft = pos-1 - repeat_start_end[1]
+                                                afkeys = aftermatch.keys(); afkeys.sort();
+                                                for afk in afkeys:
+                                                    if afk >= aft: aftermatch[afk] += 1;
+                                           else: inmatch += 1;
+
+                                elif mdi =='I':
+                                        qrepadd = True;
+                                        queryind = queryind + 1;
+                                elif mdi == 'D':
+                                        pos = pos + 1;
+                                elif mdi == 'S':
+                                        queryind = queryind + 1;
+                                        qrepadd = True;
+                                elif mdi == 'H':
+                                        pass;
+                                elif mdi == 'P':
+                                        pass;
+                                else:
+                                        logging.warning('Warning unknow CIGAR element ' + str(n1) + ' ' + mdi)
+                                if qrepadd:
+                                        #if pos-1 >= repeat_start_end[0]-repeatbeforeafter and pos-1 <= repeat_start_end[1]+repeatbeforeafter:
+                                        if pos-1 >= repeat_start_end[0]-simplebeforeafter and pos-1 <= repeat_start_end[1]+simplebeforeafter:
+                                                queryrep = queryrep + aainfo[queryind-1]
+                                if check and pos-1 >= repeat_start_end[0]-repeatbeforeafter and pos-1 <= repeat_start_end[1]+repeatbeforeafter: matchinfo += mdi
+                        #if pos-1 > repeat_start_end[1] + covermorebeforeafter: longer = True;
+                        if pos-1 > repeat_start_end[1]+simplebeforeafter: longer = True;
+
+                if check and len(queryrep)>=repregion_len_threhold:
+                   bmkeys = beforematch.keys(); bmkeys.sort(); befstr = '';
+                   for bmk in bmkeys:
+                       befstr += (str(bmk)+'='+str(beforematch[bmk])+';');
+                   afkeys = aftermatch.keys(); afkeys.sort(); aftstr = '';
+                   for afk in afkeys:
+                       aftstr += (str(afk)+'='+str(aftermatch[afk])+';');
+
+                   print repeatgene, repeat_start_end, len(queryrep), queryrep, gene_start_end
+
+                   newstr = '';
+                   print repPat, ':', 'MI', matchinfo
+                   if len(queryrep)<1000:
+                        newstr, pre0, predstats = getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, queryrep)
+
+                        #unewstr = getAlignment.myUnsymmetricPairAlignment(repPat, queryrep[repeatbeforeafter:(len(queryrep)-repeatbeforeafter)], forw_rerv);
+                        #if repeatbeforeafter>0: unewstr =  queryrep[:repeatbeforeafter]+ unewstr + queryrep[(len(queryrep)-repeatbeforeafter):]
+                        #newstr, pre0, predstats = myHMM.hmmpred(unewstr, repPat, forw_rerv, repeatbeforeafter)
+
+                        #newstr, pre0, predstats = myHMM.hmmpred(queryrep, repPat, forw_rerv, repeatbeforeafter)
+                   print ('Gene %s(%s:%d-%d) Match for repeat(%s%s):INmatch=%d/%d(%d) test_rep=%d; beforematch:%s(%d) aftermatch:%s(%d)' % (repeatgene, chr, repeat_start_end[0], repeat_start_end[1], repPat, forw_rerv[0], inmatch, len(queryrep), neighmatch, len(newstr)/3, befstr, totalbefore, aftstr, totalafter)), longer
+                   #print neighref;
+                   #print neightest;
+
+                   if longer: repeat_beforeafter.append([len(newstr)/3-simplebeforeafter*2/3, totalbefore, totalafter, neighmatch])
+
+                if len(queryrep)>=repregion_len_threhold: repeats.append([longer, queryrep, lsp[0]])
+
+        if check:
+           for rbf in repeat_beforeafter:
+                print ('%6d %6d %6d %6d' % (rbf[0], rbf[1], rbf[2], rbf[3]))
+
+        rptrue = []; rpfalse = []; orignial = [];
+        for currep in repeats:
+                #print chr, repeatgene, repPat, len(currep[1]),
+                newstr = currep[1]
+
+                pre0 = 0; predstats=''
+                if len(newstr)<1000:
+                        #newstr = getAlignment.correctSeq(repPat, currep[1], forw_rerv);
+                        if isAlign>0:
+                                pass #newstr, pre0, predstats = getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, currep[1])
+
+                                #unewstr = getAlignment.myUnsymmetricPairAlignment(repPat, currep[1][repeatbeforeafter:(len(currep[1])-repeatbeforeafter)], forw_rerv);
+                                #if repeatbeforeafter>0: unewstr =  currep[1][:repeatbeforeafter]+ unewstr + currep[1][(len(currep[1])-repeatbeforeafter):]
+                                #
+                                ##newstr, pre0, predstats = myHMM.hmmpred(currep[1], repPat, forw_rerv, repeatbeforeafter)
+                                #newstr, pre0, predstats = myHMM.hmmpred(unewstr, repPat, forw_rerv, repeatbeforeafter)
+
+
+                        else:
+                                pass #newstr, pre0, predstats = myHMM.hmmpred(newstr, repPat, forw_rerv, repeatbeforeafter)
+                else: logging.warning('The sequence is too long: '+str(len(newstr))+' '+chr+' '+repeatgene+' '+repPat+' '+str(currep[0])+' reads name:'+currep[2])
+                orignial.append([currep[1], pre0, predstats]);
+                currep[1] = newstr
+                #if len(currep[1])==0: continue;
+                if currep[0]: #repPat, forw_rerv
+                        #rptrue.append(len(newstr)/3.0-repeatbeforeafter/3);
+                        #if isHMM: rptrue.append(len(currep[1])/3.0);
+                        rptrue.append(len(currep[1])/3.0-simplebeforeafter*2/3);
+                else:
+                        #rpfalse.append(len(newstr)/3.0-repeatbeforeafter/3);
+                        #if isHMM: rpfalse.append(len(currep[1])/3.0);
+                        rpfalse.append(len(currep[1])/3.0-simplebeforeafter*2/3);
+
+        rptrue.sort(); rpfalse.sort()
+        trstr = 'true ' + str(len(rptrue)) + ' [';
+        for rpt in rptrue:
+                trstr = trstr + ('%.0f,' % rpt)
+        trstr = trstr[:-1] + ']'
+        logging.debug(trstr)
+
+        #print repeatgene, repPat, rptrue
+        p2, allocr = get2Peaks(rptrue)
+
+        if len(rpfalse)>0:
+                flstr = 'fals ' + str(len(rpfalse)) + ' ['
+                for rpf in rpfalse:
+                        flstr = flstr + ('%.0f,' % rpf)
+                flstr = flstr[:-1] + ']'
+                logging.debug(flstr);
+
+        logging.info('ref_repeat ' + ('%.0f' % ref_repeat) +'\t'+repPat+'\t'+forw_rerv);
+
+        '''
+        for currep_ind in range(len(repeats)):
+                currep = repeats[currep_ind]
+
+                aaprinindex = -1;
+                if not (currep[0]): aaprinindex = 300
+
+                logging.debug('\t'+str(currep[0]) + ' o:' + str(len(orignial[currep_ind][0]))  +'\t'+ orignial[currep_ind][0][:aaprinindex]);
+                prestr = '';
+                for i in range(orignial[currep_ind][1]): prestr += ' ';
+                #logging.debug('\t'+str(currep[0]) + ':' + str(len(orignial[currep_ind][0]))  +'\t'+prestr+ orignial[currep_ind][2]);
+                #logging.debug('\t'+str(currep[0]) + ':' + str(len(orignial[currep_ind][0]))  +'\t'+orignial[currep_ind][2]);
+                logging.debug('\t'+str(currep[0]) + ' p:' + str(len(currep[1])) +'\t' + prestr+ (currep[1][:aaprinindex]))
+        '''
+        #p2, allocr = get2Peaks(rptrue)
+
+        return [repeatgene, ref_repeat, p2, allocr, len(rptrue), len(rpfalse)+wrongalign]
+
 
 def getRepeatForGivenGene(chr, repeatgene, gene_start_end, repeat_orig_start_end, bamfile, repPat, forw_rerv, isAlign, isupdown, isExtend, unique_file_id, analysis_file_id):
         #print repeatgene,

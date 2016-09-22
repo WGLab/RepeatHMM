@@ -13,14 +13,14 @@ import logging
 import trinucleotideRepeatRealSimulation
 import findTrinucleotideRepeats
 import getAlignment
-import UnsymmetricPairAlignment from UnsymmetricPairAlignment
+from UnsymmetricPairAlignment import UnsymmetricPairAlignment
 from myheader import *
 import myHMM
 
 
 def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isAlign, isupdown, isExtend, bandwo):
-	pdebug = False; pdebug=True; 
-	mdebug = False; mdebug=True;
+	pdebug = False; #pdebug=True; 
+	mdebug = False; #mdebug=True;
 	if mdebug:
 		print 'upstreamstr', len(upstreamstr), upstreamstr
 		print 'repregion', len(repregion), repregion
@@ -44,7 +44,7 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 	repeatlength = []; replen = len(repregion)
 	bp = getAlignment.getBasePair();
 	
-	isprint = 1;	
+	isprint = 0; #1;	
 	#for j in range(1, len(allsimreads), 4):
 	for j in range(len(allsimreads)-3, 0, -4):
 		if mdebug: print "cur line=", j 
@@ -61,7 +61,8 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 		querystrR = getAlignment.getComplementary3(bp, querystr)
 		alignresR = UnsymmetricPairAlignment.unsymmetricPairWiseAlignment(templatestr, len(templatestr), querystrR, len(querystrR), match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, isprint).split(';')
 
-		if len(alignresR[1])>len(alignres[1]):
+		#if len(alignresR[1])>len(alignres[1]):
+		if int(alignresR[2])>int(alignres[2]):
 			querystr = querystrR
 			alignres = alignresR
 		
@@ -115,7 +116,6 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 			if afternum<isupdown: 
 				logging.warning("Partial cover: after="+alignres[1][end_repeat_loc+1:])
 				end_repeat_loc = -1
-
 
 			if end_repeat_loc<len(upstreamstr)+len(repregion)+1:
 				logging.warning("Could not cover the whole repeat regions %d" % end_repeat_loc);
@@ -202,23 +202,28 @@ def getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis
 
 	bamfile = fastafile + '.bam'
 
-	if not isUnsymAlign:
-		cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t 4 hg38_reference_and_index/hg38.fa '+ fastafile +' | samtools view -S -b | samtools sort > '+bamfile
+	if True: #not isUnsymAlign:
+		cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t 4 '+hg38_reference_and_index+'/hg38.fa '+ fastafile +' | samtools view -S -b | samtools sort > '+bamfile
 		logging.info(cmd);
 		os.system(cmd);
 			
 		cmd = 'samtools index '+bamfile
 		os.system(cmd)
 
+	if not isUnsymAlign:
 		p2all = findTrinucleotideRepeats.getRepeatForGivenGene(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
 		p2 = p2all[2];
 	else:
 		p2all = useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, fastafile, repeatgene, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, bwamem_w_option);
 		p2 = p2all[0];
+		pbwa = findTrinucleotideRepeats.getRepeatForGivenGene2(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
+		pbwa = pbwa[2]; pbwa.sort();
+		if len(pbwa)==1: pbwa = [pbwa[0], pbwa[0]]
+		if len(pbwa)==0: pbwa = [0, 0]
 	
 	p2.sort();
-	if len(p2)==1: p2 = [p2[0], ' '];
-	if len(p2)==0: p2 = [' ', ' '];
+	if len(p2)==1: p2 = [p2[0], p2[0]];
+	if len(p2)==0: p2 = [0, 0];
 
 	if isUnsymAlign:
 		logging.info("Result : %s, %s; Elapsed time=%.2f\n" % (str(p2[0]), str(p2[1]), (time.time() - start_time)))
@@ -227,7 +232,7 @@ def getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis
 	
 	if not isUnsymAlign:
 		predres.append([p2, p2all[5]])
-	else: predres.append([p2])
+	else: predres.append([p2, pbwa])
 
 	return predres
 
@@ -235,6 +240,8 @@ def getSCA3forKnownGeneWithPartialRev(gLoc, fastafile, isUnsymAlign, unique_file
         infospt = newinfo.split('/')
 	repeatgene = repeatgene.lower()
 	if gLoc.has_key(repeatgene):
+		print gLoc.keys()
+		logging.info(repeatgene)
 		mgloc = gLoc[repeatgene]
 	else: mgloc = ['','','', '','', '','','']
 
