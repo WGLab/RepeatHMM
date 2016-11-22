@@ -22,7 +22,7 @@ RepeatHMM takes long reads from a subject as input, and can also take a BAM file
 
 ## Usage
 
-Please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md) how to use RepeatHMM.
+Please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md) for how to use RepeatHMM.
 
 ## Revision History
 
