@@ -4,7 +4,7 @@ import string
 
 import sys
 #sys.path.append('/home/qianliu/project/HTT_CAG_repeat/UnsymmetricPairAlignment')
-from UnsymmetricPairAlignment import UnsymmetricPairAlignment; 
+import UnsymmetricPairAlignment; 
 #from UnsymmetricPairAlignment import *
 
 from myheader import *
@@ -35,7 +35,7 @@ def getPattern(na3, forw_rerv):
 
 def getPerfRep(querystr, na3):
 	t = int(len(querystr)/2);
-	t = int(len(querystr)*1.2/3)
+	t = int(len(querystr)*1.2/len(na3))
 	return na3*t
 
 

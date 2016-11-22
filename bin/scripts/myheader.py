@@ -27,6 +27,10 @@ gap_before_after = -1
 #simulation_file_id = 'mySimulationDefault'
 #analysis_file_id = 'myAnalysisDefault'
 
-hg38_reference_and_index = 'hg38_reference_and_index/'
-hg38_reference_and_index = 'mhg38/'
+#hg38_reference_and_index = 'hg38_reference_and_index/'
+#hg38_reference_and_index = 'mhg38/'
+hg_reference_and_index = 'mhgversion/'
+
+
+UserDefinedGenedefault = "///////"
 

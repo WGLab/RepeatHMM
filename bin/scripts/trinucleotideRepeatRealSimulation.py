@@ -13,9 +13,10 @@ import logging
 
 import findTrinucleotideRepeats
 import getAlignment
-from UnsymmetricPairAlignment import UnsymmetricPairAlignment
+import UnsymmetricPairAlignment
 from myheader import *
 import myHMM
+import useUnsymmetricalAlign
 
 
 def readList(fname, mtype=int):
@@ -45,7 +46,7 @@ def create_quality_for_pacbio_read(length, mean, sd):
     qualities = [fastq_Sanger_quality[min(max(0, int(random.gauss(mean, sd))), 93)] for i in range(length)]
     return ''.join(qualities)
 
-def get3part(mgloc, gene_start_end, repeat_start_end, repeatgene, unique_file_id, analysis_file_id):
+def get3part(mgloc, gene_start_end, repeat_start_end, repeatgene, unique_file_id, analysis_file_id, hgfn): #='hg38.fa'):
 	mytest = False;
 	if mytest:# or repeatgene=='aff2':
 		print repeatgene, gene_start_end, repeat_start_end
@@ -53,7 +54,7 @@ def get3part(mgloc, gene_start_end, repeat_start_end, repeatgene, unique_file_id
 
 	logging.info('The region is %s from %d to %d' % (mgloc[0], gene_start_end[0], gene_start_end[1]))
 	
-	mfasta = findTrinucleotideRepeats.getGene(repeatgene, mgloc[0], gene_start_end, unique_file_id, analysis_file_id)
+	mfasta = findTrinucleotideRepeats.getGene(repeatgene, mgloc[0], gene_start_end, unique_file_id, analysis_file_id, hgfn)
 	
 	upstreamstr = mfasta[:(repeat_start_end[0]-gene_start_end[0])]
 	repregion   = mfasta[(repeat_start_end[0]-gene_start_end[0]):-(gene_start_end[1]-repeat_start_end[1])]
@@ -69,21 +70,23 @@ def getMidPos(seq, na3):
 	findpos = False;
 
 	for pos in range(int(len(seq)*0.45), len(seq)-2):
-		if seq[pos:(pos+3)]==na3:
+		if seq[pos:(pos+len(na3))]==na3: #seq[pos:(pos+3)]==na3:
 			findpos = True;
 			break;
 	if findpos: return pos;
 	else: return 0;
 
 def getNA3fromRegion(seq, na3):
+	patlen = len(na3);
+	
 	poslist = []; lenlist = []
 	loci = 0; preloci = 0;
-	while loci<len(seq)-3:
-		if seq[loci:loci+3] == na3:
+	while loci<len(seq)-patlen: #3:
+		if seq[loci:loci+patlen] == na3:
 			if preloci<loci:
 				poslist.append(preloci); lenlist.append(loci-preloci);
-			poslist.append(loci); lenlist.append(3);
-			loci = loci + 3;
+			poslist.append(loci); lenlist.append(patlen);
+			loci = loci + patlen;
 			preloci = loci;
 		else: loci += 1;
 	if preloci<loci:
@@ -93,10 +96,10 @@ def getNA3fromRegion(seq, na3):
 
 	plen = 0; #
 	while True:
-		while lenlist[plen]>3:
-			poslist.insert(plen+1, poslist[plen]+3);
-			lenlist.insert(plen+1, lenlist[plen]-3);
-			lenlist[plen] = 3;
+		while lenlist[plen]>patlen:
+			poslist.insert(plen+1, poslist[plen]+patlen);
+			lenlist.insert(plen+1, lenlist[plen]-patlen);
+			lenlist[plen] = patlen;
 			plen += 1;
 		
 		plen += 1;
@@ -181,7 +184,7 @@ def mutateStr_bk(seq, insert_rate, del_rate, sub_rate, bp5):
 
         return newstr;
 
-def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isAlign, isupdown, isExtend, currep2, bandwo):
+def useUnsymmetricalAlign_old(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isRemInDel, isupdown, isExtend, currep2, bandwo):
 	pdebug = False; 
 	#if currep2[0]>=60 or currep2[1]>=60:
 	if currep2[0]>=70 and currep2[1]>=70:
@@ -201,7 +204,7 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 	print '\ntemp_all  :', len(templatestr[len(upstreamstr)-10:-len(downstreamstr)]), templatestr[len(upstreamstr)-10:-len(downstreamstr)], 'bandw=', bandw
 	allsimreads = findTrinucleotideRepeats.myReadTxtFile(curreadfile)
 
-	repregion_len_threhold = 3;
+	repregion_len_threhold = len(repPat);
 	repeatbeforeafter = isupdown
 	#toleratebeforeafter = 60;
 	toleratebeforeafter = 30+isupdown;
@@ -209,7 +212,9 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 	if toleratebeforeafter>len(downstreamstr): toleratebeforeafter = len(downstreamstr)-1
 
 	repeatlength = []; replen = len(repregion)
-		
+	
+	hmmoptions = findTrinucleotideRepeats.getHMMOptions(repeatbeforeafter, repPat, forw_rerv)
+	
 	#for j in range(1, len(allsimreads), 4):
 	for j in range(len(allsimreads)-3, 0, -4):
 		if mdebug: print j, 
@@ -295,13 +300,13 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 	
 				if mdebug or pdebug: print len(detectregion), repeat_start_end, detectregion
 				
-				if isAlign:
-					newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, detectregion)
+				if isRemInDel>0:
+					newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, detectregion)
 
 					#newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, detectregion, match, mismatch, gap_in_perf, gap_in_read, gap_before_after)
 				else:
-					newstr, pre0, predstats = myHMM.hmmpred(detectregion, repPat, forw_rerv, repeatbeforeafter)
-				repeatlength.append(len(newstr)/3)
+					newstr, pre0, predstats = myHMM.hmmpred(detectregion, repPat, forw_rerv, hmmoptions, repeatbeforeafter)
+				repeatlength.append(len(newstr)/len(repPat))
 	p2, allocr = findTrinucleotideRepeats.get2Peaks(repeatlength)
 	
 	
@@ -331,8 +336,34 @@ def getrandomstr(newup, currepeat, newdown):
 def getNormalDist(avgnormrep, mmin, mmax):
 	currn = getMynormNum(avgnormrep, 5, mmin, mmax, 'repeats')
 	return currn
+
+def getSimForGivenGene(commonOptions, specifiedOptions, moreOptions):	
+#def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange=[5, 100], insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isRemInDel=1, isupdown=90, isExtend=0, randTimes=100, isPartial=False):
+	mgloc = moreOptions['mgloc']
+	repeatgene = moreOptions['repeatgene']
+	gene_start_end = moreOptions['gene_start_end']
+	repeat_start_end = moreOptions['repeat_start_end']
+
+	repeatrange = moreOptions['repeatrange']
+	isPartial = moreOptions['isPartial']
+
+	isRemInDel = commonOptions['isRemInDel']
+	isupdown = commonOptions['isupdown']
+	isExtend = commonOptions['isExtend']
+	hgfile = commonOptions['hgfile']
+	SeqDepth = commonOptions['SeqDepth']
+
+	unique_file_id = specifiedOptions['unique_file_id']
+	analysis_file_id = specifiedOptions['analysis_file_id']
+	simulation_file_id = specifiedOptions['simulation_file_id']
+	isUnsymAlign = specifiedOptions['isUnsymAlign']
 	
-def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange=[5, 100], insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isAlign=1, isupdown=90, isExtend=0, randTimes=100, isPartial=False):
+	insert_rate = specifiedOptions['insert_rate']
+	del_rate = specifiedOptions['del_rate']
+	sub_rate = specifiedOptions['sub_rate']
+	coverage = specifiedOptions['coverage']
+	randTimes = specifiedOptions['randTimes']
+	
 	simfolder = 'sim_data/'
 	if not os.path.isdir(simfolder): 
 		os.system("mkdir "+simfolder);
@@ -355,7 +386,7 @@ def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, 
 	if curgenestart[1]>gene_start_end[1]: curgenestart[1]=gene_start_end[1]
 	currepstart = [mgloc[3], mgloc[4]]
 
-	upstreamstr, repregion, downstreamstr = get3part(mgloc, gene_start_end, repeat_start_end, repeatgene , unique_file_id, analysis_file_id)
+	upstreamstr, repregion, downstreamstr = get3part(mgloc, gene_start_end, repeat_start_end, repeatgene , unique_file_id, analysis_file_id, hgfile)
 	predres = []
 
 	if len(repregion)==0:
@@ -396,7 +427,7 @@ def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, 
 	
 
 	#origstr = upstreamstr+repregion+downstreamstr
-	orirepeat = int(len(repregion)/3)
+	orirepeat = int(len(repregion)/float(len(na3))) #3)
 
 	#logging.info("Orignal simulation read="+upstreamstr+'<<<'+repregion+'>>>'+downstreamstr+(" #repeat=%d; #len=%d" % (orirepeat, len(repregion))))
 	logging.info("Orignal simulation read="+'<<<'+repregion+'>>>'+(" #repeat=%d; #len=%d" % (orirepeat, len(repregion))))
@@ -413,7 +444,7 @@ def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, 
 	logging.info("bwamem_w_option="+str(bwamem_w_option))
 
 	#print mgloc
-	#print unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange, insert_rate, del_rate, sub_rate, coverage, isAlign, isupdown, isExtend, randTimes
+	#print unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange, insert_rate, del_rate, sub_rate, coverage, isRemInDel, isupdown, isExtend, randTimes
 	#print repregion
 	#sys.exit(1)
 	
@@ -434,12 +465,24 @@ def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, 
 	if os.path.isfile(refcovfolder+'_produced_repeats.txt'):
 		refcovrepeats = readList(refcovfolder+'_produced_repeats.txt')
 	else: randomproduced = True;
+
+	moreOptions['repeat_orig_start_end'] = [moreOptions['repeat_start_end'][0], moreOptions['repeat_start_end'][1]]
+	moreOptions['chr'] = mgloc[0]
+	moreOptions['repPat'] = mgloc[5];
+	moreOptions['forw_rerv']= mgloc[6]
+
 	
 	for rt in range(randTimes):
 		start_time = time.time();
 
 		curreadfile = simfile + '/' + str(rt) +'.fastq'
 		bamfile = curreadfile + '.bam'
+		
+		#moreOptions['bamfile'] = bamfile
+		specifiedOptions['bamfile'] = bamfile
+		specifiedOptions['fastafile'] = curreadfile
+
+		#print rt, produced_repeat_file, '\n', moreOptions['bamfile'], '\n', unique_file_id, '\n', analysis_file_id, '\n', simulation_file_id
 
 		if isUnsymAlign and os.path.isfile(curreadfile):
 			currep2 = previous_sim_repeats[rt]
@@ -525,7 +568,7 @@ def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, 
 			if True: #not isUnsymAlign:
 				#cmd = 'bwa mem -x pacbio -t 4 '+hg38_reference_and_index+'/hg38.fa '+ curreadfile +' | samtools view -S -b | samtools sort > '+bamfile
 				#cmd = 'bwa mem -k17 -W40 -r10 -A2 -B2 -O2 -E2 -L3 -t 4 '+hg38_reference_and_index+'/hg38.fa '+ curreadfile +' | samtools view -S -b | samtools sort > '+bamfile
-				cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t 4 '+hg38_reference_and_index+'/hg38.fa '+ curreadfile +' | samtools view -S -b | samtools sort > '+bamfile
+				cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t 4 '+hg_reference_and_index+'/'+hgfile+' '+ curreadfile +' | samtools view -S -b | samtools sort > '+bamfile
 
 				logging.info(cmd);
 				os.system(cmd);
@@ -534,13 +577,16 @@ def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, 
 				os.system(cmd)
 
 		if not isUnsymAlign:
-			#print repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id
-			p2all = findTrinucleotideRepeats.getRepeatForGivenGene(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
+			#print repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isRemInDel, isupdown, isExtend, unique_file_id, analysis_file_id
+			p2all = findTrinucleotideRepeats.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
+			#p2all = findTrinucleotideRepeats.getRepeatForGivenGene(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isRemInDel, isupdown, isExtend, unique_file_id, analysis_file_id)
 			p2 = p2all[2];
 		else:
-			p2all = useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, currep2, bwamem_w_option);
+			#p2all = useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, mgloc[5], mgloc[6], isRemInDel, isupdown, isExtend, currep2, bwamem_w_option);
+			p2all = useUnsymmetricalAlign.useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, mgloc[5], mgloc[6], isRemInDel, isupdown, isExtend, bwamem_w_option, False, currep2, True, SeqDepth);
 			p2 = p2all[0];
-			pbwa = findTrinucleotideRepeats.getRepeatForGivenGene2(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
+			pbwa = findTrinucleotideRepeats.getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions)
+			#pbwa = findTrinucleotideRepeats.getRepeatForGivenGene2(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isRemInDel, isupdown, isExtend, unique_file_id, analysis_file_id)
 			pbwa = pbwa[2];
 			pbwa.sort();
 			if len(pbwa)==1: pbwa = [pbwa[0], pbwa[0]]
@@ -608,8 +654,14 @@ def getRepeatRange(mstr):
 
 	return allrange;
 
+def getSimforKnownGeneWithPartialRev(commonOptions, specifiedOptions):
+#def getSimforKnownGeneWithPartialRev(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, newinfo, insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isRemInDel=1, isupdown=90, isExtend=0, randTimes=100):
+	moreOptions = {}
 
-def getSimforKnownGeneWithPartialRev(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, newinfo, insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isAlign=1, isupdown=90, isExtend=0, randTimes=100):
+	gLoc = commonOptions['gLoc']
+	repeatgene = commonOptions['repeatgene']
+	newinfo = commonOptions['specifiedGeneInfo']
+
         infospt = newinfo.split('/')
 	repeatgene = repeatgene.lower()
 	if gLoc.has_key(repeatgene):
@@ -637,18 +689,29 @@ def getSimforKnownGeneWithPartialRev(gLoc, isUnsymAlign, unique_file_id, simulat
 	repeatrange = getRepeatRange(mgloc[7])
 	repeatrange = getRepeatRange2(mgloc[7])
 
+	moreOptions['gene_start_end'] = gene_start_end
+	moreOptions['repeat_start_end'] = repeat_start_end
+	moreOptions['mgloc'] = mgloc
+	moreOptions['repeatgene'] = commonOptions['repeatgene']
+	moreOptions['repeatrange'] = repeatrange
+	moreOptions['isPartial'] = True;
+
 	#print mgloc; sys.exit(103);
 
-        res = getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange, insert_rate, del_rate, sub_rate, coverage, isAlign, isupdown, isExtend, randTimes, True)
+	res = getSimForGivenGene(commonOptions, specifiedOptions, moreOptions)
+        #res = getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange, insert_rate, del_rate, sub_rate, coverage, isRemInDel, isupdown, isExtend, randTimes, True)
 	
 	return res
 
-
+def getSimforKnownGene(commonOptions, specifiedOptions):
 #                  0         1             2            3            4         5     6     7
 #gloc['fmr1'] = ['chrX', '147911951', '147951127', '14799051', '147912110', 'CGG', '+', '6-53:230+/55-200']
-def getSimforKnownGene(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isAlign=1, isupdown=90, isExtend=0, randTimes=100):
+#def getSimforKnownGene(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isRemInDel=1, isupdown=90, isExtend=0, randTimes=100):
 	#defaultupdownstreamsize = 5000;
-	
+	moreOptions = {}
+
+	gLoc = commonOptions['gLoc']
+	repeatgene = commonOptions['repeatgene']	
 	
 	repeatgene = repeatgene.lower()
 	mgloc = findTrinucleotideRepeats.get_gLoc(repeatgene, gLoc);
@@ -681,16 +744,28 @@ def getSimforKnownGene(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, a
 	gene_start_end = [upstreampos, downstreampos]
 	repeatrange = getRepeatRange2(mgloc[7])
 
-	res = getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange, insert_rate, del_rate, sub_rate, coverage, isAlign, isupdown, isExtend, randTimes, False)
+	moreOptions['gene_start_end'] = gene_start_end
+	moreOptions['repeat_start_end'] = repeat_start_end
+	moreOptions['mgloc'] = mgloc
+	moreOptions['repeatgene'] = commonOptions['repeatgene']
+	moreOptions['repeatrange'] = repeatrange
+	moreOptions['isPartial'] = False;
+
+	res = getSimForGivenGene(commonOptions, specifiedOptions, moreOptions)
+	#res = getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange, insert_rate, del_rate, sub_rate, coverage, isRemInDel, isupdown, isExtend, randTimes, False)
         
 	return res;
 
-def getSim(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isAlign=1, isupdown=90, isExtend=0, randTimes=100):
+
+def getSim(commonOptions, specifiedOptions):
+#def getSim(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isRemInDel=1, isupdown=90, isExtend=0, randTimes=100):
 	res = []
 
 	glkeys = gLoc.keys(); glkeys.sort()
 	for glk in glkeys:
-		res.extend(getSimforKnownGene(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, glk, insert_rate, del_rate, sub_rate, coverage, isAlign, isupdown, isExtend, randTimes));
+		commonOptions['repeatgene'] = glk
+		res.extend(getSimforKnownGene(commonOptions, specifiedOptions))
+		#res.extend(getSimforKnownGene(gLoc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, glk, insert_rate, del_rate, sub_rate, coverage, isRemInDel, isupdown, isExtend, randTimes));
 
 	return res;
 

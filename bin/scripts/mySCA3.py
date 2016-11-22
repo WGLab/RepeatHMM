@@ -13,12 +13,15 @@ import logging
 import trinucleotideRepeatRealSimulation
 import findTrinucleotideRepeats
 import getAlignment
-from UnsymmetricPairAlignment import UnsymmetricPairAlignment
+import UnsymmetricPairAlignment
 from myheader import *
 import myHMM
+import useUnsymmetricalAlign
 
 
-def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isAlign, isupdown, isExtend, bandwo):
+
+#def useUnsymmetricalAlign_old(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isAlign, isupdown, isExtend, bandwo):
+def useUnsymmetricalAlign_old(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isRemInDel, isupdown, isExtend, bandwo):
 	pdebug = False; #pdebug=True; 
 	mdebug = False; #mdebug=True;
 	if mdebug:
@@ -33,7 +36,7 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 	if mdebug or pdebug: print '\ntemp_all  :', len(templatestr[len(upstreamstr)-10:-len(downstreamstr)]), templatestr[len(upstreamstr)-10:-len(downstreamstr)], 'bandw=', bandw
 	allsimreads = findTrinucleotideRepeats.myReadTxtFile(curreadfile)
 
-	repregion_len_threhold = 3;
+	repregion_len_threhold = len(repPat) #3;
 	repeatbeforeafter = isupdown
 	toleratebeforeafter = 30+isupdown;
 	if toleratebeforeafter>len(upstreamstr): toleratebeforeafter = len(upstreamstr)-1
@@ -43,6 +46,8 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 
 	repeatlength = []; replen = len(repregion)
 	bp = getAlignment.getBasePair();
+
+	hmmoptions = findTrinucleotideRepeats.getHMMOptions(repeatbeforeafter, repPat, forw_rerv)
 	
 	isprint = 0; #1;	
 	#for j in range(1, len(allsimreads), 4):
@@ -144,13 +149,13 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 	
 				if mdebug or pdebug: print len(detectregion), repeat_start_end, detectregion
 				
-				if isAlign:
-					newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, detectregion)
+				if isRemInDel>0: #isAlign:
+					newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, detectregion)
 
 					#newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, detectregion, match, mismatch, gap_in_perf, gap_in_read, gap_before_after)
 				else:
-					newstr, pre0, predstats = myHMM.hmmpred(detectregion, repPat, forw_rerv, repeatbeforeafter)
-				repeatlength.append(len(newstr)/3)
+					newstr, pre0, predstats = myHMM.hmmpred(detectregion, repPat, forw_rerv, hmmoptions, repeatbeforeafter)
+				repeatlength.append(len(newstr)/float(len(repPat))) #3)
 				
 				if repeatlength[-1]>70:
 					logging.info("More repeat %3d: %s" % (repeatlength[-1], detectregion))
@@ -162,9 +167,26 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 	
 	return [p2, allocr];
 
-			
-def getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, isAlign=1, isupdown=90, isExtend=0):
-	
+def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):			
+#def getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, isAlign=1, isupdown=90, isExtend=0):
+	mgloc = moreOptions['mgloc']
+	repeatgene = moreOptions['repeatgene']
+	gene_start_end = moreOptions['gene_start_end']
+	repeat_start_end = moreOptions['repeat_start_end']
+
+	fastafile = specifiedOptions['fastafile']
+ 	unique_file_id = specifiedOptions['unique_file_id']
+	analysis_file_id = specifiedOptions['analysis_file_id']
+	isUnsymAlign = specifiedOptions['isUnsymAlign']
+
+	isRemInDel = commonOptions['isRemInDel']
+	isupdown = commonOptions['isupdown']
+	isExtend = commonOptions['isExtend']
+	hgfile = commonOptions['hgfile']
+	SeqDepth = commonOptions['SeqDepth']
+
+	repPat = moreOptions['repPat']
+
 	mgloc[1] = int(mgloc[1]);  mgloc[2] = int(mgloc[2]);
 	mgloc[3] = int(mgloc[3]);  mgloc[4] = int(mgloc[4]);
 
@@ -178,19 +200,21 @@ def getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis
 	
 	currepstart = [mgloc[3], mgloc[4]]
 
-	upstreamstr, repregion, downstreamstr = trinucleotideRepeatRealSimulation.get3part(mgloc, gene_start_end, repeat_start_end, repeatgene , unique_file_id, analysis_file_id)
+	upstreamstr, repregion, downstreamstr = trinucleotideRepeatRealSimulation.get3part(mgloc, gene_start_end, repeat_start_end, repeatgene , unique_file_id, analysis_file_id, hgfile)
 	predres = []
 
 	if len(repregion)==0:
 		logging.error("Not repeat region! please check!!"+repeatgene+(' gene_location=[%d, %d], repeat_location=[%d, %d]' % (gene_start_end[0], gene_start_end[1], repeat_start_end[0], repeat_start_end[1])));
 		sys.exit(1);
 
-	logging.info("SCA3 "+repeatgene+(' gene_location=[%d, %d], repeat_location=[%d, %d]; upstreamsize=%d, downstreamsize=%d' % (gene_start_end[0], gene_start_end[1], repeat_start_end[0], repeat_start_end[1], repeat_start_end[0]-gene_start_end[0], gene_start_end[1]-repeat_start_end[1])))
+	#logging.info("SCA3 "+repeatgene+(' gene_location=[%d, %d], repeat_location=[%d, %d]; upstreamsize=%d, downstreamsize=%d' % (gene_start_end[0], gene_start_end[1], repeat_start_end[0], repeat_start_end[1], repeat_start_end[0]-gene_start_end[0], gene_start_end[1]-repeat_start_end[1])))
+	logging.info("Test "+repeatgene+(' gene_location=[%d, %d], repeat_location=[%d, %d]; upstreamsize=%d, downstreamsize=%d' % (gene_start_end[0], gene_start_end[1], repeat_start_end[0], repeat_start_end[1], repeat_start_end[0]-gene_start_end[0], gene_start_end[1]-repeat_start_end[1])))
 	logging.info("Normal/Pathogenic repeats: %s" % mgloc[7])
 
-	orirepeat = int(len(repregion)/3)
+	orirepeat = int(len(repregion)/float(len(repPat))) #3)
 
-	logging.info("Orignal SCA3 read="+'<<<'+repregion+'>>>'+(" #repeat=%d; #len=%d" % (orirepeat, len(repregion))))
+	#logging.info("Orignal SCA3 read="+'<<<'+repregion+'>>>'+(" #repeat=%d; #len=%d" % (orirepeat, len(repregion))))
+	logging.info("Orignal Test read="+'<<<'+repregion+'>>>'+(" #repeat=%d; #len=%d" % (orirepeat, len(repregion))))
 
 	bwamem_w_option = 90*4;
 	max_w_option, min_w_option = 1000, 100;
@@ -201,22 +225,33 @@ def getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis
 	start_time = time.time();
 
 	bamfile = fastafile + '.bam'
+	specifiedOptions['bamfile'] = bamfile
 
 	if True: #not isUnsymAlign:
-		cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t 4 '+hg38_reference_and_index+'/hg38.fa '+ fastafile +' | samtools view -S -b | samtools sort > '+bamfile
+		#cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t 4 '+hg38_reference_and_index+'/hg38.fa '+ fastafile +' | samtools view -S -b | samtools sort > '+bamfile                                         hg_reference_and_index+'/'+hgfn
+		cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t 4 '+hg_reference_and_index+'/'+hgfile+' '+ fastafile +' | samtools view -S -b | samtools sort > '+bamfile
 		logging.info(cmd);
 		os.system(cmd);
 			
 		cmd = 'samtools index '+bamfile
+		logging.info(cmd);
 		os.system(cmd)
 
+	moreOptions['gene_start_end'] = curgenestart
+	moreOptions['repeat_orig_start_end'] = currepstart
+
 	if not isUnsymAlign:
-		p2all = findTrinucleotideRepeats.getRepeatForGivenGene(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
+		p2all = findTrinucleotideRepeats.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions); #(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
 		p2 = p2all[2];
 	else:
-		p2all = useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, fastafile, repeatgene, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, bwamem_w_option);
+		#print 'here isUnsymAlign'
+		#useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isAlign, isupdown, isExtend, bandwo)
+		#p2all = useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, fastafile, repeatgene, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, bwamem_w_option);
+		#p2all = useUnsymmetricalAlign.useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, fastafile, repeatgene, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, bwamem_w_option, True, None, False);
+		p2all = useUnsymmetricalAlign.useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, fastafile, repeatgene, mgloc[5], mgloc[6], isRemInDel, isupdown, isExtend, bwamem_w_option, True, None, False, SeqDepth);
 		p2 = p2all[0];
-		pbwa = findTrinucleotideRepeats.getRepeatForGivenGene2(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
+		#print 'test after useUnsymmetricalAlign.useUnsymmetricalAlign', p2all
+		pbwa = findTrinucleotideRepeats.getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions); #(mgloc[0], repeatgene, curgenestart, currepstart, bamfile, mgloc[5], mgloc[6], isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
 		pbwa = pbwa[2]; pbwa.sort();
 		if len(pbwa)==1: pbwa = [pbwa[0], pbwa[0]]
 		if len(pbwa)==0: pbwa = [0, 0]
@@ -236,11 +271,18 @@ def getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis
 
 	return predres
 
-def getSCA3forKnownGeneWithPartialRev(gLoc, fastafile, isUnsymAlign, unique_file_id, analysis_file_id, repeatgene, newinfo, isAlign=1, isupdown=90, isExtend=0):
+def getSCA3forKnownGeneWithPartialRev(commonOptions, specifiedOptions):
+#def getSCA3forKnownGeneWithPartialRev(gLoc, fastafile, isUnsymAlign, unique_file_id, analysis_file_id, repeatgene, newinfo, isAlign=1, isupdown=90, isExtend=0):
+        moreOptions = {}
+
+        gLoc = commonOptions['gLoc']
+        repeatgene = commonOptions['repeatgene'].lower()
+        newinfo = commonOptions['specifiedGeneInfo']
+
         infospt = newinfo.split('/')
 	repeatgene = repeatgene.lower()
 	if gLoc.has_key(repeatgene):
-		print gLoc.keys()
+		#print gLoc.keys()
 		logging.info(repeatgene)
 		mgloc = gLoc[repeatgene]
 	else: mgloc = ['','','', '','', '','','']
@@ -266,7 +308,17 @@ def getSCA3forKnownGeneWithPartialRev(gLoc, fastafile, isUnsymAlign, unique_file
 
 	#print mgloc; sys.exit(103);
 
-        res = getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, isAlign, isupdown, isExtend)
+        moreOptions['gene_start_end'] = gene_start_end
+        moreOptions['repeat_start_end'] = repeat_start_end
+        moreOptions['mgloc'] = mgloc
+        moreOptions['repeatgene'] = commonOptions['repeatgene']
+        moreOptions['chr'] = mgloc[0]
+        moreOptions['repPat'] = mgloc[5];
+        moreOptions['forw_rerv']= mgloc[6]
+
+
+        #res = getSCA3ForGivenGene(mgloc, fastafile, isUnsymAlign, unique_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, isAlign, isupdown, isExtend)
+        res = getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions);
 	
 	return res
 

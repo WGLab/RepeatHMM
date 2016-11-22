@@ -1,6 +1,15 @@
 
+import string
+
 import numpy as np;
 from hmmlearn import hmm
+
+import getTransition_start_emission_prob_2
+import getTransition_start_emission_prob_3
+import getTransition_start_emission_prob_4
+import getTransition_start_emission_prob_5
+import getTransition_start_emission_prob_6
+import getTransition_start_emission_prob_without0
 
 def getBasePair():
         bp = {}
@@ -19,6 +28,8 @@ def getComplementary3(bp, na3):
                 c3 += getComplementary(bp, na3[li]);
         return (c3[::-1]);
 
+
+'''
 def printHMMmatrix(states, obs_symbols, trainsmat, emisionmat, startprob):
                 for si in range(len(states)):
                         if si==0:
@@ -48,7 +59,7 @@ def printHMMmatrix(states, obs_symbols, trainsmat, emisionmat, startprob):
 
 
 
-def getTransition_start_emission_prob(na3):
+def getTransition_start_emission_prob_3(na3):
 	states = ['N', 'C', 'T', 'G', 'IC', 'IT', 'IG', 'DC', 'DT', 'DG']
 	#                  N     C       T       G      IC    IT   IG    DC    DT    DG
 	trainsmat = np.array([ 	\
@@ -106,15 +117,19 @@ def getTransition_start_emission_prob(na3):
 		print 'HMMmatrix1'
 		printHMMmatrix(states, obs_symbols, trainsmat, emisionmat, startprob)
 
-	return [trainsmat, startprob, emisionmat, obs_symbols, states, len(states), len(obs_symbols)]
+	na3 = string.strip(na3);
+	state3class = [range(1, len(na3)+1), range(len(na3)+1, 2*len(na3)+1), range(2*len(na3)+1, 3*len(na3)+1)]
 
-def getTransition_start_emission_prob_without0(na3):
+	return [trainsmat, startprob, emisionmat, obs_symbols, states, len(states), len(obs_symbols), state3class]
+
+def getTransition_start_emission_prob_3_without0(na3):
 	allinfoforhmm = getTransition_start_emission_prob(na3)
 	trainsmat = allinfoforhmm[0];
 	startprob = allinfoforhmm[1];
 	emissionmat = allinfoforhmm[2]
 	obs_symbols = allinfoforhmm[3]
 	states = allinfoforhmm[4]
+	state3class = allinfoforhmm[7]
 	
 	states = np.delete(states, 0);
 	startprob = np.delete(startprob, 0);
@@ -134,9 +149,21 @@ def getTransition_start_emission_prob_without0(na3):
 		print 'HMMmatrix2'
 		printHMMmatrix(states, obs_symbols, trainsmat, emissionmat, startprob)
 
-	return [trainsmat, startprob, emissionmat, obs_symbols, states, len(states), len(obs_symbols)]
+	return [trainsmat, startprob, emissionmat, obs_symbols, states, len(states), len(obs_symbols), state3class]
+'''
 
-def getPred(predstats, obs_seq, state_add=0):
+def getTransition_start_emission_prob(repPat):
+	if len(repPat)==2: return   getTransition_start_emission_prob_2.getTransition_start_emission_prob_2(repPat);
+	elif len(repPat)==3: return getTransition_start_emission_prob_3.getTransition_start_emission_prob_3(repPat);
+	elif len(repPat)==4: return getTransition_start_emission_prob_4.getTransition_start_emission_prob_4(repPat);
+	elif len(repPat)==5: return getTransition_start_emission_prob_5.getTransition_start_emission_prob_5(repPat);
+	elif len(repPat)==6: return getTransition_start_emission_prob_6.getTransition_start_emission_prob_6(repPat);
+	else: return None 
+
+def getTransition_start_emission_prob_without0(repPat):
+	return getTransition_start_emission_prob_without0.getTransition_start_emission_prob_without0(repPat)
+
+def getPred(predstats, obs_seq, state3class, state_add=0):
         newstr = ''; ststar = ''; pre0 = 0; ispre = True;
         for stind_ind in range(len(predstats)):
                 stind = predstats[stind_ind] + state_add
@@ -144,20 +171,24 @@ def getPred(predstats, obs_seq, state_add=0):
                 if stind==0:
 			if ispre: pre0 += 1;
 		else: ispre = False;
-                if stind in [1,2,3]: newstr += obs_seq[stind_ind] #(states[stind]);
-                if stind in [4,5,6]: pass
-                if stind in [7,8,9]: 
+                #if stind in [1,2,3]: newstr += obs_seq[stind_ind] #(states[stind]);
+                #if stind in [4,5,6]: pass
+                #if stind in [7,8,9]:
+                if stind in state3class[0]: newstr += obs_seq[stind_ind] #(states[stind]);
+                if stind in state3class[1]: pass
+                if stind in state3class[2]: 
 			newstr += ('-'); 
 			newstr += obs_seq[stind_ind]
  	return [newstr, ststar, pre0]
 
-def hmmpred(obs_seq, na3, forw_rerv, afterbefore = 1):
+def hmmpred(obs_seq, na3, forw_rerv, hmmoptions, afterbefore = 1):
 	bp = getBasePair()
 	if forw_rerv[0]=='-': na3 = getComplementary3(bp, na3)
-	if afterbefore>0:
-		trainsmat, startprob, emisionmat, obs_symbols, states, numStates, numSymbols = getTransition_start_emission_prob(na3)
-	else:
-		trainsmat, startprob, emisionmat, obs_symbols, states, numStates, numSymbols = getTransition_start_emission_prob_without0(na3)
+	#if afterbefore>0:
+	#	trainsmat, startprob, emisionmat, obs_symbols, states, numStates, numSymbols = getTransition_start_emission_prob(na3)
+	#else:
+	#	trainsmat, startprob, emisionmat, obs_symbols, states, numStates, numSymbols = getTransition_start_emission_prob_without0(na3)
+	trainsmat, startprob, emisionmat, obs_symbols, states, numStates, numSymbols, state3class = hmmoptions
 	hmmmodel = hmm.MultinomialHMM(numStates)
 	hmmmodel.transmat_ = trainsmat;
 	hmmmodel.startprob_ = startprob;
@@ -174,9 +205,10 @@ def hmmpred(obs_seq, na3, forw_rerv, afterbefore = 1):
 	#0     1    2    3     4    5     6      7    8     9
 	#'N', 'C', 'T', 'G', 'IC', 'IT', 'IG', 'DC', 'DT', 'DG'
 	if afterbefore>0:
-		newstr, ststar, pre0 = getPred(predstats, obs_seq)
-	else: newstr, ststar, pre0 = getPred(predstats, obs_seq, 1)
+		newstr, ststar, pre0 = getPred(predstats, obs_seq, state3class)
+	else: newstr, ststar, pre0 = getPred(predstats, obs_seq, state3class, 1)
 
+	#print numStates, numSymbols, state3class, newstr, ststar, pre0
 
 	moutput = False;
 	if moutput: # or len(obs_seq)>120:
