@@ -1,5 +1,7 @@
 # The options for repeatHMM.py
 
+There are three options for repeatHMM.py: `BAMinput`,`FASTQinput` and `Simulate`.
+
 ```
 usage: repeatHMM.py [-h] {BAMinput,FASTQinput,Simulate} ...
 
