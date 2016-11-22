@@ -22,7 +22,7 @@ RepeatHMM takes long reads from a subject as input, and can also take a BAM file
 
 ## Usage
 
-Please refer to how to use RepeatHMM.
+Please refer to [Usage]() how to use RepeatHMM.
 
 ## Revision History
 
