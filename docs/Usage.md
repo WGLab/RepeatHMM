@@ -1,6 +1,6 @@
 # The options for repeatHMM.py
 
-There are three options for repeatHMM.py: `BAMinput`,`FASTQinput` and `Simulate`.
+There are three options below for repeatHMM.py: `BAMinput`,`FASTQinput` and `Simulate`.
 
 ```
 usage: repeatHMM.py [-h] {BAMinput,FASTQinput,Simulate} ...
@@ -65,15 +65,15 @@ Common options for gene information:
 ### Example
 ```
 For example,
- python repeatHMM.py FASTQinput --fastq XXX.fq --repeatgene HTT --UnsymAlign 1;
- python repeatHMM.py FASTQinput --fastq XXX.fq --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1;
- python repeatHMM.py FASTQinput --fastq XXX.fq --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName PCR1;
+     python repeatHMM.py FASTQinput --fastq XXX.fq --repeatgene HTT --UnsymAlign 1;
+     python repeatHMM.py FASTQinput --fastq XXX.fq --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1;
+     python repeatHMM.py FASTQinput --fastq XXX.fq --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName PCR1;
 ```
 If `--UnsymAlign` is used,  `-UserDefinedGene /92070888/92072403/////` must be given and same as your PCR primer design. The two numbers are the location of the forward primer and the reverse primer.
 
 ####  with FASTQ file
 ```
- python repeatHMM.py FASTQinput --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName sca3_pcr25_raw_test --fastq atxn3_data/rawdata/sam025.raw.fastq
+     python repeatHMM.py FASTQinput --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName sca3_pcr25_raw_test --fastq atxn3_data/rawdata/sam025.raw.fastq
 ```
 
 ### Where to find the result:
@@ -128,14 +128,14 @@ Common options for gene information:
 ### Example
 ```
 For example,
- python repeatHMM.py Simulate --repeatgene HTT --UnsymAlign 1;
- python repeatHMM.py Simulate --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1;
- python repeatHMM.py Simulate --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1 --coverage 100 --randTimes 100 -UserDefinedGene /92070888/92072403///// --UserDefinedGeneName PCR1;
- python repeatHMM.py Simulate --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --randTimes 100 --coverage 50
- python repeatHMM.py Simulate --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --randTimes 100 --coverage 50 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName pcr1
+     python repeatHMM.py Simulate --repeatgene HTT --UnsymAlign 1;
+     python repeatHMM.py Simulate --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1;
+     python repeatHMM.py Simulate --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1 --coverage 100 --randTimes 100 -UserDefinedGene /92070888/92072403///// --UserDefinedGeneName PCR1;
+     python repeatHMM.py Simulate --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --randTimes 100 --coverage 50
+     python repeatHMM.py Simulate --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --randTimes 100 --coverage 50 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName pcr1
  ```
  
- ### Where to find the result:
+### Where to find the result:
  Final results was stored in logsim/TrinRepSim*.log
 
 ## 3. With a BAM file
@@ -178,9 +178,9 @@ Common options for gene information:
 ### Example
 ```
 For example,
- python repeatHMM.py BAMinput --bamfile XXX.bam --repeatgene HTT;
- python repeatHMM.py BAMinput --bamfile XXX.bam --repeatgene HTT --RemInDel 1 --updown 18 --extend 0;
- python repeatHMM.py BAMinput --bamfile freeze4-all-merge.sort.bam --repeatgene HTT;
+     python repeatHMM.py BAMinput --bamfile XXX.bam --repeatgene HTT;
+     python repeatHMM.py BAMinput --bamfile XXX.bam --repeatgene HTT --RemInDel 1 --updown 18 --extend 0;
+     python repeatHMM.py BAMinput --bamfile freeze4-all-merge.sort.bam --repeatgene HTT;
 ```
 Please note that BAM file should be produced with the same version of 'hg' if '--hg' or '--hgfile' is specified.
 
