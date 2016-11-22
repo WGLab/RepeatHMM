@@ -26,7 +26,7 @@ Please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usag
 
 ## Revision History
 
-For release history, please visit [here](https://github.com/WGLab/RepeatHMM/releases). For details, please go [here](https://github.com/WGLab/RepeatHMM/blob/master).
+For release history, please visit [here](https://github.com/WGLab/RepeatHMM/releases). For details, please go [here](https://github.com/WGLab/RepeatHMM/blob/master/README.md).
 
 ## Contact
 
