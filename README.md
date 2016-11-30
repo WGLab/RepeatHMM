@@ -22,11 +22,11 @@ RepeatHMM takes long reads from a subject as input, and can also take a BAM file
 
 ## Usage
 
-Please refer to how to use RepeatHMM.
+Please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md) for how to use RepeatHMM.
 
 ## Revision History
 
-For release history, please visit [here](https://github.com/WGLab/RepeatHMM/releases). For details, please go [here](https://github.com/WangGenomicsLab/RepeatHMM/blob/master).
+For release history, please visit [here](https://github.com/WGLab/RepeatHMM/releases). For details, please go [here](https://github.com/WGLab/RepeatHMM/blob/master/README.md).
 
 ## Contact
 
@@ -34,4 +34,4 @@ If you have any questions/issues/bugs, please post them on [GitHub](https://gith
 
 ## More information
 
-Copyright 2016 [USC Wang Lab](http://genomics.usc.edu/)
+Copyright 2016 [USC Wang Lab](http://wglab.org/)
