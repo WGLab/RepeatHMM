@@ -11,8 +11,8 @@ len_sensitive_prob = {2:0.8490, 3:0.8486, 4:0.8485, 5:0.8484, 6:0.8480}
 outputm = False ; #outputm = True
 
 
-def getTransition_start_emission_prob_without0(repPat):
-        allinfoforhmm = myHMM.getTransition_start_emission_prob(repPat)
+def getTransition_start_emission_prob_without0(repPat, forprint=False):
+        allinfoforhmm = myHMM.getTransition_start_emission_prob(repPat, forprint)
         trainsmat = allinfoforhmm[0];
         startprob = allinfoforhmm[1];
         emissionmat = allinfoforhmm[2]
@@ -34,7 +34,7 @@ def getTransition_start_emission_prob_without0(repPat):
         trainsmat[3*len(repPat)-2][0] = len_sensitive_prob[len(repPat)] + 0.02
         trainsmat[3*len(repPat)-1][1] = len_sensitive_prob[len(repPat)] + 0.02
 
-        if outputm:
+        if outputm or forprint:
                 print 'HMMmatrix2'
                 printHMMmatrix.printHMMmatrix(states, obs_symbols, trainsmat, emissionmat, startprob)
 

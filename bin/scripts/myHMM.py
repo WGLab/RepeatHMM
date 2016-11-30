@@ -152,16 +152,16 @@ def getTransition_start_emission_prob_3_without0(na3):
 	return [trainsmat, startprob, emissionmat, obs_symbols, states, len(states), len(obs_symbols), state3class]
 '''
 
-def getTransition_start_emission_prob(repPat):
-	if len(repPat)==2: return   getTransition_start_emission_prob_2.getTransition_start_emission_prob_2(repPat);
-	elif len(repPat)==3: return getTransition_start_emission_prob_3.getTransition_start_emission_prob_3(repPat);
-	elif len(repPat)==4: return getTransition_start_emission_prob_4.getTransition_start_emission_prob_4(repPat);
-	elif len(repPat)==5: return getTransition_start_emission_prob_5.getTransition_start_emission_prob_5(repPat);
-	elif len(repPat)==6: return getTransition_start_emission_prob_6.getTransition_start_emission_prob_6(repPat);
+def getTransition_start_emission_prob(repPat, forprint=False):
+	if len(repPat)==2: return   getTransition_start_emission_prob_2.getTransition_start_emission_prob_2(repPat, forprint);
+	elif len(repPat)==3: return getTransition_start_emission_prob_3.getTransition_start_emission_prob_3(repPat, forprint);
+	elif len(repPat)==4: return getTransition_start_emission_prob_4.getTransition_start_emission_prob_4(repPat, forprint);
+	elif len(repPat)==5: return getTransition_start_emission_prob_5.getTransition_start_emission_prob_5(repPat, forprint);
+	elif len(repPat)==6: return getTransition_start_emission_prob_6.getTransition_start_emission_prob_6(repPat, forprint);
 	else: return None 
 
-def getTransition_start_emission_prob_without0(repPat):
-	return getTransition_start_emission_prob_without0.getTransition_start_emission_prob_without0(repPat)
+def getTransition_start_emission_prob_without0(repPat, forprint=False):
+	return getTransition_start_emission_prob_without0.getTransition_start_emission_prob_without0(repPat, forprint)
 
 def getPred(predstats, obs_seq, state3class, state_add=0):
         newstr = ''; ststar = ''; pre0 = 0; ispre = True;

@@ -9,7 +9,7 @@ import numpy as np;
 import getTransition_start_emission_prob_without0
 import printHMMmatrix
 
-def getTransition_start_emission_prob_2(repPat):
+def getTransition_start_emission_prob_2(repPat, forprint=False):
 	avgsub = 0.001
 
 	repPat = string.strip(repPat);
@@ -55,7 +55,7 @@ def getTransition_start_emission_prob_2(repPat):
 				print ('%.4f' % ce),
 			print ''
 
-	if getTransition_start_emission_prob_without0.outputm:
+	if getTransition_start_emission_prob_without0.outputm or forprint:
 		print 'HMMmatrix1'
 		printHMMmatrix.printHMMmatrix(states, obs_symbols, trainsmat, emisionmat, startprob)
 
