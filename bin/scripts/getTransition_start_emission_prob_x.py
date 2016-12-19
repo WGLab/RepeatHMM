@@ -20,6 +20,8 @@ import getTransition_start_emission_prob_x_without0
 from myheader import *
 
 def getTransition_start_emission_prob_x(repPat, forprint=False):
+	if len(repPat)<1: return None
+
 	avgsub = 0.0005
 	avgsub = hmm_random_rep_transit/len(repPat)
 	repPat = string.strip(repPat);
@@ -37,14 +39,17 @@ def getTransition_start_emission_prob_x(repPat, forprint=False):
 	#for N to N
 	trainsmat[0][0] = 0.96;
 	#for N to rep;
-	trainsmat[0][1] = 0.02;
-	if len(states)>2:
+	if not len(repPat)<2:
+		trainsmat[0][1] = 0.02;
+	else: trainsmat[0][1] = 0.04;
+	if not len(repPat)<2:
 		trainsmat[0][1+len(repEle)*2] = 0.02;
 	#for rep to N;
 	trainsmat[len(repEle)][0] = 0.02;
 	trainsmat[len(repEle)*2][0] = 0.02;
 	trainsmat[len(repEle)*3][0] = 0.02;
-	trainsmat[len(repEle)*3-1][0] = 0.02;
+	if not len(repPat)<2:
+		trainsmat[len(repEle)*3-1][0] = 0.02;
 	#avgsub
 	for i in range(1, len(states)):
 		for j in range(len(repEle)):
@@ -64,6 +69,7 @@ def getTransition_start_emission_prob_x(repPat, forprint=False):
 	add_index = len(repEle)*2+1;
 	for typ_ind in range(len(typeOfRepEle)):
 		for j in range(len(repEle)):
+			if len(repPat)<2: continue;
 			if typ_ind<len(typeOfRepEle)-1:
 				jind = j+1;
 				if jind > len(repEle)-1:
@@ -95,14 +101,19 @@ def getTransition_start_emission_prob_x(repPat, forprint=False):
 	for i in range(len(states)):
 		startprob.append(1e-9)
 	startprob[0] = 0.96;
-	startprob[1] = 0.02
-	startprob[1+len(repEle)*2] = 0.02
+	if len(repPat)<2:
+		startprob[1] = 0.04
+	else:
+		startprob[1] = 0.02
+		startprob[1+len(repEle)*2] = 0.02
 	startprob = np.array(startprob)
 
 	emisionmat = np.full((len(repEle)*len(typeOfRepEle)+1, 4), 0.005);
 	randrow = [0]
 	for j in range(len(repEle)):
 		randrow.append(j+len(repEle)+1);
+	if len(repPat)<2: randrow.append(len(repEle)*len(typeOfRepEle))
+	#print randrow
 	for rdr in randrow:
 		for jcol in range(4):
 			emisionmat[rdr][jcol] = 0.25;
@@ -111,6 +122,7 @@ def getTransition_start_emission_prob_x(repPat, forprint=False):
         for naind in range(len(repPat)):
                 emind = (np.where(obs_symbols==repPat[naind]))[0][0]
                 emisionmat[naind+1][emind] = 0.985
+		if len(repPat)<2: continue;
                 if naind<len(repPat)-1:
                         afterd = naind + 1;
                 else:
@@ -198,33 +210,35 @@ def compareMat(matorg, matx):
 if __name__=='__main__':
 	wouldprint = False; #True;
 
-	print '4'
+	print 'len(Pattern) = 4'
 	matorg4 = getTransition_start_emission_prob_4.getTransition_start_emission_prob_4('TATC', wouldprint)
 	matx4   = getTransition_start_emission_prob_x('TATC', wouldprint);
 	compareMat(matorg4, matx4)
 
-	print '\n3'
+	print '\nlen(Pattern) = 3'
 	matorg3 = getTransition_start_emission_prob_3.getTransition_start_emission_prob_3('CAG', wouldprint)
 	matx3   = getTransition_start_emission_prob_x('CAG', wouldprint);
 	compareMat(matorg3, matx3)
 
-	print '\n2'
+	print '\nlen(Pattern) = 2'
 	matorg2 = getTransition_start_emission_prob_2.getTransition_start_emission_prob_2('CG', wouldprint)
 	matx2   = getTransition_start_emission_prob_x('CG', wouldprint);
 	compareMat(matorg2, matx2)
 	
-	print '\n5'
+	print '\nlen(Pattern) = 5'
 	matorg5 = getTransition_start_emission_prob_5.getTransition_start_emission_prob_5('TATCG', wouldprint)
 	matx5   = getTransition_start_emission_prob_x('TATCG', wouldprint);
 	compareMat(matorg5, matx5)
 
-	print '\n6'
+	print '\nlen(Pattern) = 6'
 	matorg6 = getTransition_start_emission_prob_6.getTransition_start_emission_prob_6('TATCGG', wouldprint)
 	matx6   = getTransition_start_emission_prob_x('TATCGG', wouldprint);
 	compareMat(matorg6, matx6)
 
 	wouldprint = True; 
 	getTransition_start_emission_prob_x_without0.getTransition_start_emission_prob_x_without0('CAG', wouldprint)
+	
+	matx1   = getTransition_start_emission_prob_x('G', wouldprint);
 
 	#etTransition_start_emission_prob_without0.getTransition_start_emission_prob_without0('TATC')
 
