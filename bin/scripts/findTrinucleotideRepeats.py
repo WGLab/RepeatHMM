@@ -103,6 +103,165 @@ def getDiseseGeneInRefGenomeLocation_hg19():
 	locus_name='D22S1045'; locus_name = locus_name.lower();
 	gLoc[locus_name] = ['chr22', '37436285','37636570', '37536327','37536380', 'ATT', plusminus+'17', '']
 
+
+	locus_name='D8S1179'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr8','125907063','125907405','125907104','125907159','TATC','+13','',]
+	locus_name='D21S11'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr21','20554262','20554483','20554290','20554441','TCTA','+38','',]
+	locus_name='D7S820'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr7','83789380','83789718','83789528','83789593','CTAT','+16','',]
+	locus_name='CSF1PO'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr5','149455734','149456053','149455884','149455960','CTAT','+19','',]
+	locus_name='D3S1358'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr3','45582204','45582335','45582228','45582295','TATC','+16','',]
+	locus_name='TH01'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr11','2192276','2192522','2192315','2192346','TGAA','+7','',]
+	locus_name='D13S317'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr13','82722032','82722314','82722159','82722223','TATC','+16','',]
+	locus_name='D16S539'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr16','86386033','86386428','86386307','86386351','GATA','+11','',]
+	locus_name='D19S433'; locus_name = locus_name.lower(); ######
+	gLoc[locus_name] = ['chr19','30416989','30417261','30417140','30417206','TCCT','+16','',]
+	locus_name='TPOX'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr2','1493367','1493481','1493422','1493456','TGAA','+8','',]
+	locus_name='D18S51'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr18','60948677','60949364','60948899','60949006','AGAA','+26','',]
+	locus_name='D5S818'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr5','123111124','123111402','123111246','123111293','TCTA','+11','',]
+	#locus_name='FGA'; locus_name = locus_name.lower();
+	#gLoc[locus_name] = ['FGA','155508847','155509043','155508872','155508975','AAAG','+25','',]
+	locus_name='D1S1656'; locus_name = locus_name.lower(); ######
+	gLoc[locus_name] = ['chr1','230905195','230905509','230905362','230905429','CTAT','+16','',]
+	locus_name='D2S441'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr2','68239015','68239157','68239078','68239127','TCTA','+12','',]
+	locus_name='D10S1248'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr10','131092373','131092796','131092507','131092559','GGAA','+13','',]
+	locus_name='D22S1045'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr22','37536284','37536570','37536326','37536382','ATT','+18','',]
+	locus_name='D20S1082'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr20','53865825','53866083','53865937','53865979','ATA','+14','',]
+	locus_name='D6S474'; locus_name = locus_name.lower();  #******
+	gLoc[locus_name] = ['chr6','112878949','112879283','112879151','112879231','TAGA','+20','',]
+	locus_name='D1S1677'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr1','163559699','163560041','163559815','163559892','TTCC','+19','',]
+	locus_name='D11S4463'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr11','130872238','130872721','130872403','130872462','TCTA','+14','',]
+	locus_name='D4S2364'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr4','93517335','93517632','93517367','93517421','ATTC','+13','',]
+	locus_name='D9S1122'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr9','79688593','79688849','79688733','79688791','TAGA','+14','',]
+	locus_name='D2S1776'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr2','169645171','169645775','169645402','169645454','AGAT','+13','',]
+	locus_name='D10S1435'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr10','2243219','2243552','2243331','2243392','TATC','+15','',]
+	locus_name='D3S3053'; locus_name = locus_name.lower();  #******
+	gLoc[locus_name] = ['chr3','171750701','171751224','171750963','171751000','AGAT','+9','',]
+	locus_name='D5S2500'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr5','58697040','58697348','58697269','58697313','CTAT','+11','',]
+	locus_name='D1S1627'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr1','106963664','106963777','106963713','106963752','ATT','+13','',]
+	locus_name='D3S4529'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr3','85852473','85852736','85852632','85852684','AGAT','+13','',]
+	locus_name='D17S974'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr17','10518665','10518972','10518722','10518791','AGAT','+17','',]
+	locus_name='D6S1017'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr6','41677173','41677509','41677267','41677308','TGGA','+10','',]
+	locus_name='D4S2408'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr4','31304230','31304513','31304419','31304456','ATCT','+9','',]
+	locus_name='D9S2157'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr9','136035466','136035859','136035668','136035699','ATA','+10','',]
+	locus_name='D17S1301'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr17','72680785','72681109','72680993','72681041','AGAT','+12','',]
+	locus_name='D18S853'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr18','3990523','3990853','3990628','3990665','ATA','+12','',]
+	locus_name='D20S482'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr20','4506247','4506466','4506337','4506396','AGAT','+14','',]
+	locus_name='D14S1434'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr14','95308122','95308685','95308401','95308443','TCTA','+10','',]
+	#locus_name='DYS390'; locus_name = locus_name.lower(); ######
+	#gLoc[locus_name] = ['chrY','17274873','17275219','17274932','17275050','AGAT','+29','',]
+	#locus_name='DYS19'; locus_name = locus_name.lower(); ######
+	#gLoc[locus_name] = ['chrY','9521933','9522128','9521986','9522052','TATC','+16','',]
+	#locus_name='DYS393'; locus_name = locus_name.lower();
+	#gLoc[locus_name] = ['chrY','88861983','88862275','88862009','88862064','ATAG','+13','',]
+	#locus_name='DYS391'; locus_name = locus_name.lower();
+	#gLoc[locus_name] = ['chrY','14102739','14103068','14102780','14102841','TATC','+15','',]
+	#locus_name='DYS392'; locus_name = locus_name.lower();
+	#gLoc[locus_name] = ['chrY','22633713','22634011','22633871','22633912','AAT','+13','',]
+	locus_name='D5S2505'; locus_name = locus_name.lower();  #******
+	gLoc[locus_name] = ['chr5','5816996','5817453','5817134','5817338','AGAT','+53','',]
+	locus_name='D8S1115'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr8','42536554','42536839','42536588','42536615','AAT','+9','',]
+	locus_name='D10S2325'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr10','12792945','12793245','12793050','12793126','ATAAG','+15','',]
+	locus_name='D11S554'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr11','44930233','44930472','44930285','44930381','AAAG','+23','',]
+	locus_name='D13S308'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr13','26457002','26457149','26457032','26457111','GAT','+26','',]
+	locus_name='D14S306'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr14','38328082','38328451','38328290','38328392','TCTA','+25','',]
+	locus_name='D18S535'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr18','38148774','38149329','38148825','38148894','TAGA','+17','',]
+	locus_name='D18S849'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr18','55564577','55564888','55564619','55564758','TCTA','+35','',]
+	locus_name='D19S253'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr19','15728135','15728364','15728294','15728345','ATCT','+12','',]
+	locus_name='D1S103'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr1','230836735','230836986','230836894','230836933','TG','+19','',]
+	locus_name='D20S85'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr20','38051608','38051920','38051753','38051830','TTTC','+20','',]
+	locus_name='D21S2055'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr21','41191368','41191662','41191434','41191586','CTAT','+39','',]
+	locus_name='D2S1360'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr2','17491921','17492295','17491984','17492069','AGAT','+21','',]
+	locus_name='D2S410'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr2','116240906','116241220','116241001','116241056','TCTA','+13','',]
+	locus_name='D2S436'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr2','107243132','107243450','107243293','107243381','TCTA','+22','',]
+	locus_name='D3S1359'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr3','49948548','49948757','49948611','49948679','AGAT','+16','',]
+	locus_name='D3S1744'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr3','147092494','147092853','147092538','147092646','ATAG','+27','',]
+	locus_name='D4S2366'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr4','6484677','6484947','6484828','6484901','GATA','+18','',]
+	locus_name='D5S815'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr5','90990446','90990802','90990491','90990590','TATC','+24','',]
+	locus_name='D6S1043'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr6','92449866','92450188','92449940','92450005','CTAT','+16','',]
+	locus_name='D6S502'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr6','125907063','125907405','125907104','125907159','TATC','+13','',]
+	locus_name='D7S1517'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr7','123497650','123498050','123497698','123497787','CTTT','+22','',]
+	locus_name='D8S1132'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr8','107328820','107329072','107328919','107329003','TCTA','+21','',]
+	locus_name='D8S344'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr8','131076949','131077362','131077139','131077180','TG','+20','',]
+	locus_name='D8S347'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr8','129340452','129340831','129340529','129340619','TCTA','+22','',]
+	locus_name='D8S639'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr8','16770880','16771227','16771051','16771172','ATAG','+30','',]
+	#locus_name='DXS7132'; locus_name = locus_name.lower(); #******
+	#gLoc[locus_name] = ['chrX','64655267','64655632','64655524','64655595','GATA','+17','',]
+	#locus_name='DXS7423'; locus_name = locus_name.lower(); #******
+	#gLoc[locus_name] = ['chrX','149710902','149711089','149710970','149711041','TGGA','+17','',]
+	#locus_name='DXS8378'; locus_name = locus_name.lower(); #******
+	#gLoc[locus_name] = ['chrX','9370149','9370429','9370301','9370341','ATAG','+10','',]
+	locus_name='HUMTH01'; locus_name = locus_name.lower(); #******
+	gLoc[locus_name] = ['chr11','2192276','2192522','2192315','2192346','TGAA','+7','',]
+
+	#SE33                    6q14            AAAG   chr6:88986839-88987087   TCTT   chr6:88986849-88987076 '26'
+	locus_name='SE33'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr6', '88986839', '88987087', '88986849', '88987076', 'TCTT', '+26', '']
+	#Penta_D                 21q22.3         AAAGA  chr21:45055834-45056398  AAAGA chr21:45056073-45056153  '13'
+	locus_name='Penta_D'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr21', '45055834', '45056398', '45056073', '45056153','AAAGA',  '+13', '']
+	#Penta_E                 15q26.2         AAAGA chr15:97374212-97374565 TTTTC chr15:97374242-97374269    '5'
+	locus_name='Penta_E'; locus_name = locus_name.lower();
+        gLoc[locus_name] = ['chr15', '97374212', '97374565', '97374242', '97374269', 'TTTTC', '+5', '']
+	#F13B                    1q31-q32.1      AAAT  chr1:197007783-197007951 TAAA chr1:197007832-197007869 '10'
+	locus_name='F13B'; locus_name = locus_name.lower();
+        gLoc[locus_name] = ['chr1', '197007783', '197007951', '197007832', '197007869', 'TAAA', '+10', '']
+
 	glockeys = gLoc.keys(); glockeys.sort()
 	for glk in glockeys:
 		genstr = int(gLoc[glk][1]); genend = int(gLoc[glk][2])
@@ -125,7 +284,7 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         #HTT at chr4:3074510-3243960
         gLoc['htt'] = ['chr4','3074510','3243960','3074877','3074939', 'CAG', '+19', '6-35:36-250']                # (CAG)* +1CAACAG 
         #ATN1 at         chr12:   6924463 -  6942321   6936729   6936773
-        gLoc['atn1'] = ['chr12', '6924463', '6942321','6936717', '6936773', 'CAG', '+', '6-35:49-88']   # 2(CAGCAA) (CAG)*
+        gLoc['atn1'] = ['chr12', '6924463', '6942321','6936717', '6936773', 'CAG', '+10', '6-35:49-88']   # 2(CAGCAA) (CAG)*
         #ar: (Q)* <+ 5non-Q + 7 Q>
         gLoc['ar'] = ['chrX', '67544032', '67730619', '67545318', '67545386', 'CAG', '+22', '9-36:38-62']         # (CAG)* +1CAA
         gLoc['atxn1'] = ['chr6', '16299112', '16761490', '16327636', '16327722', 'CAG', '-14', '6-35:49-88']      # (CAG)* +2(ATGCTG) 11(CTG)
@@ -134,14 +293,14 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         #ATXN3 at chr14:92058552-92106621 
         gLoc['atxn3'] = ['chr14', '92038652', '92106610', '92071011', '92071052', 'CAG', '-14', '12-40:55-86']       # (CAG)* + CTGTTGCTGCTTTTGCTGCTG
         #CACNA1A at chr19:13206443-13506460 
-        gLoc['cacna1a'] = ['chr19', '13206443', '13506460', '13207859', '13207897', 'CAG', '-', '4-18:21-30']     #y
+        gLoc['cacna1a'] = ['chr19', '13206443', '13506460', '13207859', '13207897', 'CAG', '-8', '4-18:21-30']     #y
         #ATXN7 at chr3:63864557-64003460 
         #could not be found using UCSC genome browser with "simple repeat" on
         gLoc['atxn7'] = ['chr3','63864557', '64003460', '63912686', '63912715', 'CAG', '+7', '7-17:38-120']        # (CAG)* + 3CAG
         #TBP at chr6:           170554333 -  170572870
         gLoc['tbp'] = ['chr6', '170554333', '170572870', '170561899', '170562021', 'CAG', '+19', '25-42:47-63']    # 20*3 (CAG)* +1CAACAG
         #FMR1 at chrX:147911951-147951127 
-        gLoc['fmr1'] = ['chrX', '147911951', '147951127', '147912051', '147912110', 'CGG', '+', '6-53:230+/55-200']     # (CGG)* + 1AGG + 9(CGG)
+        gLoc['fmr1'] = ['chrX', '147911951', '147951127', '147912051', '147912110', 'CGG', '+10', '6-53:230+/55-200']     # (CGG)* + 1AGG + 9(CGG)
         #aff2: 148500612--148500639: 6 CCG + 3 non-CCG
         #gLoc['aff2'] = ['chrX', '148500619', '149000663', '148500639', '148500692', 'CCG', '+15', '6-35:200+']   # (CCG)* + 1CTG + 2CCG
         gLoc['aff2'] = ['chrX', '148500619', '149000663', '148500606', '148500692', 'CCG', '+15', '6-35:200+']   
@@ -159,13 +318,219 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         #PPP2R2B at chr5:           146589505 -  147081520 RefSeq
         gLoc['ppp2r2b'] = ['chr5', '146589505', '147081520', '146878729', '146878759', 'CAG', '-10', '7-28:66-78'] #may contain errors;
 
+        locus_name='D8S1179'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr8','124894821','124895163','124894862','124894917','TATC','+13','',]
+        locus_name='D21S11'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr21','19181944','19182165','19181972','19182123','TCTA','+38','',]
+        locus_name='D7S820'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr7','84160064','84160402','84160212','84160277','CTAT','+16','',]
+        locus_name='CSF1PO'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr5','150076171','150076490','150076321','150076397','CTAT','+19','',]
+        locus_name='D3S1358'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr3','45540712','45540843','45540736','45540803','TATC','+16','',]
+        locus_name='TH01'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr11','2171046','2171292','2171085','2171116','TGAA','+7','',]
+        locus_name='D13S317'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr13','82147897','82148179','82148024','82148088','TATC','+16','',]
+        locus_name='D16S539'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr16','86352427','86352822','86352701','86352745','GATA','+11','',]
+        locus_name='D19S433'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr19','29926082','29926354','29926233','29926299','TCCT','+16','',]
+        locus_name='D18S51'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr18','63281444','63282131','63281666','63281773','AGAA','+26','',]
+        locus_name='D5S818'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr5','123775430','123775708','123775552','123775599','TCTA','+11','',]
+        #locus_name='FGA'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chr4','154587695','154587891','154587720','154587823','AAAG','+25','',]
+        locus_name='D1S1656'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr1','230769449','230769763','230769616','230769683','CTAT','+16','',]
+        locus_name='D2S441'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr2','68011883','68012025','68011946','68011995','TCTA','+12','',]
+        locus_name='D10S1248'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr10','129294109','129294532','129294243','129294295','GGAA','+13','',]
+        locus_name='D22S1045'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr22','37140244','37140530','37140286','37140342','ATT','+18','',]
+        locus_name='D20S1082'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr20','55249286','55249544','55249398','55249440','ATA','+14','',]
+        locus_name='D6S474'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr6','112557747','112558081','112557949','112558029','TAGA','+20','',]
+        locus_name='D1S1677'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr1','163589909','163590251','163590025','163590102','TTCC','+19','',]
+        locus_name='D11S4463'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr11','131002343','131002826','131002508','131002567','TCTA','+14','',]
+        locus_name='D4S2364'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr4','92596184','92596481','92596216','92596270','ATTC','+13','',]
+        locus_name='D9S1122'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr9','77073677','77073933','77073817','77073875','TAGA','+14','',]
+        locus_name='D2S1776'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr2','168788661','168789265','168788892','168788944','AGAT','+13','',]
+        locus_name='D10S1435'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr10','2201025','2201358','2201137','2201198','TATC','+15','',]
+        locus_name='D3S3053'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr3','172032911','172033434','172033173','172033210','AGAT','+9','',]
+        locus_name='D5S2500'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr5','59401214','59401522','59401443','59401487','CTAT','+11','',]
+        locus_name='D1S1627'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr1','106421042','106421155','106421091','106421130','ATT','+13','',]
+        locus_name='D3S4529'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr3','85803323','85803586','85803482','85803534','AGAT','+13','',]
+        locus_name='D17S974'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr17','10615348','10615655','10615405','10615474','AGAT','+17','',]
+        locus_name='D6S1017'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr6','41709435','41709771','41709529','41709570','TGGA','+10','',]
+        locus_name='D4S2408'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr4','31302608','31302891','31302797','31302834','ATCT','+9','',]
+        locus_name='D9S2157'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr9','133160079','133160472','133160281','133160312','ATA','+10','',]
+        locus_name='D17S1301'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr17','74684646','74684970','74684854','74684902','AGAT','+12','',]
+        locus_name='D18S853'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr18','3990523','3990853','3990628','3990665','ATA','+12','',]
+        locus_name='D20S482'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr20','4525601','4525820','4525691','4525750','AGAT','+14','',]
+        locus_name='D14S1434'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr14','94841785','94842348','94842064','94842106','TCTA','+10','',]
+        #locus_name='DYS390'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','15162993','15163339','15163052','15163170','AGAT','+29','',]
+        #locus_name='DYS19'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','9684324','9684519','9684377','9684443','TATC','+16','',]
+        #locus_name='DYS393'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrX','89606984','89607276','89607010','89607065','ATAG','+13','',]
+        #locus_name='DYS391'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','11982033','11982362','11982074','11982135','TATC','+15','',]
+        #locus_name='DYS392'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','20471827','20472125','20471985','20472026','AAT','+13','',]
+        locus_name='D5S2505'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr5','5816883','5817340','5817021','5817225','AGAT','+53','',]
+        locus_name='D8S1115'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr8','42681411','42681696','42681445','42681472','AAT','+9','',]
+        locus_name='D10S2325'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr10','12750946','12751246','12751051','12751127','ATAAG','+15','',]
+        locus_name='D11S554'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr11','44908682','44908921','44908734','44908830','AAAG','+23','',]
+        locus_name='D14S306'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr14','37858877','37859246','37859085','37859187','TCTA','+25','',]
+        locus_name='D18S535'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr18','40568810','40569365','40568861','40568930','TAGA','+17','',]
+        locus_name='D18S849'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr18','57897345','57897656','57897387','57897526','TCTA','+35','',]
+        locus_name='D19S253'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr19','15617324','15617553','15617483','15617534','ATCT','+12','',]
+        locus_name='D1S103'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr1','230700989','230701240','230701148','230701187','TG','+19','',]
+        locus_name='D20S85'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr20','39422965','39423277','39423110','39423187','TTTC','+20','',]
+        locus_name='D21S2055'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr21','39819441','39819735','39819507','39819659','CTAT','+39','',]
+        locus_name='D2S1360'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr2','17310654','17311028','17310717','17310802','AGAT','+21','',]
+        locus_name='D2S410'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr2','115483330','115483644','115483425','115483480','TCTA','+13','',]
+        locus_name='D2S436'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr2','106626676','106626994','106626837','106626925','TCTA','+22','',]
+        locus_name='D3S1744'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr3','147374707','147375066','147374751','147374859','ATAG','+27','',]
+        locus_name='D4S2366'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr4','6482950','6483220','6483101','6483174','GATA','+18','',]
+        locus_name='D5S815'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr5','91694629','91694985','91694674','91694773','TATC','+24','',]
+        locus_name='D6S1043'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr6','91740148','91740470','91740222','91740287','CTAT','+16','',]
+        locus_name='D6S502'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr8','124894821','124895163','124894862','124894917','TATC','+13','',]
+        locus_name='D7S1517'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr7','123857596','123857996','123857644','123857733','CTTT','+22','',]
+        locus_name='D8S1132'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr8','106316592','106316844','106316691','106316775','TCTA','+21','',]
+        locus_name='D8S344'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr8','130064703','130065116','130064893','130064934','TG','+20','',]
+        locus_name='D8S347'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr8','128328206','128328585','128328283','128328373','TCTA','+22','',]
+        locus_name='D8S639'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr8','16913371','16913718','16913542','16913663','ATAG','+30','',]
+        #locus_name='DXS7132'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrX','65435387','65435752','65435644','65435715','GATA','+17','',]
+        #locus_name='DXS7423'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrX','150542453','150542640','150542521','150542592','TGGA','+17','',]
+        #locus_name='DXS8378'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrX','9402109','9402389','9402261','9402301','ATAG','+10','',]
+        locus_name='HUMTH01'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr11','2171046','2171292','2171085','2171116','TGAA','+7','',]
+        locus_name='CSF1PO'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr5','150076171','150076490','150076321','150076397','CTAT','+19','',]
+        #locus_name='FGA'; locus_name = locus_name.lower();   
+        #gLoc[locus_name] = ['chr4','154587695','154587891','154587720','154587823','AAAG','+25','',]
+        locus_name='TH01'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr11','2171046','2171292','2171085','2171116','TGAA','+7','',]
+        locus_name='D1S1656'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr1','230769449','230769763','230769616','230769683','CTAT','+16','',]
+        locus_name='D2S441'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr2','68011883','68012025','68011946','68011995','TCTA','+12','',]
+        locus_name='D3S1358'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr3','45540712','45540843','45540736','45540803','TATC','+16','',]
+        locus_name='D5S818'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr5','123775430','123775708','123775552','123775599','TCTA','+11','',]
+        locus_name='D6S1043'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr6','91740148','91740470','91740222','91740287','CTAT','+16','',]
+        locus_name='D7S820'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr7','84160064','84160402','84160212','84160277','CTAT','+16','',]
+        locus_name='D8S1179'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr8','124894821','124895163','124894862','124894917','TATC','+13','',]
+        locus_name='D10S1248'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr10','129294109','129294532','129294243','129294295','GGAA','+13','',]
+        locus_name='D13S317'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr13','82147897','82148179','82148024','82148088','TATC','+16','',]
+        locus_name='D14S1434'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr14','94841785','94842348','94842064','94842106','TCTA','+10','',]
+        locus_name='D16S539'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr16','86352427','86352822','86352701','86352745','GATA','+11','',]
+        locus_name='D18S51'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr18','63281444','63282131','63281666','63281773','AGAA','+26','',]
+        locus_name='D19S433'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr19','29926082','29926354','29926233','29926299','TCCT','+16','',]
+        locus_name='D21S11'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr21','19181944','19182165','19181972','19182123','TCTA','+38','',]
+        locus_name='D22S1045'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr22','37140244','37140530','37140286','37140342','ATT','+18','',]
+        #locus_name='DYS19'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','9684324','9684519','9684377','9684443','TATC','+16','',]
+        #locus_name='DYS388'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','12635276','12635761','12635603','12635639','AAT','+12','',]
+        #locus_name='DYS390'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','15162993','15163339','15163052','15163170','AGAT','+29','',]
+        #locus_name='DYS391'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','11982033','11982362','11982074','11982135','TATC','+15','',]
+        #locus_name='DYS392'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','20471827','20472125','20471985','20472026','AAT','+13','',]
+        #locus_name='DYS393'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrX','89606984','89607276','89607010','89607065','ATAG','+13','',]
+        #locus_name='Y-GATA-A4'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','12403374','12403649','12403460','12403566','GATA','+26','',]
+        #locus_name='Y-GATA-A7.1'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','18888689','18889221','18888801','18888995','TATC','+49','',]
+        #locus_name='Y-GATA-A7.2'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','18888689','18889221','18888801','18888995','TATC','+49','',]
+        #locus_name='Y-GATA-A10'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','16606889','16607107','16607006','16607074','TATC','+17','',]
+        #locus_name='Y-GATA-H4'; locus_name = locus_name.lower();
+        #gLoc[locus_name] = ['chrY','16631292','16631877','16631623','16631759','CTAT','+33','',]
+
+        locus_name='D2S1338'; locus_name = locus_name.lower(); ########
+        gLoc[locus_name] = ['chr2','218014645','218014994','218014853','218014950','AGGA','+17','',]
+        locus_name='TPOX'; locus_name = locus_name.lower();    #$
+        gLoc[locus_name] = ['chr2','1489595','1489709','1489650','1489684','TGAA','+8','',]
+        locus_name='D12S391'; locus_name = locus_name.lower(); ########
+        gLoc[locus_name] = ['chr12','12296939','12297292','12297013','12297094','ATAG','+13','',]
+        locus_name='D8S320'; locus_name = locus_name.lower();
+        gLoc[locus_name] = ['chr8','88818683','88819178','88818857','88819107','TTTC','+9','',]
+
         return gLoc;
 
 def get_gLoc(dis_type, gLoc):
         dis_type = dis_type.lower();
         return gLoc[dis_type];
 
-def getValues(mdict):
+def getValues(mdict, minreads):
         valdict = {}
         mdkeys = mdict.keys();
         for mdk in mdkeys:
@@ -175,25 +540,33 @@ def getValues(mdict):
         valkeys = valdict.keys(); valkeys.sort();
         more = []
         #for i in range(1, len(valkeys)*2/3+1):
+        #print 'test', valkeys, minreads
         for i in range(1, len(valkeys)+1):
-                if valkeys[-i]<4: continue;
+                #if valkeys[-i]<4: continue;
+                #
+                #revised on Dec 12, 2016
+                #change from above to the blow
+                if valkeys[-i]<minreads: continue;
                 #print -i, valkeys[-i], valdict[valkeys[-i]]
                 if valdict[valkeys[-i]]>=2: more.append(valkeys[-i])
+        #print 'test', more
         return more;
 
 def findSameValues(mdict, v, mdkeys):
         start = -1; end = -1;
         for mdk_ind in range(len(mdkeys)-1):
-                if mdict[mdkeys[mdk_ind]]==mdict[mdkeys[mdk_ind+1]]:
+                if mdict[mdkeys[mdk_ind]]==mdict[mdkeys[mdk_ind+1]] and mdict[mdkeys[mdk_ind]]==v:
                         if start==-1: start = mdk_ind
                         end = mdk_ind+1
                 if (not mdict[mdkeys[mdk_ind]]==mdict[mdkeys[mdk_ind+1]]) and (not start==-1): break;
         return [start, end]
 
 def reviseDict(mdict, v):
+        has_revised = False;
         mdkeys = mdict.keys();  mdkeys.sort()
         while True:
                 [start, end] = findSameValues(mdict, v, mdkeys)
+		#print 'revisev', v, start, end, mdict
                 if start==-1 or end==-1: break;
                 else:
                         i=start; j = end;
@@ -202,20 +575,28 @@ def reviseDict(mdict, v):
                                 if i>=j:
                                         print 'Error i is larger than j', i, j, start, end;
                                         break;
+                             
+                                has_revised = True;  
                                 i += 1;
                                 mdict[mdkeys[i]] += 1;
                                 if i==j: break;
                                 j -= 1;
                                 if i==j: break;
                                 mdict[mdkeys[j]] += 1;
-                                #print i, j, mdkeys[i], mdkeys[j], mdict[mdkeys[i]], mdict[mdkeys[j]]
+                                ##print 'ij', i, j, mdkeys[i], mdkeys[j], mdict[mdkeys[i]], mdict[mdkeys[j]]
 
-        return mdict;
+        return [mdict, has_revised];
 
-def reviseDictAccordingV(mdict):
-        more = getValues(mdict)
-        for m in more:
-                mdict = reviseDict(mdict, m);
+def reviseDictAccordingV(mdict, minreads):
+	while True:
+           more = getValues(mdict, minreads)
+           #print 'more', more, minreads
+           more.sort();
+           has_revised = False;
+           for m in more:
+                   mdict, has1_revised = reviseDict(mdict, m);
+                   if not has_revised: has_revised = has1_revised
+           if not has_revised: break;
         return mdict
 
 
@@ -226,6 +607,9 @@ def selectFromTwoX(x_index2a, x_index2b, lendict, x_index1):
 		for pi in range(len(point3)):
 			for xi in range(point3[pi]-1, point3[pi]+2):
 				if lendict.has_key(xi): neighbor3[pi] += lendict[xi]
+		
+		#print x_index2a, neighbor3[0], x_index2b, neighbor3[1]
+		
 		if neighbor3[0]*x_index2a < neighbor3[1]*x_index2b:
 			x_index2 = x_index2b
 		elif neighbor3[0]*x_index2a > neighbor3[1]*x_index2b:
@@ -265,7 +649,9 @@ def selectOne(iy, curyvalue, lendict, y_index1, indexes, x):
 	return selectFromTwo(y_index2a, y_index2b, lendict, y_index1, x)
 
 
-def getPeaks2(x, y, lendict, mm, mdebug):
+#def getPeaks2(x, y, lendict, mm, mdebug):
+#revised frmo above to below on Dec 12 2016.
+def getPeaks2(x, y, lendict, mm, mdebug, minreads, pnearby_size=3):
 	indexes = peakutils.indexes(numpy.array(y), thres=0.01) - mm
 	peak2 = [];
 	pnearby = []; 
@@ -319,12 +705,12 @@ def getPeaks2(x, y, lendict, mm, mdebug):
 		#			else: y_index2 = y_index2b
 
 		peak2.append(x[y_index1]); 
-		for ni in range(x[y_index1]-2, x[y_index1]+3):
+		for ni in range(x[y_index1]-pnearby_size+1, x[y_index1]+pnearby_size):
 			pnearby.append(ni);
 		#if y_index1-1>0: pnearby.append(x[y_index1-1]);
 		#if y_index1+1<len(x): pnearby.append(x[y_index1+1]);
 		peak2.append(x[y_index2])
-		for ni in range(x[y_index2]-2, x[y_index2]+3):
+		for ni in range(x[y_index2]-pnearby_size+1, x[y_index2]+pnearby_size):
 			pnearby.append(ni);
 		#if y_index2-1>0: pnearby.append(x[y_index2-1]); 
 		#if y_index2+1<len(x): pnearby.append(x[y_index2+1]);
@@ -332,13 +718,18 @@ def getPeaks2(x, y, lendict, mm, mdebug):
 		if len(indexes)==1:
 			logging.debug("Only find one peak");
 			peak2.append(x[indexes[0]])
-			for ni in range(x[indexes[0]]-2, x[indexes[0]]+3):
+			for ni in range(x[indexes[0]]-pnearby_size+1, x[indexes[0]]+pnearby_size):
 				pnearby.append(ni);
 			#pnearby.append(x[indexes[0]]);
 			#if indexes[0]-1>0: pnearby.append(x[indexes[0]-1]); 
 			#if indexes[0]+1<len(x): pnearby.append(x[indexes[0]+1]);
 		else:
 			logging.debug("Cannot find a peak");
+
+	#print 'for testing'
+	#print x
+	#print y;
+	#print peak2
 
 	if len(peak2)>1 and y[peak2.index(peak2[1])] > [y[peak2.index(peak2[0])]]:
 		peak2[0], peak2[1] = peak2[1], peak2[0]
@@ -354,24 +745,59 @@ def getPeaks2(x, y, lendict, mm, mdebug):
         #       if lendict[x[len(x)-2]]==lendict[x[len(x)-1]]:  twotails.append(x[len(x)-1]);
         #       else: twotails.append(x[len(x)-2]); twotails.append(x[len(x)-1]);
 	
+	#print twotails
+	tailschoosen = []
 	for ti in twotails:
+		tinearby = [ti-1, ti+1]; shouldchoose = True;
+		if lendict[ti]<minreads: shouldchoose=False
+		else:
+			for tnb in tinearby:
+				if lendict.has_key(tnb) and lendict[tnb]>lendict[ti]: shouldchoose=False;
+		tailschoosen.append(shouldchoose);
+		if not shouldchoose: continue;
+		
 		for i in range(p2len):
 			if selectFromTwoX(ti, peak2[i], lendict, -1)==ti:
 			#if lendict[ti] > lendict[peak2[i]]: 
 				peak2.insert(i, ti); break;
 
+	if len(peak2)==0:
+		for curtt_ind in range(len(twotails)):
+			if not tailschoosen[curtt_ind]: continue;
+			curtt = twotails[curtt_ind]
+			if curtt>4 and lendict[curtt] >= minreads: peak2.append(curtt);
+	#print peak2
 	if len(peak2)>2: peak2 = peak2[:2];
 
 	return peak2	
+
+def getLargerOverSmallRatio(p1, p2):
+	mp = [p1,p2]; mp.sort();
+	
+	mratio = 2**(-mp[1]/float(mp[0])) #math.exp(-mp[1]/float(mp[0]));
+	mratio = math.exp(-mp[1]/float(mp[0]));
+	if mratio<0.1: mratio=0.1;
+	
+	return mratio
+
+def checkSmallSupport(peak2, lendict, minreads):
+	newpeak2 = []
+	for p in peak2:
+		if lendict[p]<minreads: 
+			print 'checkSmallSupport', p, lendict[p], minreads, ' for peak2 ', peak2
+		else: newpeak2.append(p)
+	return newpeak2
 
 def get2Peaks(lengd, SeqDepth):
 #def get2Peaks(lengd):
 	#prnucleotideRepeats.pyint lengd
 
-	minreads = int(SeqDepth)/10;
-	if minreads<0: minreads = 3
+	minreads = int(SeqDepth)/20;
+	if minreads<0: minreads = 2
+	if minreads>5: minreads = 5
 
 	pvalue = 0.05; ratio = 0.4;
+	smalleratio = 0.5; #0.55 #0.4; #0.55 # 0.5 #0.6;
 
 	mdebug = True; mdebug = False;
 	
@@ -388,6 +814,7 @@ def get2Peaks(lengd, SeqDepth):
 		allocr += ('%d:%d, ' % (ldk, lendict[ldk]))
 	if mdebug: print allocr
 	logging.info(allocr)
+	#print 'allocr:', allocr
 
 	if len(ldkeys)<1: return [[0], allocr]
 	elif len(ldkeys)<2: return [[ldkeys[0]], allocr]
@@ -438,15 +865,14 @@ def get2Peaks(lengd, SeqDepth):
                         else: len3dict[ldkeys[i]] = lendict[ldkeys[i-1]] + lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
 	'''
 	
-	len3dict = reviseDictAccordingV(len3dict)
+	len3dict = reviseDictAccordingV(len3dict, minreads)
 	
 	x = []; yo = [];
 	for ldk in ldkeys:
 		x.append(ldk); 
 		yo.append(len3dict[ldk]);
 
-	peak2 = getPeaks2(x, yo, lendict, 0, mdebug)	
-
+	peak2 = getPeaks2(x, yo, lendict, 0, mdebug, minreads)
 
 	'''
 	lendict = {};
@@ -520,6 +946,27 @@ def get2Peaks(lengd, SeqDepth):
 	peak2 = pea1k2
 	'''
 	if mdebug: print peak2
+
+	samevalues = []
+	for curp_ind in range(len(peak2)):
+                curp = peak2[curp_ind]
+                pin = ldkeys.index(curp)
+                nb3 = [curp]
+                if pin-1>0: nb3.append(ldkeys[pin-1])
+                if pin+1<len(ldkeys): nb3.append(ldkeys[pin+1])
+                curmx = nb3[-1]
+                for curi in nb3:
+                        #if lendict[curi]>lendict[curmx]: curmx = curi
+                        #
+                        #revised from the line above to below:
+                        if (lendict[curi]*curi>lendict[curmx]*curmx): curmx = curi
+                        if (lendict[curi]*curi==lendict[curmx]*curmx) and curi>curmx: curmx = curi
+                peak2[curp_ind] = curmx
+
+                samevalues.append([curmx, nb3])
+
+	peak2 = checkSmallSupport(peak2, lendict, minreads)
+
 	if len(peak2)>2: peak2 = peak2[:2]
 
 	if mdebug:
@@ -549,9 +996,11 @@ def get2Peaks(lengd, SeqDepth):
 		for pf in peak2:
 			print (' %d=%.6f:%.3f; ' % (pf, 1-norm.cdf((lendict[pf]-mmean)/mstd), (lendict[pf]-mmean)/mstd)), 
 
-	if len(peak2)<2:
-		if lendict[ldkeys[-1]]>minreads and (len(peak2)==0 or (len(peak2)==1 and math.fabs(peak2[0]-ldkeys[-1])>1 and ((not lendict.has_key(ldkeys[-1]-1)) or (lendict.has_key(ldkeys[-1]-1) and lendict[ldkeys[-1]]>lendict[ldkeys[-1]-1]) ) )):
-			peak2.append(ldkeys[-1])
+	#if len(peak2)<2:
+	#	if lendict[ldkeys[-1]]>minreads and (len(peak2)==0 or (len(peak2)==1 and math.fabs(peak2[0]-ldkeys[-1])>1 and ((not lendict.has_key(ldkeys[-1]-1)) or (lendict.has_key(ldkeys[-1]-1) and lendict[ldkeys[-1]]>lendict[ldkeys[-1]-1]) ) )):
+	#		peak2.append(ldkeys[-1])
+
+	#print 'mtest d3s1359: ', peak2;
 	
 	if len(peak2)==2:  # pvalue = 0.05; ratio = 0.55
 		mstr = 'In Peak:'
@@ -580,27 +1029,129 @@ def get2Peaks(lengd, SeqDepth):
 			print sum3_1, peak2[1], '=', sum3_1*peak2[1], '/', sum3_0, peak2[0], '=', sum3_0*peak2[0], '===', sum3_1*peak2[1]/float(sum3_0*peak2[0])
 		logging.info(mstr)
 		
-		if sum3_1*peak2[1]/float(sum3_0*peak2[0])<0.1: 
-			peak2 = peak2[:1]
+		#print 'mtest d3s1359: ', mstr
+		#print 'mtest d3s1359: ', sum3_1, sum3_0, sum3_1/float(sum3_0), getLargerOverSmallRatio(peak2[0], peak2[1])
 
-	for curp_ind in range(len(peak2)):
-                curp = peak2[curp_ind]
-                pin = ldkeys.index(curp)
-                nb3 = [curp]
-                if pin-1>0: nb3.append(ldkeys[pin-1])
-                if pin+1<len(ldkeys): nb3.append(ldkeys[pin+1])
-                curmx = nb3[-1]
-                for curi in nb3:
-                        if lendict[curi]>lendict[curmx]: curmx = curi
-                peak2[curp_ind] = curmx
+		#if sum3_1*peak2[1]/float(sum3_0*peak2[0])<0.1:
+ 		#
+		#revised on 13 dec 2016
+		#
+		if sum3_1/float(sum3_0)<getLargerOverSmallRatio(peak2[0], peak2[1]):
+			peak2 = peak2[:1]
 
 	peak2.sort();
 	if len(peak2)>1:
-                if len3dict[peak2[0]]<len3dict[peak2[1]]*0.6:
-                        peak2 = [peak2[1], peak2[1]]
+		#revised on 13 dec 2016
+		#if len3dict[peak2[0]]<len3dict[peak2[1]]*0.6:
+		if len3dict[peak2[0]]<len3dict[peak2[1]]*smalleratio or lendict[peak2[0]]<lendict[peak2[1]]*smalleratio:
+		#if len3dict[peak2[0]]<len3dict[peak2[1]]*smalleratio and lendict[peak2[0]]<lendict[peak2[1]]*smalleratio:
+                        peak2 = [peak2[1]] #, peak2[1]]
 
+
+	#
+	#add on Dec 12, 2016
+	#
+	if len(peak2)>1 and peak2[0]==peak2[1]: peak2=peak2[1:]
+	
+	peaksteststr = 'Peak2='+str(len(peak2))+' info:';
+	for pst in peak2: peaksteststr += ' '+str(pst)
+	logging.info(peaksteststr)
+	
+	if len(peak2)==1:
+		curPeak1 = peak2[0]
+		lenP1dict = {}
+		for px in range(curPeak1-6, curPeak1+7):
+			if lendict.has_key(px):
+				lenP1dict[px] = lendict[px];
+			else: pass #lenP1dict[px] = 0
+		ld1keys = lenP1dict.keys(); ld1keys.sort();
+		forbelowtest = False; #True;
+		if forbelowtest:
+			print 'test', int(minreads/2.0+0.5), 
+			allocr = '';
+			for ldk in ld1keys:
+				allocr += ('%d:%d, ' % (ldk, lenP1dict[ldk]))
+			print allocr; 
+		lenP1dict = reviseDictAccordingV(lenP1dict, int(minreads/2.0+0.5))
+		if forbelowtest:
+			print 'test', int(minreads/2.0+0.5),
+			allocr = '';
+			for ldk in ld1keys:
+				allocr += ('%d:%d, ' % (ldk, lenP1dict[ldk]))
+			print allocr
+		
+		ld1keys = lenP1dict.keys(); ld1keys.sort();
+		x = []; yo = []
+		#x = [ld1keys[0]-1]; yo = [0]; lenP1dict[ld1keys[0]-1] = 0;
+		for ldk in ld1keys:
+			x.append(ldk);
+			yo.append(lenP1dict[ldk]);
+		#x.append(ld1keys[-1]+1); yo.append(0); lenP1dict[ld1keys[-1]+1] = 0
+		peak2 = getPeaks2(x, yo, lenP1dict, 0, mdebug, int(minreads/2.0+0.5), 0)
+		peak2 = checkSmallSupport(peak2, lendict, minreads)
+
+		peaksteststr = 'Peak2 for P1='+str(len(peak2))+' info:';
+		for pst in peak2: peaksteststr += ' '+str(pst)
+		logging.info(peaksteststr)
+	
+		if curPeak1 not in peak2:
+			allocr = '';
+			for ldk in ld1keys:
+				allocr += ('%d:%d, ' % (ldk, lenP1dict[ldk]))
+			
+			p1pstr = ' '
+			for p1p in peak2: p1pstr += str(p1p)+','
+			logging.info("Warning!!!! previously detected peak "+str(curPeak1)+" not in this detection:"+p1pstr[1:-1]+" for "+allocr)
+			
+			newpeak2 = []; 
+			for curdetp in peak2:
+				issame = False;
+				for i in range(len(samevalues)):
+					if (curPeak1 in samevalues[i][1]) and (curdetp in samevalues[i][1]) and (lendict[curPeak1]==lendict[curdetp]):
+						issame = True; newpeak2.append(samevalues[i][0])
+				if not issame: newpeak2.append(curdetp)
+			peak2 = newpeak2
+			p1pstr = ' '
+			for p1p in peak2: p1pstr += str(p1p)+','
+			logging.info("New peaks "+p1pstr[1:-1])
+				
+	if len(peak2)>2: peak2 = peak2[:2]
+	if len(peak2)<2:
+		if lendict[ldkeys[-1]]>minreads and (len(peak2)==0 or (len(peak2)==1 and math.fabs(peak2[0]-ldkeys[-1])>1 and ((not lendict.has_key(ldkeys[-1]-1)) or (lendict.has_key(ldkeys[-1]-1) and lendict[ldkeys[-1]]>lendict[ldkeys[-1]-1]) ) )):
+			peak2.append(ldkeys[-1])
+	
+	peak2.sort();
+	#copy from above
+	if len(peak2)==2:
+		print peak2, lendict #, lenP1dict
+		sum3_0 = lendict[peak2[0]]; sum3_1 = lendict[peak2[1]];
+		if lendict.has_key(peak2[0]-1) and lendict.has_key(peak2[1]-1):
+			sum3_0 += lendict[peak2[0]-1]; sum3_1 += lendict[peak2[1]-1]
+		if lendict.has_key(peak2[0]+1) and lendict.has_key(peak2[1]+1):
+			sum3_0 += lendict[peak2[0]+1]; sum3_1 += lendict[peak2[1]+1]
+		mstr = ('P1 <1=%d, 0=%d> >>> %.3f(%d/%d)' % (peak2[1], peak2[0], sum3_1*peak2[1]/float(sum3_0*peak2[0]), sum3_1*peak2[1], sum3_0*peak2[0]))
+		logging.info(mstr)
+		#if sum3_1*peak2[1]/float(sum3_0*peak2[0])<0.1:
+		#
+		#revised on 13 dec 2016
+		#
+		if sum3_1/float(sum3_0)<getLargerOverSmallRatio(peak2[0], peak2[1]):
+			peak2 = peak2[:1]
+
+	#copy from above
+	peak2.sort();
+	if len(peak2)>1:
+		#if len3dict[peak2[0]]<len3dict[peak2[1]]*0.6 and lendict[peak2[0]]<lendict[peak2[1]]*0.6:
+		if len3dict[peak2[0]]<len3dict[peak2[1]]*smalleratio or lendict[peak2[0]]<lendict[peak2[1]]*smalleratio:
+		#if len3dict[peak2[0]]<len3dict[peak2[1]]*smalleratio and lendict[peak2[0]]<lendict[peak2[1]]*smalleratio:
+			peak2 = [peak2[1]] #, peak2[1]]
+	#
+	#end the revised on 12 dec 2016
+	#
 
 	if mdebug: print 'mPeak', peak2
+
+	peak2 = checkSmallSupport(peak2, lendict, minreads)
 
 	return [peak2, allocr[:-1]];
 

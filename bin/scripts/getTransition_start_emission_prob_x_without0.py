@@ -7,11 +7,10 @@ import myHMM
 import printHMMmatrix
 import numpy as np;
 
-len_sensitive_prob = {2:0.8490, 3:0.8486, 4:0.8485, 5:0.8484, 6:0.8480}
 outputm = False ; #outputm = True
 
 
-def getTransition_start_emission_prob_without0(repPat, forprint=False):
+def getTransition_start_emission_prob_x_without0(repPat, forprint=False):
         allinfoforhmm = myHMM.getTransition_start_emission_prob(repPat, forprint)
         trainsmat = allinfoforhmm[0];
         startprob = allinfoforhmm[1];
@@ -26,13 +25,13 @@ def getTransition_start_emission_prob_without0(repPat, forprint=False):
 
         emissionmat = np.delete(emissionmat, 0, 0);
 
+        trainsmat[len(repPat)][1]   = trainsmat[len(repPat)][0]  + trainsmat[len(repPat)][1]
+        trainsmat[2*len(repPat)][1] = trainsmat[2*len(repPat)][0]+ trainsmat[2*len(repPat)][1]
+        trainsmat[3*len(repPat)-1][1] = trainsmat[3*len(repPat)-1][0]+ trainsmat[3*len(repPat)-1][1] 
+        trainsmat[3*len(repPat)][2] = trainsmat[3*len(repPat)][0]+ trainsmat[3*len(repPat)][2] 
+
         trainsmat = np.delete(trainsmat, 0, 0);
         trainsmat = np.delete(trainsmat, 0, 1);
-
-        trainsmat[len(repPat)-1][0]   = len_sensitive_prob[len(repPat)] + 0.02
-        trainsmat[2*len(repPat)-1][0] = len_sensitive_prob[len(repPat)] + 0.02
-        trainsmat[3*len(repPat)-2][0] = len_sensitive_prob[len(repPat)] + 0.02
-        trainsmat[3*len(repPat)-1][1] = len_sensitive_prob[len(repPat)] + 0.02
 
         if outputm or forprint:
                 print 'HMMmatrix2'

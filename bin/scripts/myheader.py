@@ -34,3 +34,5 @@ hg_reference_and_index = 'mhgversion/'
 
 UserDefinedGenedefault = "///////"
 
+hmm_random_rep_transit = 0.002;
+

@@ -14,15 +14,15 @@ import logging
 
 from argparse import RawTextHelpFormatter
 
+#from scripts import trinucleotideRepeatRealSimulation
+#from scripts import findTrinucleotideRepeats
+#from scripts.myheader import *
+
 from scripts import trinucleotideRepeatRealSimulation
 from scripts import findTrinucleotideRepeats
 from scripts import mySCA3
-from scripts.myheader import *
 
-#import trinucleotideRepeatRealSimulation
-#import findTrinucleotideRepeats
-#import mySCA3
-#from myheader import *
+from scripts.myheader import *
 
 
 parser = argparse.ArgumentParser(description="Determine Trinucleotide repeat for (a) gene(s) of interests or for all genes.", epilog="For example, \n \
@@ -121,6 +121,20 @@ def simulation(margs):
    specifiedOptions['coverage'] = coverage
    specifiedOptions['randTimes'] = randTimes
 
+   repeatSizeDif = margs.RepeatSizeDif; 
+   if not repeatSizeDif==None:
+      repeatSizeDifArray = repeatSizeDif.split('_'); usedRepeatSizeDifArray= []
+      for irsda in range(len(repeatSizeDifArray)):
+         if len(repeatSizeDifArray[irsda])>0: 
+            usedRepeatSizeDifArray.append(int(repeatSizeDifArray[irsda]))
+            errorStr += non_negative(usedRepeatSizeDifArray[-1], 'repeatSizeDif'+str(irsda));
+      specifiedOptions['repeatSizeDif'] = usedRepeatSizeDifArray
+      if len(usedRepeatSizeDifArray)>1:
+         if usedRepeatSizeDifArray[0]>=usedRepeatSizeDifArray[1]:
+            errorStr += ("\tError!!! the first repeat size difference (%s) must be smaller than the second (%s)" % (usedRepeatSizeDifArray[0], usedRepeatSizeDifArray[1]))+'\n'
+   else:
+      specifiedOptions['repeatSizeDif'] = []
+
    if not errorStr==originalError:
       print errorStr; #BAMinput|FASTQinput|Simulate
       parser.print_help();
@@ -128,6 +142,8 @@ def simulation(margs):
       sys.exit(140)
 
    simulation_file_id += ('_ins%.2f_del%.2f_sub%.2f_cov%d' % (insert_rate, del_rate, sub_rate, coverage))
+   if not repeatSizeDif==None:
+      simulation_file_id += ('_repeatSizeDif%s' % (repeatSizeDif))
    analysis_file_id += ('_times%d' % randTimes)
    if commonOptions['specifiedGeneName']==None:
       pass; #simulation_file_id = ("_def%s" % (commonOptions['repeatgene'])) + simulation_file_id
@@ -287,23 +303,41 @@ def BAMinput(margs):
         summary.append(findTrinucleotideRepeats.getRepeatForKnownGene(commonOptions, specifiedOptions))
 
    for curgrep in summary:
-       print curgrep
+       print curgrep[0], ('%.2f' % curgrep[1]), curgrep[2:]
+       #print curgrep
 
    for curgrep in summary:
         pstr = 'NONE'
         if len(curgrep[2])>0: pstr = str(curgrep[2][0])
         if len(curgrep[2])>1: pstr += ','+ str(curgrep[2][1])
-        else: pstr += ','+ str(curgrep[2][0])
+        else: 
+            if len(curgrep[2])>0: pstr += ','+ str(curgrep[2][0])
+            else: pstr += '0,0'
         logging.critical('\t Gene name='+curgrep[0]+'; ref_repeat='+('%.0f' % (curgrep[1]))+('(allreads=%d); ' % (curgrep[4]))+'repeat in test genome='+ pstr + ' #not_used_reads:'+str(curgrep[5]))
         logging.critical('\t#Format: Repeat_time=numberOfAlignedRead:'+curgrep[3])
 
    print ''
+   gLoc = commonOptions['gLoc']; mprintstr = ''
    for curgrep in summary:
+        pstr = 'NONE'
         if len(curgrep[2])>0: pstr = str(curgrep[2][0])
         if len(curgrep[2])>1: pstr += ','+ str(curgrep[2][1])
-        else: pstr += ','+ str(curgrep[2][0])
+        else: 
+            if len(curgrep[2])>0: pstr += ','+ str(curgrep[2][0])
+            else: pstr += '0,0'
         logging.critical('\t Gene name='+curgrep[0]+' repeat in test genome='+ pstr)
-
+   
+        mprintstr += curgrep[0]+' '+pstr
+        if gLoc.has_key(curgrep[0]) and len(gLoc[curgrep[0]][7])>0:
+           mrange = trinucleotideRepeatRealSimulation.getRepeatRange2(gLoc[curgrep[0]][7])
+           for mi in range(2):
+              for ni in range(2):
+                 if ni==0: mprintstr += ';' # ' ,\''
+                 else: mprintstr += '-'
+                 if len(mrange)>mi and len(mrange[mi])>ni: mprintstr += str(mrange[mi][ni]);
+           
+        mprintstr += '\n'
+   print mprintstr
 
 
 ##############################################################################
@@ -390,6 +424,7 @@ parser_sim.add_argument("--sub_rate", type=float, default=0.02, help="Substituti
 parser_sim.add_argument("--coverage", type=int, default=300, help="The number of reads produced after mutations. Default: 300");
 parser_sim.add_argument("--randTimes", type=int, default=100, help="The number of simulation times. Default: 100");
 parser_sim.add_argument("--UnsymAlign", type=int, default=1, help="Whether unsymmetrical alignment (1) rather than bwa mem (0) would be used. Default: 1");
+parser_sim.add_argument("--RepeatSizeDif", default=None, help="The absolute difference of repeat size in two alleles: Default: None; could be 1, 2, or 3_4 and so on. Must be positive numbers.");
 parser_sim.set_defaults(func=simulation)
 
 

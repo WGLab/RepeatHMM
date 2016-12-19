@@ -337,6 +337,30 @@ def getNormalDist(avgnormrep, mmin, mmax):
 	currn = getMynormNum(avgnormrep, 5, mmin, mmax, 'repeats')
 	return currn
 
+def getDefinedSizeDif(mmin, mmax, m_repeatSizeDif):
+        if len(m_repeatSizeDif)==1:
+                repeatSizeDif = [m_repeatSizeDif[0], m_repeatSizeDif[0]]
+                #repeat1 = int(random.uniform(repeatrange[0][0]+repeatSizeDif[0], repeatrange[1][1]-repeatSizeDif[0]))
+                #repeat2array = [repeat1-repeatSizeDif[0], repeat1+repeatSizeDif[0]]
+                #repeat2 = repeat2array[int(random.uniform(0,len(repeat2array)-1)+0.5)]
+        else:
+                repeatSizeDif = [m_repeatSizeDif[0], m_repeatSizeDif[1]]
+
+        repeat1 = int(random.uniform(mmin+repeatSizeDif[1], mmax-repeatSizeDif[1]))
+        repeat2array = []
+        for curr2 in range(repeat1-repeatSizeDif[1], repeat1+repeatSizeDif[1]+1):
+                #print '##', repeat1, repeat1-repeatSizeDif[1], repeat1+repeatSizeDif[1], '>', curr2, repeat1-repeatSizeDif[0], repeat1+repeatSizeDif[0], not (curr2>repeat1-repeatSizeDif[0] and curr2<repeat1+repeatSizeDif[0]), repeat1, repeatSizeDif[0], repeatSizeDif[1]
+                if not (curr2>repeat1-repeatSizeDif[0] and curr2<repeat1+repeatSizeDif[0]):
+                        repeat2array.append(curr2);
+        rep2ind = random.uniform(0,len(repeat2array)-1)
+        #print '##', repeat1, repeat2array, rep2ind, int(rep2ind+0.5)
+        repeat2 = repeat2array[int(rep2ind+0.5)]
+
+        retrep = [repeat1, repeat2]; retrep.sort();
+
+        return retrep
+
+
 def getSimForGivenGene(commonOptions, specifiedOptions, moreOptions):	
 #def getSimForGivenGene(mgloc, isUnsymAlign, unique_file_id, simulation_file_id, analysis_file_id, repeatgene, gene_start_end, repeat_start_end, repeatrange=[5, 100], insert_rate=0.12, del_rate=0.02, sub_rate=0.02, coverage=300, isRemInDel=1, isupdown=90, isExtend=0, randTimes=100, isPartial=False):
 	mgloc = moreOptions['mgloc']
@@ -363,6 +387,7 @@ def getSimForGivenGene(commonOptions, specifiedOptions, moreOptions):
 	sub_rate = specifiedOptions['sub_rate']
 	coverage = specifiedOptions['coverage']
 	randTimes = specifiedOptions['randTimes']
+	repeatSizeDif = specifiedOptions['repeatSizeDif']
 	
 	simfolder = 'sim_data/'
 	if not os.path.isdir(simfolder): 
@@ -484,13 +509,13 @@ def getSimForGivenGene(commonOptions, specifiedOptions, moreOptions):
 
 		#print rt, produced_repeat_file, '\n', moreOptions['bamfile'], '\n', unique_file_id, '\n', analysis_file_id, '\n', simulation_file_id
 
-		if isUnsymAlign and os.path.isfile(curreadfile):
+		if isUnsymAlign and os.path.isfile(curreadfile) and rt<len(previous_sim_repeats):
 			currep2 = previous_sim_repeats[rt]
 			cur_sim_repeats.append(currep2)
 			
 			logging.info("Simutlate repeats are %d and %d at %d round" % (currep2[0], currep2[1], rt))
 			logging.info("File exist "+curreadfile)
-		elif (not isUnsymAlign) and os.path.isfile(bamfile) and os.path.isfile(bamfile+'.bai') and rt<len(previous_sim_repeats):
+		elif (not isUnsymAlign) and os.path.isfile(bamfile) and os.path.isfile(bamfile+'.bai') and rt<len(previous_sim_repeats) and rt<len(previous_sim_repeats):
 			currep2 = previous_sim_repeats[rt]
 			
 			cur_sim_repeats.append(currep2)
@@ -498,10 +523,14 @@ def getSimForGivenGene(commonOptions, specifiedOptions, moreOptions):
 			logging.info("Simutlate repeats are %d and %d at %d round" % (currep2[0], currep2[1], rt))
 			logging.info("File exist "+bamfile)
 		else: 
-			if randomproduced or alwaysproduced:
-				#repeat1 = int(random.uniform(repeatrange[0][0], repeatrange[0][1]))
-				repeat1 = getNormalDist(avgnormrep, repeatrange[0][0], repeatrange[0][1])
-				repeat2 = int(random.uniform(repeatrange[1][0], repeatrange[1][1]))
+			if (randomproduced or alwaysproduced): # and rt<len(previous_sim_repeats):
+				if len(repeatSizeDif)==0:
+					#repeat1 = int(random.uniform(repeatrange[0][0], repeatrange[0][1]))
+					repeat1 = getNormalDist(avgnormrep, repeatrange[0][0], repeatrange[0][1])
+					repeat2 = int(random.uniform(repeatrange[1][0], repeatrange[1][1]))
+				else:
+					repeat1, repeat2 = getDefinedSizeDif(repeatrange[0][0], repeatrange[1][1], repeatSizeDif)
+					
 				currep2 = [repeat1, repeat2]; currep2.sort();
 				cur_sim_repeats.append(currep2)
 				
