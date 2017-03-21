@@ -6,18 +6,12 @@ import logging
 
 import findTrinucleotideRepeats
 import getAlignment
-import UnsymmetricPairAlignment
+from UnsymmetricPairAlignment import UnsymmetricPairAlignment
 import myHMM
 from myheader import *
+import printHMMmatrix
 
-
-#def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isRemInDel, isupdown, isExtend, bandwo, seqbp=False, currep2=None, printTwoTail=False, SeqDepth = 0):
-def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isRemInDel, isupdown, isExtend, bandwo, seqbp, currep2, printTwoTail, SeqDepth):
-	#print 'test here'
-
-	pdebug = False; #pdebug=True; 
-	if (not currep2==None) and currep2[0]>=70 and currep2[1]>=70 and printTwoTail:
-		pdebug=True;
+def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, repeatgene, repPat, forw_rerv, isRemInDel, isupdown, isExtend, bandwo, seqbp, currep2, printTwoTail, MinSup, commonOptions):
 	mdebug = False; #mdebug=True;
 	if mdebug:
 		print 'upstreamstr', len(upstreamstr), upstreamstr
@@ -26,13 +20,18 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 
 	templatestr = upstreamstr+repregion+downstreamstr;
 
-	bandw = bandwo; # + int(len(templatestr)*0.2)
+	len_repPat = printHMMmatrix.get_len_repPat(repPat, commonOptions)
+	logging.info("len_repPat="+str(len_repPat))
 
-	if mdebug or pdebug: print '\ntemp_all  :', len(templatestr[len(upstreamstr)-10:-len(downstreamstr)]), templatestr[len(upstreamstr)-10:-len(downstreamstr)], 'bandw=', bandw
+	print 'rep patterns', repPat, commonOptions['CompRep']
+
+	bandw = bandwo; 
+
+	if mdebug: print '\ntemp_all  :', len(templatestr[len(upstreamstr)-10:-len(downstreamstr)]), templatestr[len(upstreamstr)-10:-len(downstreamstr)], 'bandw=', bandw
 	if (not currep2==None): print '\ntemp_all  :', len(templatestr[len(upstreamstr)-10:-len(downstreamstr)]), templatestr[len(upstreamstr)-10:-len(downstreamstr)], 'bandw=', bandw
 	allsimreads = findTrinucleotideRepeats.myReadTxtFile(curreadfile)
 
-	repregion_len_threhold = len(repPat) #3;
+	repregion_len_threhold = len_repPat #3;
 	repeatbeforeafter = isupdown
 	toleratebeforeafter = 30+isupdown;
 	if toleratebeforeafter>len(upstreamstr): toleratebeforeafter = len(upstreamstr)-1
@@ -43,35 +42,38 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 	repeatlength = []; replen = len(repregion)
 	if seqbp: bp = getAlignment.getBasePair();
 
-	hmmoptions = findTrinucleotideRepeats.getHMMOptions(repeatbeforeafter, repPat, forw_rerv)
-	
+	hmmoptions = findTrinucleotideRepeats.getHMMOptions(repeatbeforeafter, repPat, forw_rerv, commonOptions)
+
+	curmaxlen = 0;
 	isprint = 0; #1;	
-	#for j in range(1, len(allsimreads), 4):
 	for j in range(len(allsimreads)-3, 0, -4):
 		if mdebug: print "cur line=", j 
+		
+		if len(allsimreads[j])>3000:
+			if curmaxlen<len(allsimreads[j]): curmaxlen=len(allsimreads[j])
+			#print 'useUnsymmetricalAlign', j, curmaxlen, len(allsimreads[j]); sys.stdout.flush()
+
+		if ((not commonOptions==None) and len(allsimreads[j])>commonOptions['MaxRep']*len_repPat): 
+			logging.error("Error!!!! the sequence is too long!!!"+str(len(allsimreads[j]))+" "+str(j))
+			continue;
+
 		querystr = allsimreads[j];
 		querystr = string.strip(querystr)
 
-		#querystr = getAlignment.getComplementary3(bp, querystr)
-
-		#alignres = UnsymmetricPairAlignment.unsymmetricPairWiseAlignment(templatestr[::-1], len(templatestr), querystr[::-1], len(querystr), match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, 0).split(';')
 		alignres = UnsymmetricPairAlignment.unsymmetricPairWiseAlignment(templatestr, len(templatestr), querystr, len(querystr), match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, isprint).split(';')
-		#alignres[0] = alignres[0][::-1]
-		#alignres[1] = alignres[1][::-1]
 
 		if seqbp:
 			querystrR = getAlignment.getComplementary3(bp, querystr)
 			alignresR = UnsymmetricPairAlignment.unsymmetricPairWiseAlignment(templatestr, len(templatestr), querystrR, len(querystrR), match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, isprint).split(';')
 
-			#if len(alignresR[1])>len(alignres[1]):
 			if int(alignresR[2])>int(alignres[2]):
 				querystr = querystrR
 				alignres = alignresR
 		
 		
 		if mdebug: print 'done: '
-		if mdebug or pdebug: print 'temp_first', len(templatestr), len(alignres[1]), len(alignres[1][len(upstreamstr)-10:-len(downstreamstr)]), alignres[1][len(upstreamstr)-10:-len(downstreamstr)]
-		if mdebug or pdebug: print 'quey_first', len(querystr), len(alignres[0]), len(alignres[0][len(upstreamstr)-10:-len(downstreamstr)]), alignres[0][len(upstreamstr)-10:-len(downstreamstr)]
+		if mdebug: print 'temp_first', len(templatestr), len(alignres[1]), len(alignres[1][len(upstreamstr)-10:-len(downstreamstr)]), alignres[1][len(upstreamstr)-10:-len(downstreamstr)]
+		if mdebug: print 'quey_first', len(querystr), len(alignres[0]), len(alignres[0][len(upstreamstr)-10:-len(downstreamstr)]), alignres[0][len(upstreamstr)-10:-len(downstreamstr)]
 		res_temp = alignres[1].replace('-','');
 		
 		start_loc = templatestr.index(res_temp)
@@ -138,8 +140,8 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 					repeat_start_end[1] = len(res_query)-1
 			
 	
-				if mdebug or pdebug: print 'temp_rep', len(alignres[1][repeat_start_end[0]:repeat_start_end[1]]), alignres[1][repeat_start_end[0]:repeat_start_end[1]]
-				if mdebug or pdebug: print 'quer_rep', len(alignres[0][repeat_start_end[0]:repeat_start_end[1]]), alignres[0][repeat_start_end[0]:repeat_start_end[1]]
+				if mdebug: print 'temp_rep', len(alignres[1][repeat_start_end[0]:repeat_start_end[1]]), alignres[1][repeat_start_end[0]:repeat_start_end[1]]
+				if mdebug: print 'quer_rep', len(alignres[0][repeat_start_end[0]:repeat_start_end[1]]), alignres[0][repeat_start_end[0]:repeat_start_end[1]]
 	
 				detectregion = alignres[0][repeat_start_end[0]:repeat_start_end[1]].replace('-','');
 				if len(detectregion)<repregion_len_threhold and printTwoTail:
@@ -148,22 +150,24 @@ def useUnsymmetricalAlign(upstreamstr, repregion, downstreamstr, curreadfile, re
 					logging.warning('quer_rep: %d, %s' % (len(alignres[0][repeat_start_end[0]:repeat_start_end[1]]), alignres[0][repeat_start_end[0]:repeat_start_end[1]]))
 					continue;
 	
-				if mdebug or pdebug: print len(detectregion), repeat_start_end, detectregion
+				if mdebug: print len(detectregion), repeat_start_end, detectregion
 				
-				if isRemInDel>0:
-					newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, detectregion)
+				if commonOptions==None or (len(detectregion)<commonOptions['MaxRep']*len_repPat):
+					if isRemInDel>0:
+						newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, detectregion, commonOptions)
 
-					#newstr, pre0, predstats = findTrinucleotideRepeats.getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, detectregion, match, mismatch, gap_in_perf, gap_in_read, gap_before_after)
+					else:
+						newstr, pre0, predstats = myHMM.hmmpred(detectregion, repPat, forw_rerv, hmmoptions, commonOptions, repeatbeforeafter)
+					repeatlength.append(len(newstr)/float(len_repPat)) #3)
 				else:
-					newstr, pre0, predstats = myHMM.hmmpred(detectregion, repPat, forw_rerv, hmmoptions, repeatbeforeafter)
-				repeatlength.append(len(newstr)/float(len(repPat))) #3)
-				
+					logging.warning('The sequence is too long: '+str(len(detectregion))+' '+repeatgene+' '+repPat+" "+str(commonOptions['MaxRep'])+" "+str(commonOptions['MaxRep']*len_repPat))
+
 				if repeatlength[-1]>70 and printTwoTail:
 					logging.info("More repeat %3d: %s" % (repeatlength[-1], detectregion))
 					logging.info("            %3d: %s" % (repeatlength[-1], predstats))
 					logging.info("            %3d: %s" % (repeatlength[-1], newstr))
 				
-	p2, allocr = findTrinucleotideRepeats.get2Peaks(repeatlength, SeqDepth)
+	p2, allocr = findTrinucleotideRepeats.get2Peaks(repeatlength, MinSup, commonoptions=commonOptions)
 	
 	
 	return [p2, allocr];

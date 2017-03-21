@@ -7,6 +7,8 @@ import math;
 import copy
 
 import numpy;
+import time
+import resource
 import peakutils;
 import argparse;
 
@@ -20,18 +22,17 @@ import heapq
 
 import getAlignment
 import myHMM
-
+import myPeakDetection
+import printHMMmatrix
+import myRepeatReAlignment
 
 from myheader import *
-
-#LOG_FILENAME = 'TrinRepDis.log'
-#logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,filemode='w',format="%(levelname)s: %(message)s")
 
 def myReadTxtFile(filename):
         f = open(filename,'r')
 
         data = f.readlines();
-        while string.strip(data[-1])=="": data = data[:-1];
+        while len(data)>0 and string.strip(data[-1])=="": data = data[:-1];
         f.close();
 
         return data;
@@ -47,11 +48,46 @@ def myWriteTxtFile(mlist, filename):
 
 def getDiseseGeneInRefGenomeLocation_hg19():
 	gLoc = {};  plusminus = '-'; plusminus = '+';
+
+	locus_name='htt'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr4', '3076237', '3245687', '3076604', '3076666', 'CAG', '+19']
+	locus_name='atn1'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr12', '7033626', '7051484', '7045880', '7045936', 'CAG', '+10']
+	locus_name='atxn1'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr6', '16299343', '16761721', '16327867', '16327953', 'CAG', '-14']
+	locus_name='atxn2'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr12', '111890018', '112037480', '112036755', '112036823', 'CAG', '-13']
+	locus_name='atxn3'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr14', '92504996', '92572954', '92537355', '92537396', 'CAG', '-14']
+	locus_name='cacna1a'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr19', '13317257', '13617274', '13318673', '13318711', 'CAG', '-8']
+	locus_name='atxn7'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr3', '63850233', '63989136', '63898362', '63898391', 'CAG', '+7']
+	locus_name='tbp'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr6', '170863421', '170881958', '170870987', '170871109', 'CAG', '+19']
+	locus_name='fxn'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr9', '71650479', '71715094', '71652203', '71652221', 'GAA', '+5']
+	locus_name='dmpk'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr19', '46272967', '46285815', '46273463', '46273522', 'CTG', '-20']
+	locus_name='atxn8os'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr13', '70681345', '70713885', '70713483', '70713560', 'CTG', '+15']
+	locus_name='ppp2r2b'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chr5', '145969068', '146461083', '146258292', '146258322', 'CAG', '-10']
+	locus_name='ar'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chrX', '66763874', '66950461', '66765160', '66765228', 'CAG', '+22']
+	locus_name='fmr1'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chrX', '146993469', '147032647', '146993569', '146993628', 'CGG', '+10']
+	locus_name='aff2'; locus_name = locus_name.lower();
+	gLoc[locus_name] = ['chrX', '147582039', '148082293', '147582126', '147582212', 'CCG', '+15']
+	#gLoc[locus_name] = ['chrX', '147582139', '148082193', '147582126', '147582212', 'CCG', '+15']
+	#   gLoc['aff2'] = ['chrX', '148500619', '149000663', '148500606', '148500692', 'CCG', '+15', '6-35:200+']
+
+
 	#CSF1PO  5q33.1   TCTA +12       chr5:149355735 - 149556053    chr5:149455883 - 149455959 AGAT(top strand commonly used
 	locus_name='CSF1PO'; locus_name = locus_name.lower();
 	gLoc[locus_name] = ['chr5', '149355735','149556053', '149455883','149455959', 'TCTA', plusminus+'12', '']
 
-	#TH01    11p15.5  AATG +9        chr11:2092277 - 2292522       chr11:2192322 - 2192345    AATG bottom strand (commonly used)	
+	#TH01    11p15.5  AATG +9        chr11:2092277 - 2292522       chr11:2192322 - 2192345    AATG bottom strand (commonly used)
 	locus_name='TH01'; locus_name = locus_name.lower();
 	gLoc[locus_name] = ['chr11', '2092277','2292522', '2192322','2192345', 'AATG', plusminus+'9', '']
 
@@ -93,7 +129,7 @@ def getDiseseGeneInRefGenomeLocation_hg19():
 	
 	#D2S441  2p14     TCTA +12       chr2:68139016 - 68339157      chr2:68239079 - 68239126   TCTA top strand
 	locus_name='D2S441'; locus_name = locus_name.lower();
-	gLoc[locus_name] = ['chr2', '68139016','68339157', '68239079','68239126', 'TCTA', plusminus+'12', '']
+	gLoc[locus_name] = ['chr2', '68139016','68339157', '68239079','68239126', 'TCTA', plusminus+'12', '7-17:7-17']
 
 	#D10S1248 10q26.3 GGAA +13       chr10:130992374 - 131192796   chr10:131092508 - 131092559
 	locus_name='D10S1248'; locus_name = locus_name.lower();
@@ -133,7 +169,7 @@ def getDiseseGeneInRefGenomeLocation_hg19():
 	locus_name='D1S1656'; locus_name = locus_name.lower(); ######
 	gLoc[locus_name] = ['chr1','230905195','230905509','230905362','230905429','CTAT','+16','',]
 	locus_name='D2S441'; locus_name = locus_name.lower();
-	gLoc[locus_name] = ['chr2','68239015','68239157','68239078','68239127','TCTA','+12','',]
+	gLoc[locus_name] = ['chr2','68239015','68239157','68239078','68239127','TCTA','+12','7-17:7-17',]
 	locus_name='D10S1248'; locus_name = locus_name.lower();
 	gLoc[locus_name] = ['chr10','131092373','131092796','131092507','131092559','GGAA','+13','',]
 	locus_name='D22S1045'; locus_name = locus_name.lower();
@@ -191,7 +227,7 @@ def getDiseseGeneInRefGenomeLocation_hg19():
 	locus_name='D5S2505'; locus_name = locus_name.lower();  #******
 	gLoc[locus_name] = ['chr5','5816996','5817453','5817134','5817338','AGAT','+53','',]
 	locus_name='D8S1115'; locus_name = locus_name.lower(); #******
-	gLoc[locus_name] = ['chr8','42536554','42536839','42536588','42536615','AAT','+9','',]
+	gLoc[locus_name] = ['chr8','42536554','42536839','42536588','42536615','AAT','+9','9-22:9-22',]
 	locus_name='D10S2325'; locus_name = locus_name.lower(); #******
 	gLoc[locus_name] = ['chr10','12792945','12793245','12793050','12793126','ATAAG','+15','',]
 	locus_name='D11S554'; locus_name = locus_name.lower(); #******
@@ -239,7 +275,7 @@ def getDiseseGeneInRefGenomeLocation_hg19():
 	locus_name='D8S347'; locus_name = locus_name.lower(); #******
 	gLoc[locus_name] = ['chr8','129340452','129340831','129340529','129340619','TCTA','+22','',]
 	locus_name='D8S639'; locus_name = locus_name.lower(); #******
-	gLoc[locus_name] = ['chr8','16770880','16771227','16771051','16771172','ATAG','+30','',]
+	gLoc[locus_name] = ['chr8','16770880','16771227','16771051','16771172','ATAG','+30','20-34:20-34',]
 	#locus_name='DXS7132'; locus_name = locus_name.lower(); #******
 	#gLoc[locus_name] = ['chrX','64655267','64655632','64655524','64655595','GATA','+17','',]
 	#locus_name='DXS7423'; locus_name = locus_name.lower(); #******
@@ -267,7 +303,8 @@ def getDiseseGeneInRefGenomeLocation_hg19():
 		genstr = int(gLoc[glk][1]); genend = int(gLoc[glk][2])
 		repstr = int(gLoc[glk][3]); repend = int(gLoc[glk][4])
 		if repstr-genstr<0 or genend-repend<0:
-			print ('Wrong gene and repeat information: gene = [%d, %d], and repeat = [%d, %d]' % genstr,genend,repstr,repend)
+			print glk, ('Wrong gene and repeat information: gene = [%d, %d], and repeat = [%d, %d]' % (genstr,genend,repstr,repend))
+			#print glk, ('Wrong gene and repeat information: gene = [%d, %d], and repeat = [%d, %d]' % genstr,genend,repstr,repend)
 
 	return gLoc;
 
@@ -278,20 +315,21 @@ def getDiseseGeneInRefGenomeLocation(hg):
 		logging.error('Error: not supported yet')
 
 #from wiki: https://en.wikipedia.org/wiki/Trinucleotide_repeat_disorder
-#RefSeq chr:start-end would be used.	
+#RefSeq chr:start-end would be used.
 def getDiseseGeneInRefGenomeLocation_hg38():
-        gLoc = {}
-        #HTT at chr4:3074510-3243960
+        gLoc = {} # htt, atn1, atxn1, atxn2, atxn3, cacna1a, atxn7, tbp, fxn, dmpk, atxn8os, ppp2r2b, ar, fmr1, aff2
+        #HTT at chr4:3074510-3243960               3074400   3076157
         gLoc['htt'] = ['chr4','3074510','3243960','3074877','3074939', 'CAG', '+19', '6-35:36-250']                # (CAG)* +1CAACAG 
         #ATN1 at         chr12:   6924463 -  6942321   6936729   6936773
         gLoc['atn1'] = ['chr12', '6924463', '6942321','6936717', '6936773', 'CAG', '+10', '6-35:49-88']   # 2(CAGCAA) (CAG)*
-        #ar: (Q)* <+ 5non-Q + 7 Q>
+        #ar: (Q)* <+ 5non-Q + 7 Q>           6936346  /6937032
         gLoc['ar'] = ['chrX', '67544032', '67730619', '67545318', '67545386', 'CAG', '+22', '9-36:38-62']         # (CAG)* +1CAA
         gLoc['atxn1'] = ['chr6', '16299112', '16761490', '16327636', '16327722', 'CAG', '-14', '6-35:49-88']      # (CAG)* +2(ATGCTG) 11(CTG)
         gLoc['atxn2'] = ['chr12', '111452214', '111599676', '111598951', '111599019', 'CAG', '-13', '14-32:33-77'] # 10Q  (CAG)*
         #atxn3: chr:start-end for RefSeq is chr14:92058552-92106621. chr:start-end for UCSC is chr14:92038652-92106610
         #ATXN3 at chr14:92058552-92106621 
         gLoc['atxn3'] = ['chr14', '92038652', '92106610', '92071011', '92071052', 'CAG', '-14', '12-40:55-86']       # (CAG)* + CTGTTGCTGCTTTTGCTGCTG
+        gLoc['atxn3'] = ['chr14', '92038652', '92106610', '92071011', '92071052', 'CAG', '-14', '12-40:55-150']
         #CACNA1A at chr19:13206443-13506460 
         gLoc['cacna1a'] = ['chr19', '13206443', '13506460', '13207859', '13207897', 'CAG', '-8', '4-18:21-30']     #y
         #ATXN7 at chr3:63864557-64003460 
@@ -314,9 +352,13 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         #ATXN8OS at       chr13 :  70107213 -  70139753
         gLoc['atxn8os'] = ['chr13', '70107213', '70139753', '70139351', '70139428', 'CTG', '+15', '16-37:110-250']   # 1TTA + 10 CTA + (CTG)*
        
-	#https://en.wikipedia.org/wiki/Spinocerebellar_ataxia 
+        #https://en.wikipedia.org/wiki/Spinocerebellar_ataxia 
         #PPP2R2B at chr5:           146589505 -  147081520 RefSeq
-        gLoc['ppp2r2b'] = ['chr5', '146589505', '147081520', '146878729', '146878759', 'CAG', '-10', '7-28:66-78'] #may contain errors;
+        gLoc['ppp2r2b'] = ['chr5', '146589505', '147081520', '146878729', '146878759', 'CAG', '-10', '7-28:66-78'] #may contain errors;  aff2, fxn, dmpk, atxn8os, ppp2r2b
+
+        locus_name='ATXN10'; locus_name = locus_name.lower();    #$ atxn10
+        #gLoc[locus_name] = ['chr22', '45671798', '45845307', '45795355', '45795424', 'ATTCT','+14','10-32',]
+        gLoc[locus_name] = ['chr22', '45792355', '45798424', '45795355', '45795424', 'ATTCT','+14','10-32']
 
         locus_name='D8S1179'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr8','124894821','124895163','124894862','124894917','TATC','+13','',]
@@ -345,11 +387,11 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         locus_name='D1S1656'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr1','230769449','230769763','230769616','230769683','CTAT','+16','',]
         locus_name='D2S441'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr2','68011883','68012025','68011946','68011995','TCTA','+12','',]
+        gLoc[locus_name] = ['chr2','68011883','68012025','68011946','68011995','TCTA','+12','7-17:7-17',]
         locus_name='D10S1248'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr10','129294109','129294532','129294243','129294295','GGAA','+13','',]
         locus_name='D22S1045'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr22','37140244','37140530','37140286','37140342','ATT','+18','',]
+        gLoc[locus_name] = ['chr22','37140244','37140530','37140286','37140342','ATT','+18','11-25:11-25',]
         locus_name='D20S1082'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr20','55249286','55249544','55249398','55249440','ATA','+14','',]
         locus_name='D6S474'; locus_name = locus_name.lower();    #$
@@ -403,9 +445,9 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         locus_name='D5S2505'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr5','5816883','5817340','5817021','5817225','AGAT','+53','',]
         locus_name='D8S1115'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr8','42681411','42681696','42681445','42681472','AAT','+9','',]
+        gLoc[locus_name] = ['chr8','42681411','42681696','42681445','42681472','AAT','+9','9-22:9-22',]
         locus_name='D10S2325'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr10','12750946','12751246','12751051','12751127','ATAAG','+15','',]
+        gLoc[locus_name] = ['chr10','12750946','12751246','12751051','12751127','ATAAG','+15','8-22:8-22',]
         locus_name='D11S554'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr11','44908682','44908921','44908734','44908830','AAAG','+23','',]
         locus_name='D14S306'; locus_name = locus_name.lower();    #$
@@ -413,11 +455,11 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         locus_name='D18S535'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr18','40568810','40569365','40568861','40568930','TAGA','+17','',]
         locus_name='D18S849'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr18','57897345','57897656','57897387','57897526','TCTA','+35','',]
+        gLoc[locus_name] = ['chr18','57897345','57897656','57897387','57897526','TCTA','+35','28-42:28-42',]
         locus_name='D19S253'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr19','15617324','15617553','15617483','15617534','ATCT','+12','',]
         locus_name='D1S103'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr1','230700989','230701240','230701148','230701187','TG','+19','',]
+        gLoc[locus_name] = ['chr1','230700989','230701240','230701148','230701187','TG','+19','12-26:12-26',]
         locus_name='D20S85'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr20','39422965','39423277','39423110','39423187','TTTC','+20','',]
         locus_name='D21S2055'; locus_name = locus_name.lower();    #$
@@ -447,7 +489,7 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         locus_name='D8S347'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr8','128328206','128328585','128328283','128328373','TCTA','+22','',]
         locus_name='D8S639'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr8','16913371','16913718','16913542','16913663','ATAG','+30','',]
+        gLoc[locus_name] = ['chr8','16913371','16913718','16913542','16913663','ATAG','+30','20-34:20-34',]
         #locus_name='DXS7132'; locus_name = locus_name.lower();
         #gLoc[locus_name] = ['chrX','65435387','65435752','65435644','65435715','GATA','+17','',]
         #locus_name='DXS7423'; locus_name = locus_name.lower();
@@ -465,7 +507,7 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         locus_name='D1S1656'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr1','230769449','230769763','230769616','230769683','CTAT','+16','',]
         locus_name='D2S441'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr2','68011883','68012025','68011946','68011995','TCTA','+12','',]
+        gLoc[locus_name] = ['chr2','68011883','68012025','68011946','68011995','TCTA','+12','7-17:7-17',]
         locus_name='D3S1358'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr3','45540712','45540843','45540736','45540803','TATC','+16','',]
         locus_name='D5S818'; locus_name = locus_name.lower();    #$
@@ -491,7 +533,7 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         locus_name='D21S11'; locus_name = locus_name.lower();    #$
         gLoc[locus_name] = ['chr21','19181944','19182165','19181972','19182123','TCTA','+38','',]
         locus_name='D22S1045'; locus_name = locus_name.lower();    #$
-        gLoc[locus_name] = ['chr22','37140244','37140530','37140286','37140342','ATT','+18','',]
+        gLoc[locus_name] = ['chr22','37140244','37140530','37140286','37140342','ATT','+18','11-25:11-25',]
         #locus_name='DYS19'; locus_name = locus_name.lower();
         #gLoc[locus_name] = ['chrY','9684324','9684519','9684377','9684443','TATC','+16','',]
         #locus_name='DYS388'; locus_name = locus_name.lower();
@@ -524,654 +566,41 @@ def getDiseseGeneInRefGenomeLocation_hg38():
         locus_name='D8S320'; locus_name = locus_name.lower();
         gLoc[locus_name] = ['chr8','88818683','88819178','88818857','88819107','TTTC','+9','',]
 
+        locus_name='MUC1'; locus_name = locus_name.lower();
+        gLoc[locus_name] = ['chr1', '155186123', '155192868', '155188508', '155192051', 'GGTGGAGCCCGGGGCCGGCCTGGTGTCCGGGGCCGAGGTGACACCGTGGGCTGGGGGGGC', '+40', '']
+
         return gLoc;
 
 def get_gLoc(dis_type, gLoc):
         dis_type = dis_type.lower();
         return gLoc[dis_type];
 
-def getValues(mdict, minreads):
-        valdict = {}
-        mdkeys = mdict.keys();
-        for mdk in mdkeys:
-                if not valdict.has_key(mdict[mdk]):
-                        valdict[mdict[mdk]] = 0;
-                valdict[mdict[mdk]] += 1;
-        valkeys = valdict.keys(); valkeys.sort();
-        more = []
-        #for i in range(1, len(valkeys)*2/3+1):
-        #print 'test', valkeys, minreads
-        for i in range(1, len(valkeys)+1):
-                #if valkeys[-i]<4: continue;
-                #
-                #revised on Dec 12, 2016
-                #change from above to the blow
-                if valkeys[-i]<minreads: continue;
-                #print -i, valkeys[-i], valdict[valkeys[-i]]
-                if valdict[valkeys[-i]]>=2: more.append(valkeys[-i])
-        #print 'test', more
-        return more;
-
-def findSameValues(mdict, v, mdkeys):
-        start = -1; end = -1;
-        for mdk_ind in range(len(mdkeys)-1):
-                if mdict[mdkeys[mdk_ind]]==mdict[mdkeys[mdk_ind+1]] and mdict[mdkeys[mdk_ind]]==v:
-                        if start==-1: start = mdk_ind
-                        end = mdk_ind+1
-                if (not mdict[mdkeys[mdk_ind]]==mdict[mdkeys[mdk_ind+1]]) and (not start==-1): break;
-        return [start, end]
-
-def reviseDict(mdict, v):
-        has_revised = False;
-        mdkeys = mdict.keys();  mdkeys.sort()
-        while True:
-                [start, end] = findSameValues(mdict, v, mdkeys)
-		#print 'revisev', v, start, end, mdict
-                if start==-1 or end==-1: break;
-                else:
-                        i=start; j = end;
-                        while True:
-                                #print i, j, mdkeys[i], mdkeys[j], mdict[mdkeys[i]], mdict[mdkeys[j]]
-                                if i>=j:
-                                        print 'Error i is larger than j', i, j, start, end;
-                                        break;
-                             
-                                has_revised = True;  
-                                i += 1;
-                                mdict[mdkeys[i]] += 1;
-                                if i==j: break;
-                                j -= 1;
-                                if i==j: break;
-                                mdict[mdkeys[j]] += 1;
-                                ##print 'ij', i, j, mdkeys[i], mdkeys[j], mdict[mdkeys[i]], mdict[mdkeys[j]]
-
-        return [mdict, has_revised];
-
-def reviseDictAccordingV(mdict, minreads):
-	while True:
-           more = getValues(mdict, minreads)
-           #print 'more', more, minreads
-           more.sort();
-           has_revised = False;
-           for m in more:
-                   mdict, has1_revised = reviseDict(mdict, m);
-                   if not has_revised: has_revised = has1_revised
-           if not has_revised: break;
-        return mdict
 
 
-def selectFromTwoX(x_index2a, x_index2b, lendict, x_index1):
-	if x_index2a==x_index2b: x_index2 = x_index2b
-	else:
-		neighbor3 = [0,0]; point3 = [x_index2a, x_index2b]
-		for pi in range(len(point3)):
-			for xi in range(point3[pi]-1, point3[pi]+2):
-				if lendict.has_key(xi): neighbor3[pi] += lendict[xi]
+def get2Peaks(lengd, MinSup, commonoptions=None):
+	return myPeakDetection.get2Peaks(lengd, MinSup, True, commonoptions) 
 		
-		#print x_index2a, neighbor3[0], x_index2b, neighbor3[1]
-		
-		if neighbor3[0]*x_index2a < neighbor3[1]*x_index2b:
-			x_index2 = x_index2b
-		elif neighbor3[0]*x_index2a > neighbor3[1]*x_index2b:
-			x_index2 = x_index2a
-		elif x_index2a*2 < x_index2b and neighbor3[0]*0.9 < neighbor3[1]:
-			x_index2 = x_index2b
-		elif x_index2b*2 < x_index2a and neighbor3[1]*0.9 < neighbor3[0]:
-			x_index2 = x_index2a
-		else:
-			if neighbor3[0]>neighbor3[1]: x_index2 = x_index2a
-			elif neighbor3[0]<neighbor3[1]: x_index2 = x_index2b
-			else:
-				if x_index2a>x_index2b: x_index2 = x_index2a;
-				elif x_index2a<x_index2b: x_index2 = x_index2b
-				else:
-					if math.fabs(x_index1-x_index2a)>math.fabs(x_index1-x_index2b): x_index2 = x_index2a;
-					else: x_index2 = x_index2b
-	return x_index2
-
-def selectFromTwo(y_index2a, y_index2b, lendict, y_index1, x):
-	if y_index2a==y_index2b: y_index2 = y_index2b
-	else:
-		x2 = selectFromTwoX(x[y_index2a], x[y_index2b], lendict, x[y_index1])
-		if x2==x[y_index2a]: y_index2 = y_index2a
-		else: y_index2 = y_index2b
-	return y_index2
 	
-
-def selectOne(iy, curyvalue, lendict, y_index1, indexes, x):
-	y_index2a = indexes[iy.index(curyvalue)];
-	iy.reverse();
-	y_index2b = indexes[len(iy) - iy.index(curyvalue) - 1]
-
-	if y_index2a==y_index1: return y_index2b
-	elif y_index2b==y_index1: return y_index2a
-	
-	return selectFromTwo(y_index2a, y_index2b, lendict, y_index1, x)
-
-
-#def getPeaks2(x, y, lendict, mm, mdebug):
-#revised frmo above to below on Dec 12 2016.
-def getPeaks2(x, y, lendict, mm, mdebug, minreads, pnearby_size=3):
-	indexes = peakutils.indexes(numpy.array(y), thres=0.01) - mm
-	peak2 = [];
-	pnearby = []; 
-	
-	if mdebug:
-		for i in range(len(x)): print ('%d=%d;' % (x[i], y[i])),
-		print 'mindexes',
-		for i in indexes: print x[i],
-		print ''
-		print '#x =',
-		for i in range(len(x)): print ('%3d' % x[i]),
-		print ''
-		print 'y  =',
-		for i in range(len(x)): print ('%3d' % y[i]),
-		print ''
-
-	if len(indexes)>1:
-		iy = []
-		for i in indexes: iy.append(y[i]);
-		ylargest = heapq.nlargest(2, iy);
-		y_index1 = indexes[iy.index(ylargest[0])];
-		
-		p_y_index2 = selectOne(copy.deepcopy(iy), ylargest[1], lendict, y_index1, indexes, x)
-		if len(iy)>2:
-			ylargest = heapq.nlargest(3, iy);
-			p_y_index3 = selectOne(iy, ylargest[2], lendict, y_index1, indexes, x)
-			y_index2 = selectFromTwo(p_y_index2, p_y_index3, lendict, y_index1, x)
-		else: y_index2 = p_y_index2
-
-
-		#ylargest = heapq.nlargest(2, iy);
-		#y_index1 = indexes[iy.index(ylargest[0])];
-		#
-		#y_index2a = indexes[iy.index(ylargest[1])];
-		#iy.reverse();
-		#y_index2b = indexes[len(iy) - iy.index(ylargest[1]) - 1]
-		#
-		#if y_index2a==y_index2b: y_index2 = y_index2b
-		#else:
-		#	neighbor3 = [0,0]; point3 = [y_index2a, y_index2b]
-		#	for pi in range(len(point3)):
-		#		for xi in range(point3[pi]-1, point3[pi]+2):
-		#			if lendict.has_key(xi):	neighbor3[pi] += lendict[xi]
-		#	if neighbor3[0]>neighbor3[1]: y_index2 = y_index2a
-		#	elif neighbor3[0]<neighbor3[1]: y_index2 = y_index2b
-		#	else:
-		#		if y_index2a>y_index2b: y_index2 = y_index2a;
-		#		elif y_index2a<y_index2b: y_index2 = y_index2b
-		#		else:
-		#			if math.fabs(y_index1-y_index2a)>math.fabs(y_index1-y_index2b): y_index2 = y_index2a;
-		#			else: y_index2 = y_index2b
-
-		peak2.append(x[y_index1]); 
-		for ni in range(x[y_index1]-pnearby_size+1, x[y_index1]+pnearby_size):
-			pnearby.append(ni);
-		#if y_index1-1>0: pnearby.append(x[y_index1-1]);
-		#if y_index1+1<len(x): pnearby.append(x[y_index1+1]);
-		peak2.append(x[y_index2])
-		for ni in range(x[y_index2]-pnearby_size+1, x[y_index2]+pnearby_size):
-			pnearby.append(ni);
-		#if y_index2-1>0: pnearby.append(x[y_index2-1]); 
-		#if y_index2+1<len(x): pnearby.append(x[y_index2+1]);
-        else:
-		if len(indexes)==1:
-			logging.debug("Only find one peak");
-			peak2.append(x[indexes[0]])
-			for ni in range(x[indexes[0]]-pnearby_size+1, x[indexes[0]]+pnearby_size):
-				pnearby.append(ni);
-			#pnearby.append(x[indexes[0]]);
-			#if indexes[0]-1>0: pnearby.append(x[indexes[0]-1]); 
-			#if indexes[0]+1<len(x): pnearby.append(x[indexes[0]+1]);
-		else:
-			logging.debug("Cannot find a peak");
-
-	#print 'for testing'
-	#print x
-	#print y;
-	#print peak2
-
-	if len(peak2)>1 and y[peak2.index(peak2[1])] > [y[peak2.index(peak2[0])]]:
-		peak2[0], peak2[1] = peak2[1], peak2[0]
-	
-	p2len = len(peak2)
-	twotails = [];
-	if (x[0] not in pnearby): twotails.append(x[0]);
-	if (x[len(x)-1] not in pnearby): twotails.append(x[len(x)-1]);
-        #if (x[0] not in peak2) and (x[1] not in peak2):
-        #       if lendict[x[0]]==lendict[x[1]]: twotails.append(x[0]);
-        #       else: twotails.append(x[0]);twotails.append(x[1]);
-        #if (x[len(x)-2] not in peak2) and (x[len(x)-1] not in peak2):
-        #       if lendict[x[len(x)-2]]==lendict[x[len(x)-1]]:  twotails.append(x[len(x)-1]);
-        #       else: twotails.append(x[len(x)-2]); twotails.append(x[len(x)-1]);
-	
-	#print twotails
-	tailschoosen = []
-	for ti in twotails:
-		tinearby = [ti-1, ti+1]; shouldchoose = True;
-		if lendict[ti]<minreads: shouldchoose=False
-		else:
-			for tnb in tinearby:
-				if lendict.has_key(tnb) and lendict[tnb]>lendict[ti]: shouldchoose=False;
-		tailschoosen.append(shouldchoose);
-		if not shouldchoose: continue;
-		
-		for i in range(p2len):
-			if selectFromTwoX(ti, peak2[i], lendict, -1)==ti:
-			#if lendict[ti] > lendict[peak2[i]]: 
-				peak2.insert(i, ti); break;
-
-	if len(peak2)==0:
-		for curtt_ind in range(len(twotails)):
-			if not tailschoosen[curtt_ind]: continue;
-			curtt = twotails[curtt_ind]
-			if curtt>4 and lendict[curtt] >= minreads: peak2.append(curtt);
-	#print peak2
-	if len(peak2)>2: peak2 = peak2[:2];
-
-	return peak2	
-
-def getLargerOverSmallRatio(p1, p2):
-	mp = [p1,p2]; mp.sort();
-	
-	mratio = 2**(-mp[1]/float(mp[0])) #math.exp(-mp[1]/float(mp[0]));
-	mratio = math.exp(-mp[1]/float(mp[0]));
-	if mratio<0.1: mratio=0.1;
-	
-	return mratio
-
-def checkSmallSupport(peak2, lendict, minreads):
-	newpeak2 = []
-	for p in peak2:
-		if lendict[p]<minreads: 
-			print 'checkSmallSupport', p, lendict[p], minreads, ' for peak2 ', peak2
-		else: newpeak2.append(p)
-	return newpeak2
-
-def get2Peaks(lengd, SeqDepth):
-#def get2Peaks(lengd):
-	#prnucleotideRepeats.pyint lengd
-
-	minreads = int(SeqDepth)/20;
-	if minreads<0: minreads = 2
-	if minreads>5: minreads = 5
-
-	pvalue = 0.05; ratio = 0.4;
-	smalleratio = 0.5; #0.55 #0.4; #0.55 # 0.5 #0.6;
-
-	mdebug = True; mdebug = False;
-	
-	lendict = {};
-	for l in lengd:
-		l = int(l+0.5)
-		if not lendict.has_key(l): lendict[l] = 0;
-		lendict[l] += 1;
-
-	ldkeys = lendict.keys(); ldkeys.sort();
-	
-	allocr = '';
-	for ldk in ldkeys:
-		allocr += ('%d:%d, ' % (ldk, lendict[ldk]))
-	if mdebug: print allocr
-	logging.info(allocr)
-	#print 'allocr:', allocr
-
-	if len(ldkeys)<1: return [[0], allocr]
-	elif len(ldkeys)<2: return [[ldkeys[0]], allocr]
-	elif len(ldkeys)==2 or len(ldkeys)==3:
-		maxk = ldkeys[0]
-		if maxk==0: maxk = ldkeys[1]
-		for ldk in ldkeys:
-			if lendict[ldk]>=lendict[maxk] and ldk>0: maxk = ldk
-		return [[maxk], allocr]
-		
-
-	len3dict = {}
-	for i in range(len(ldkeys)):
-                curlk = ldkeys[i]
-                if i==0:
-                        if curlk==0: len3dict[curlk] = 0
-                        else:
-                                len3dict[curlk] = lendict[curlk]
-                                if lendict.has_key(curlk+1): len3dict[curlk] += lendict[curlk+1]
-                                else: len3dict[curlk+1] = 0
-                elif i==len(ldkeys)-1:
-                        if curlk-1==0: len3dict[curlk] = lendict[curlk]
-                        else:
-                                len3dict[curlk] = lendict[curlk]
-                                if lendict.has_key(curlk-1): len3dict[curlk] += lendict[curlk-1]
-                                else: len3dict[curlk-1] = 0
-                else:
-                        if curlk-1==0:
-                                len3dict[curlk] = lendict[curlk]
-                                if lendict.has_key(curlk+1): len3dict[curlk] += lendict[curlk+1]
-                                else: len3dict[curlk+1] = 0
-                        else:
-                                len3dict[curlk] = lendict[curlk]
-                                if lendict.has_key(curlk-1): len3dict[curlk] += lendict[curlk-1]
-                                else: len3dict[curlk-1] = 0
-                                if lendict.has_key(curlk+1): len3dict[curlk] += lendict[curlk+1]
-                                else: len3dict[curlk+1] = 0
-	'''
-	for i in range(len(ldkeys)):
-                if i==0:
-	                if ldkeys[i]==0: len3dict[ldkeys[i]] = 0; #lendict[ldkeys[i]]
-                        else: len3dict[ldkeys[i]] = lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
-                elif i==len(ldkeys)-1:
-                        if ldkeys[i-1]==0: len3dict[ldkeys[i]] = lendict[ldkeys[i]]
-                        else: len3dict[ldkeys[i]] = lendict[ldkeys[i]] + lendict[ldkeys[i-1]]
-                else:
-                        if ldkeys[i-1]==0: len3dict[ldkeys[i]] = lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
-                        else: len3dict[ldkeys[i]] = lendict[ldkeys[i-1]] + lendict[ldkeys[i]] + lendict[ldkeys[i+1]]
-	'''
-	
-	len3dict = reviseDictAccordingV(len3dict, minreads)
-	
-	x = []; yo = [];
-	for ldk in ldkeys:
-		x.append(ldk); 
-		yo.append(len3dict[ldk]);
-
-	peak2 = getPeaks2(x, yo, lendict, 0, mdebug, minreads)
-
-	'''
-	lendict = {};
-	for l in lengd:
-		l = int(l+0.5)
-		if not lendict.has_key(l): lendict[l] = 0;
-		lendict[l] += 1;
-
-	lendict = reviseDictAccordingV(lendict)
-	#print lendict
-
-	x = []; yo = []; allocr = ''; 
-	yo = [0]; 
-	ldkeys = lendict.keys(); ldkeys.sort();
-	for ldk in ldkeys:
-		x.append(ldk); yo.append(lendict[ldk]);
-		allocr += ('%d:%d, ' % (ldk, lendict[ldk]))
-
-	#print lendict	
-	logging.info(allocr)
-	
-	if len(ldkeys)<1: return [[0], allocr]
-	elif len(ldkeys)<2: return [[yo[1]], allocr]
-
-	yo.append(0); 
-	
-	pea1k2 = getPeaks2(x, yo[1:-1], lendict, 0, mdebug)	
-	
-	y2a = []
-	for i in range(len(yo)-1): y2a.append(yo[i]+yo[i+1])
-	pea2k2 = getPeaks2(x, y2a, lendict, 1, mdebug)
-
-	pea1knearby = []; 
-	for p1 in pea1k2:
-		for ni in range(p1-2, p1+3):
-			pea1knearby.append(ni);
-		#pea1knearby.append(p1);
-		#p1ind = x.index(p1);
-		#if p1ind-1>0: pea1knearby.append(x[p1ind-1]);
-		#if p1ind+1<len(x): pea1knearby.append(x[p1ind+1]);
-
-	pea2k2new = []
-	for p2 in pea2k2:
-		p2ind = x.index(p2);
-		nb3 = [p2]
-		if p2ind-1>0: nb3.append(x[p2ind-1]);
-		if p2ind+1<len(x): nb3.append(x[p2ind+1]);
-		curmx = nb3[-1]  #p2;
-		for curi in nb3: 
-			if lendict[curi]>lendict[curmx]: curmx = curi
-		pea2k2new.append(curmx)
-
-	notinpea1k = []
-	for p2 in pea2k2new:
-		if p2 not in pea1knearby: notinpea1k.append(p2);
-
-	#print pea1k2, notinpea1k, pea2k2new 
-
-	#if len(pea1k2)==0: pea1k2 = pea2k2new
-	#else:
-	for p2 in notinpea1k:
-			has_insert = False;
-			for i in range(len(pea1k2)):
-				x_index_find = selectFromTwoX(p2, pea1k2[i], lendict, -1)
-				if x_index_find == p2:
-					pea1k2.insert(i, p2); has_insert = True; break;
-				#if lendict[p2] > lendict[pea1k2[i]]:
-				#	 pea1k2.insert(i, p2); has_insert = True; break;
-			if not has_insert: pea1k2.append(p2)
-
-	peak2 = pea1k2
-	'''
-	if mdebug: print peak2
-
-	samevalues = []
-	for curp_ind in range(len(peak2)):
-                curp = peak2[curp_ind]
-                pin = ldkeys.index(curp)
-                nb3 = [curp]
-                if pin-1>0: nb3.append(ldkeys[pin-1])
-                if pin+1<len(ldkeys): nb3.append(ldkeys[pin+1])
-                curmx = nb3[-1]
-                for curi in nb3:
-                        #if lendict[curi]>lendict[curmx]: curmx = curi
-                        #
-                        #revised from the line above to below:
-                        if (lendict[curi]*curi>lendict[curmx]*curmx): curmx = curi
-                        if (lendict[curi]*curi==lendict[curmx]*curmx) and curi>curmx: curmx = curi
-                peak2[curp_ind] = curmx
-
-                samevalues.append([curmx, nb3])
-
-	peak2 = checkSmallSupport(peak2, lendict, minreads)
-
-	if len(peak2)>2: peak2 = peak2[:2]
-
-	if mdebug:
-		for i in range(len(x)): print ('%d=%d;' % (x[i], lendict[x[i]])),
-		print 'mPeak', peak2
-		print '#xF=',
-		for i in range(len(x)): print ('%3d' % x[i]),
-		print ''
-		print 'yF =',
-		for i in range(len(x)): print ('%3d' % lendict[x[i]]),
-		print ''
-
-	ally = [lendict[ldkeys[0]], lendict[ldkeys[-1]]]
-	if len(ldkeys)>1: last2 = -2;
-	else: last2 = -1;
-	for ik in range(ldkeys[1], ldkeys[last2]+1):
-		if (ik in peak2) and len(ldkeys)>1: continue;
-		if lendict.has_key(ik): ally.append(lendict[ik]);
-		else: ally.append(0)
-
-	#mmean = numpy.mean(numpy.array(yo[1:-1]));
-	#mstd = numpy.std(numpy.array(yo[1:-1]));
-	mmean = numpy.mean(numpy.array(ally));
-	mstd = numpy.std(numpy.array(ally));
-	if mdebug:
-		print ('<%.2f,%.2f/%d>' % (mmean, mstd, len(yo[1:-1]))),
-		for pf in peak2:
-			print (' %d=%.6f:%.3f; ' % (pf, 1-norm.cdf((lendict[pf]-mmean)/mstd), (lendict[pf]-mmean)/mstd)), 
-
-	#if len(peak2)<2:
-	#	if lendict[ldkeys[-1]]>minreads and (len(peak2)==0 or (len(peak2)==1 and math.fabs(peak2[0]-ldkeys[-1])>1 and ((not lendict.has_key(ldkeys[-1]-1)) or (lendict.has_key(ldkeys[-1]-1) and lendict[ldkeys[-1]]>lendict[ldkeys[-1]-1]) ) )):
-	#		peak2.append(ldkeys[-1])
-
-	#print 'mtest d3s1359: ', peak2;
-	
-	if len(peak2)==2:  # pvalue = 0.05; ratio = 0.55
-		mstr = 'In Peak:'
-		for pf in peak2:
-			mstr += ('for %d, pvalue=%.6f; ' % (pf, 1-norm.cdf((lendict[pf]-mmean)/mstd)))
-		if not lendict.has_key(peak2[0]): mstr += (' No %d' % peak2[0]);
-		elif not lendict.has_key(peak2[1]): mstr += (' No %d' % peak2[1]);
-		else:  mstr += (' ratio=%.3f(%d/%d)' % (lendict[peak2[1]]/float(lendict[peak2[0]]), lendict[peak2[1]], lendict[peak2[0]]))
-		#logging.info(mstr)
-
-		if mdebug: 
-			print ('%.3f=%d/%d: ' % (lendict[peak2[1]]/float(lendict[peak2[0]]), lendict[peak2[1]], lendict[peak2[0]]) ), 
-		#if lendict[peak2[1]]/float(lendict[peak2[0]])<ratio or 1-norm.cdf((lendict[peak2[1]]-mmean)/mstd)>pvalue:
-		#if 1-norm.cdf((lendict[peak2[1]]-mmean)/mstd)>pvalue:
-		sum3_0 = lendict[peak2[0]]; sum3_1 = lendict[peak2[1]];
-		if lendict.has_key(peak2[0]-1) and lendict.has_key(peak2[1]-1):
-			sum3_0 += lendict[peak2[0]-1]
-			sum3_1 += lendict[peak2[1]-1]
-		if lendict.has_key(peak2[0]+1) and lendict.has_key(peak2[1]+1):
-			sum3_0 += lendict[peak2[0]+1]
-			sum3_1 += lendict[peak2[1]+1]
-		
-		mstr += (' >>> %.3f(%d/%d)' % (sum3_1*peak2[1]/float(sum3_0*peak2[0]), sum3_1*peak2[1], sum3_0*peak2[0]))
-		if mdebug: 
-			print mstr
-			print sum3_1, peak2[1], '=', sum3_1*peak2[1], '/', sum3_0, peak2[0], '=', sum3_0*peak2[0], '===', sum3_1*peak2[1]/float(sum3_0*peak2[0])
-		logging.info(mstr)
-		
-		#print 'mtest d3s1359: ', mstr
-		#print 'mtest d3s1359: ', sum3_1, sum3_0, sum3_1/float(sum3_0), getLargerOverSmallRatio(peak2[0], peak2[1])
-
-		#if sum3_1*peak2[1]/float(sum3_0*peak2[0])<0.1:
- 		#
-		#revised on 13 dec 2016
-		#
-		if sum3_1/float(sum3_0)<getLargerOverSmallRatio(peak2[0], peak2[1]):
-			peak2 = peak2[:1]
-
-	peak2.sort();
-	if len(peak2)>1:
-		#revised on 13 dec 2016
-		#if len3dict[peak2[0]]<len3dict[peak2[1]]*0.6:
-		if len3dict[peak2[0]]<len3dict[peak2[1]]*smalleratio or lendict[peak2[0]]<lendict[peak2[1]]*smalleratio:
-		#if len3dict[peak2[0]]<len3dict[peak2[1]]*smalleratio and lendict[peak2[0]]<lendict[peak2[1]]*smalleratio:
-                        peak2 = [peak2[1]] #, peak2[1]]
-
-
-	#
-	#add on Dec 12, 2016
-	#
-	if len(peak2)>1 and peak2[0]==peak2[1]: peak2=peak2[1:]
-	
-	peaksteststr = 'Peak2='+str(len(peak2))+' info:';
-	for pst in peak2: peaksteststr += ' '+str(pst)
-	logging.info(peaksteststr)
-	
-	if len(peak2)==1:
-		curPeak1 = peak2[0]
-		lenP1dict = {}
-		for px in range(curPeak1-6, curPeak1+7):
-			if lendict.has_key(px):
-				lenP1dict[px] = lendict[px];
-			else: pass #lenP1dict[px] = 0
-		ld1keys = lenP1dict.keys(); ld1keys.sort();
-		forbelowtest = False; #True;
-		if forbelowtest:
-			print 'test', int(minreads/2.0+0.5), 
-			allocr = '';
-			for ldk in ld1keys:
-				allocr += ('%d:%d, ' % (ldk, lenP1dict[ldk]))
-			print allocr; 
-		lenP1dict = reviseDictAccordingV(lenP1dict, int(minreads/2.0+0.5))
-		if forbelowtest:
-			print 'test', int(minreads/2.0+0.5),
-			allocr = '';
-			for ldk in ld1keys:
-				allocr += ('%d:%d, ' % (ldk, lenP1dict[ldk]))
-			print allocr
-		
-		ld1keys = lenP1dict.keys(); ld1keys.sort();
-		x = []; yo = []
-		#x = [ld1keys[0]-1]; yo = [0]; lenP1dict[ld1keys[0]-1] = 0;
-		for ldk in ld1keys:
-			x.append(ldk);
-			yo.append(lenP1dict[ldk]);
-		#x.append(ld1keys[-1]+1); yo.append(0); lenP1dict[ld1keys[-1]+1] = 0
-		peak2 = getPeaks2(x, yo, lenP1dict, 0, mdebug, int(minreads/2.0+0.5), 0)
-		peak2 = checkSmallSupport(peak2, lendict, minreads)
-
-		peaksteststr = 'Peak2 for P1='+str(len(peak2))+' info:';
-		for pst in peak2: peaksteststr += ' '+str(pst)
-		logging.info(peaksteststr)
-	
-		if curPeak1 not in peak2:
-			allocr = '';
-			for ldk in ld1keys:
-				allocr += ('%d:%d, ' % (ldk, lenP1dict[ldk]))
-			
-			p1pstr = ' '
-			for p1p in peak2: p1pstr += str(p1p)+','
-			logging.info("Warning!!!! previously detected peak "+str(curPeak1)+" not in this detection:"+p1pstr[1:-1]+" for "+allocr)
-			
-			newpeak2 = []; 
-			for curdetp in peak2:
-				issame = False;
-				for i in range(len(samevalues)):
-					if (curPeak1 in samevalues[i][1]) and (curdetp in samevalues[i][1]) and (lendict[curPeak1]==lendict[curdetp]):
-						issame = True; newpeak2.append(samevalues[i][0])
-				if not issame: newpeak2.append(curdetp)
-			peak2 = newpeak2
-			p1pstr = ' '
-			for p1p in peak2: p1pstr += str(p1p)+','
-			logging.info("New peaks "+p1pstr[1:-1])
-				
-	if len(peak2)>2: peak2 = peak2[:2]
-	if len(peak2)<2:
-		if lendict[ldkeys[-1]]>minreads and (len(peak2)==0 or (len(peak2)==1 and math.fabs(peak2[0]-ldkeys[-1])>1 and ((not lendict.has_key(ldkeys[-1]-1)) or (lendict.has_key(ldkeys[-1]-1) and lendict[ldkeys[-1]]>lendict[ldkeys[-1]-1]) ) )):
-			peak2.append(ldkeys[-1])
-	
-	peak2.sort();
-	#copy from above
-	if len(peak2)==2:
-		print peak2, lendict #, lenP1dict
-		sum3_0 = lendict[peak2[0]]; sum3_1 = lendict[peak2[1]];
-		if lendict.has_key(peak2[0]-1) and lendict.has_key(peak2[1]-1):
-			sum3_0 += lendict[peak2[0]-1]; sum3_1 += lendict[peak2[1]-1]
-		if lendict.has_key(peak2[0]+1) and lendict.has_key(peak2[1]+1):
-			sum3_0 += lendict[peak2[0]+1]; sum3_1 += lendict[peak2[1]+1]
-		mstr = ('P1 <1=%d, 0=%d> >>> %.3f(%d/%d)' % (peak2[1], peak2[0], sum3_1*peak2[1]/float(sum3_0*peak2[0]), sum3_1*peak2[1], sum3_0*peak2[0]))
-		logging.info(mstr)
-		#if sum3_1*peak2[1]/float(sum3_0*peak2[0])<0.1:
-		#
-		#revised on 13 dec 2016
-		#
-		if sum3_1/float(sum3_0)<getLargerOverSmallRatio(peak2[0], peak2[1]):
-			peak2 = peak2[:1]
-
-	#copy from above
-	peak2.sort();
-	if len(peak2)>1:
-		#if len3dict[peak2[0]]<len3dict[peak2[1]]*0.6 and lendict[peak2[0]]<lendict[peak2[1]]*0.6:
-		if len3dict[peak2[0]]<len3dict[peak2[1]]*smalleratio or lendict[peak2[0]]<lendict[peak2[1]]*smalleratio:
-		#if len3dict[peak2[0]]<len3dict[peak2[1]]*smalleratio and lendict[peak2[0]]<lendict[peak2[1]]*smalleratio:
-			peak2 = [peak2[1]] #, peak2[1]]
-	#
-	#end the revised on 12 dec 2016
-	#
-
-	if mdebug: print 'mPeak', peak2
-
-	peak2 = checkSmallSupport(peak2, lendict, minreads)
-
-	return [peak2, allocr[:-1]];
-
-#def getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, queryrep, match=10, mismatch=-9, gap_in_perf=-2, gap_in_read=-13, gap_before_after = -1):
-def getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, queryrep):
+def getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, queryrep, commonOptions):
 	unewstr = getAlignment.myUnsymmetricPairAlignment(repPat, queryrep[repeatbeforeafter:(len(queryrep)-repeatbeforeafter)], forw_rerv, match, mismatch, gap_in_perf, gap_in_read, gap_before_after);
 	if repeatbeforeafter>0: unewstr =  queryrep[:repeatbeforeafter]+ unewstr + queryrep[(len(queryrep)-repeatbeforeafter):]
-	newstr, pre0, predstats = myHMM.hmmpred(unewstr, repPat, forw_rerv, hmmoptions, repeatbeforeafter)
+
+	unewstr = unewstr.replace('-', '')
+	unewstr = unewstr.replace('N', ''); unewstr = unewstr.replace('n', '');
+
+	if len(unewstr)>1:
+		newstr, pre0, predstats = myHMM.hmmpred(unewstr, repPat, forw_rerv, hmmoptions, commonOptions)
+	else:
+		newstr, pre0, predstats = '', '', ''
 	
 	return [newstr, pre0, predstats]
 	
 
-def getGene(repeatgene, chr, gene_start_end, unique_file_id, analysis_file_id, hgfn): #='hg38.fa'):
+def getGene(repeatgene, chr, gene_start_end, unique_file_id, analysis_file_id, hgfn): #='hg38.fa'
         alignfolder = 'align/'
-	if not os.path.isdir(alignfolder): os.system('mkdir '+alignfolder)
-
-        #unique_file_id = simulation_file_id + analysis_file_id
+        if not os.path.isdir(alignfolder): os.system('mkdir '+alignfolder)
 
         fastafile = alignfolder + repeatgene + unique_file_id +'.fasta'
-        #get_alg_cmd = 'samtools faidx ./hg38/Homo_sapiens_assembly38.fasta '+ chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+fastafile
 
         get_alg_cmd = 'samtools faidx '+hg_reference_and_index+'/'+hgfn+' '+ chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+fastafile
         print get_alg_cmd
@@ -1187,23 +616,16 @@ def getGene(repeatgene, chr, gene_start_end, unique_file_id, analysis_file_id, h
             if li[-1]=='\n': li = li[:-1]
             mfadata = mfadata + li
 
-	os.system('rm '+fastafile)
+        os.system('rm '+fastafile)
 
-	return mfadata.upper()
+        return mfadata.upper()
 
-def getHMMOptions(repeatbeforeafter, repPat, forw_rerv):
-        bp = myHMM.getBasePair()
-        if forw_rerv[0]=='-': repPat = myHMM.getComplementary3(bp, repPat)
-        
+def getHMMOptions(repeatbeforeafter, repPat, forw_rerv, commonOptions):
         hmmoptions = []
-        if repeatbeforeafter>0:
-                hmmoptions = myHMM.getTransition_start_emission_prob(repPat)
-        else:
-                hmmoptions = myHMM.getTransition_start_emission_prob_without0(repPat)
+        hmmoptions = myHMM.getTransition_start_emission_prob(repPat, commonOptions)
         return hmmoptions
 
 def getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions):
-#def getRepeatForGivenGene2(chr, repeatgene, gene_start_end, repeat_orig_start_end, bamfile, repPat, forw_rerv, isAlign, isupdown, isExtend, unique_file_id, analysis_file_id):
         chr = moreOptions['chr']
         repeatgene = moreOptions['repeatgene']
         gene_start_end = moreOptions['gene_start_end']
@@ -1218,13 +640,16 @@ def getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions):
         isRemInDel = commonOptions['isRemInDel']
         isupdown = commonOptions['isupdown']
         isExtend = commonOptions['isExtend']
-        SeqDepth = commonOptions['SeqDepth']
+        MinSup = commonOptions['MinSup']
+
+        len_repPat = printHMMmatrix.get_len_repPat(repPat, commonOptions)
+        logging.info("len_repPat="+str(len_repPat))
 
         #print repeatgene,
         alignfolder = 'align/'
         if not os.path.isdir(alignfolder): os.system('mkdir '+alignfolder)
 
-        ref_repeat = (repeat_orig_start_end[1]-repeat_orig_start_end[0]+1)/float(len(repPat)) #3.0
+        ref_repeat = (repeat_orig_start_end[1]-repeat_orig_start_end[0]+1)/float(len_repPat) #3.0
         alignfile = alignfolder + repeatgene + unique_file_id +'.alignment.txt'
         get_alg_cmd = 'samtools view '+bamfile+' ' + chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+alignfile
         logging.info('Running '+get_alg_cmd)
@@ -1246,38 +671,22 @@ def getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions):
         mfadata = getGene(repeatgene, chr, gene_start_end, unique_file_id, analysis_file_id, commonOptions['hgfile'])
 
         covermorebeforeafter = 30
-        repregion_len_threhold = len(repPat); #3;
+        repregion_len_threhold = len_repPat; #3;
         repeatbeforeafter = isupdown - isExtend
         repeat_start_end = [repeat_orig_start_end[0], repeat_orig_start_end[1]]
-        #repeat_start_end[0] -= isExtend; repeat_start_end[1] += isExtend;
-        #if isExtend>0 and repeat_start_end[0]<1: repeat_start_end[0]=1
 
-        simplebeforeafter = len(repPat); #3;
+        simplebeforeafter = len_repPat; #3;
 
-        check = False; #True;
         wrongalign = 0;
-        if check: repeat_beforeafter = [];
-
-        hmmoptions = getHMMOptions(repeatbeforeafter, repPat, forw_rerv)
+        hmmoptions = getHMMOptions(repeatbeforeafter, repPat, forw_rerv, commonOptions)
 
         repeats = [];
         for line in aligndata:
-                if check:
-                   beforematch = {}; aftermatch = {}; inmatch = 0; allmatch = 0; neighbeforeafter = 200;
-                   beforematch[50] = 0; aftermatch[50] = 0
-                   beforematch[100] = 0; aftermatch[100] = 0
-                   beforematch[150] = 0; aftermatch[150] = 0
-                   beforematch[200] = 0; aftermatch[200] = 0
-                   beforematch[250] = 0; aftermatch[250] = 0
-                   beforematch[300] = 0; aftermatch[300] = 0
-
                 lsp = line.split('\t')
                 cchr = lsp[2]
                 pos = int(lsp[3])
                 aligninfo = lsp[5]
                 aainfo = lsp[9]
-                #qualifyinfo = lsp[12]
-                #print 'qualifyinfo', qualifyinfo[:100]
 
                 if pos > repeat_start_end[0] - covermorebeforeafter:
                         wrongalign += 1;
@@ -1297,49 +706,17 @@ def getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions):
                 queryind = 0;
                 queryrep = '';
                 longer = False;
-                if check:
-                   totalbefore = 0; totalafter = 0;  matchinfo = '';
-                   neighmatch = 0; neighref=''; neightest = ''
 
                 for n1ind in range(len(numinfo)):
                         n1 = int(numinfo[n1ind])
                         mdi = mdiinfo[n1ind];
 
                         for n1i in range(n1):
-                                if check:
-                                   if totalbefore<repeat_start_end[0]-pos:
-                                      totalbefore=repeat_start_end[0]-pos;
-                                   if totalafter<pos-repeat_start_end[1]:
-                                      totalafter=pos-repeat_start_end[1]
-
                                 qrepadd = False;
                                 if mdi=='M':
-                                        if check:
-                                           faind = pos - (repeat_start_end[0] -  neighbeforeafter)
-                                           if (faind>=0 and pos-repeat_start_end[0]<0) or \
-                                              (pos-repeat_start_end[1]>=0 and pos-(repeat_start_end[1]+neighbeforeafter)<=0):
-                                                if mfadata[faind] == aainfo[queryind]: neighmatch += 1;
-                                                neighref = neighref + mfadata[faind]
-                                                neightest = neightest + aainfo[queryind]
-
                                         pos = pos + 1;
                                         queryind = queryind + 1;
                                         qrepadd = True;
-
-                                        if check:
-                                           allmatch += 1;
-                                           if pos-1 < repeat_start_end[0]:
-                                                bef = repeat_start_end[0] - pos + 1
-                                                bmkeys = beforematch.keys(); bmkeys.sort();
-                                                for bmk in bmkeys:
-                                                    if bmk>=bef: beforematch[bmk] += 1;
-                                           elif pos-1 > repeat_start_end[1]:
-                                                aft = pos-1 - repeat_start_end[1]
-                                                afkeys = aftermatch.keys(); afkeys.sort();
-                                                for afk in afkeys:
-                                                    if afk >= aft: aftermatch[afk] += 1;
-                                           else: inmatch += 1;
-
                                 elif mdi =='I':
                                         qrepadd = True;
                                         queryind = queryind + 1;
@@ -1355,79 +732,31 @@ def getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions):
                                 else:
                                         logging.warning('Warning unknow CIGAR element ' + str(n1) + ' ' + mdi)
                                 if qrepadd:
-                                        #if pos-1 >= repeat_start_end[0]-repeatbeforeafter and pos-1 <= repeat_start_end[1]+repeatbeforeafter:
                                         if pos-1 >= repeat_start_end[0]-simplebeforeafter and pos-1 <= repeat_start_end[1]+simplebeforeafter:
                                                 queryrep = queryrep + aainfo[queryind-1]
-                                if check and pos-1 >= repeat_start_end[0]-repeatbeforeafter and pos-1 <= repeat_start_end[1]+repeatbeforeafter: matchinfo += mdi
-                        #if pos-1 > repeat_start_end[1] + covermorebeforeafter: longer = True;
                         if pos-1 > repeat_start_end[1]+simplebeforeafter: longer = True;
-
-                if check and len(queryrep)>=repregion_len_threhold:
-                   bmkeys = beforematch.keys(); bmkeys.sort(); befstr = '';
-                   for bmk in bmkeys:
-                       befstr += (str(bmk)+'='+str(beforematch[bmk])+';');
-                   afkeys = aftermatch.keys(); afkeys.sort(); aftstr = '';
-                   for afk in afkeys:
-                       aftstr += (str(afk)+'='+str(aftermatch[afk])+';');
-
-                   print repeatgene, repeat_start_end, len(queryrep), queryrep, gene_start_end
-
-                   newstr = '';
-                   print repPat, ':', 'MI', matchinfo
-                   if len(queryrep)<1000:
-                        newstr, pre0, predstats = getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, queryrep)
-
-                        #unewstr = getAlignment.myUnsymmetricPairAlignment(repPat, queryrep[repeatbeforeafter:(len(queryrep)-repeatbeforeafter)], forw_rerv);
-                        #if repeatbeforeafter>0: unewstr =  queryrep[:repeatbeforeafter]+ unewstr + queryrep[(len(queryrep)-repeatbeforeafter):]
-                        #newstr, pre0, predstats = myHMM.hmmpred(unewstr, repPat, forw_rerv, repeatbeforeafter)
-
-                        #newstr, pre0, predstats = myHMM.hmmpred(queryrep, repPat, forw_rerv, repeatbeforeafter)
-                   print ('Gene %s(%s:%d-%d) Match for repeat(%s%s):INmatch=%d/%d(%d) test_rep=%d; beforematch:%s(%d) aftermatch:%s(%d)' % (repeatgene, chr, repeat_start_end[0], repeat_start_end[1], repPat, forw_rerv[0], inmatch, len(queryrep), neighmatch, len(newstr)/float(len(repPat)), befstr, totalbefore, aftstr, totalafter)), longer
-                   #print neighref;
-                   #print neightest;
-
-                   if longer: repeat_beforeafter.append([len(newstr)/float(len(repPat))-simplebeforeafter*2/len(repPat), totalbefore, totalafter, neighmatch])
 
                 if len(queryrep)>=repregion_len_threhold: repeats.append([longer, queryrep, lsp[0]])
 
         print len(repeats), repeat_start_end, repeat_start_end[1]-repeat_start_end[0],gene_start_end, gene_start_end[1]-gene_start_end[0] 
 
-        if check:
-           for rbf in repeat_beforeafter:
-                print ('%6d %6d %6d %6d' % (rbf[0], rbf[1], rbf[2], rbf[3]))
-
         rptrue = []; rpfalse = []; orignial = [];
         for currep in repeats:
-                #print chr, repeatgene, repPat, len(currep[1]),
                 newstr = currep[1]
 
                 pre0 = 0; predstats=''
-                if len(newstr)<1000:
-                        #newstr = getAlignment.correctSeq(repPat, currep[1], forw_rerv);
-                        if isRemInDel>0: #isAlign>0:
-                                pass #newstr, pre0, predstats = getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, currep[1])
-
-                                #unewstr = getAlignment.myUnsymmetricPairAlignment(repPat, currep[1][repeatbeforeafter:(len(currep[1])-repeatbeforeafter)], forw_rerv);
-                                #if repeatbeforeafter>0: unewstr =  currep[1][:repeatbeforeafter]+ unewstr + currep[1][(len(currep[1])-repeatbeforeafter):]
-                                #
-                                ##newstr, pre0, predstats = myHMM.hmmpred(currep[1], repPat, forw_rerv, repeatbeforeafter)
-                                #newstr, pre0, predstats = myHMM.hmmpred(unewstr, repPat, forw_rerv, repeatbeforeafter)
-
-
+                if len(newstr)<commonOptions['MaxRep']*len_repPat:
+                        if isRemInDel>0: 
+                                pass 
                         else:
-                                pass #newstr, pre0, predstats = myHMM.hmmpred(newstr, repPat, forw_rerv, repeatbeforeafter)
-                else: logging.warning('The sequence is too long: '+str(len(newstr))+' '+chr+' '+repeatgene+' '+repPat+' '+str(currep[0])+' reads name:'+currep[2])
+                                pass 
+                else: logging.warning('The sequence is too long: '+str(len(newstr))+' '+chr+' '+repeatgene+' '+repPat+' '+str(currep[0])+' reads name:'+currep[2]+" "+str(commonOptions['MaxRep'])+" "+str(commonOptions['MaxRep']*len_repPat))
                 orignial.append([currep[1], pre0, predstats]);
                 currep[1] = newstr
-                #if len(currep[1])==0: continue;
-                if currep[0]: #repPat, forw_rerv
-                        #rptrue.append(len(newstr)/3.0-repeatbeforeafter/3);
-                        #if isHMM: rptrue.append(len(currep[1])/3.0);
-                        rptrue.append(len(currep[1])/float(len(repPat))-simplebeforeafter*2/len(repPat));
+                if currep[0]: 
+                        rptrue.append(len(currep[1])/float(len_repPat)-simplebeforeafter*2/len_repPat);
                 else:
-                        #rpfalse.append(len(newstr)/3.0-repeatbeforeafter/3);
-                        #if isHMM: rpfalse.append(len(currep[1])/3.0);
-                        rpfalse.append(len(currep[1])/float(len(repPat))-simplebeforeafter*2/len(repPat));
+                        rpfalse.append(len(currep[1])/float(len_repPat)-simplebeforeafter*2/len_repPat);
 
         rptrue.sort(); rpfalse.sort()
         trstr = 'true ' + str(len(rptrue)) + ' [';
@@ -1436,8 +765,7 @@ def getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions):
         trstr = trstr[:-1] + ']'
         logging.debug(trstr)
 
-        #print repeatgene, repPat, rptrue
-        p2, allocr = get2Peaks(rptrue, SeqDepth)
+        p2, allocr = get2Peaks(rptrue, MinSup, commonoptions=commonOptions)
 
         if len(rpfalse)>0:
                 flstr = 'fals ' + str(len(rpfalse)) + ' ['
@@ -1448,26 +776,9 @@ def getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions):
 
         logging.info('ref_repeat ' + ('%.0f' % ref_repeat) +'\t'+repPat+'\t'+forw_rerv);
 
-        '''
-        for currep_ind in range(len(repeats)):
-                currep = repeats[currep_ind]
-
-                aaprinindex = -1;
-                if not (currep[0]): aaprinindex = 300
-
-                logging.debug('\t'+str(currep[0]) + ' o:' + str(len(orignial[currep_ind][0]))  +'\t'+ orignial[currep_ind][0][:aaprinindex]);
-                prestr = '';
-                for i in range(orignial[currep_ind][1]): prestr += ' ';
-                #logging.debug('\t'+str(currep[0]) + ':' + str(len(orignial[currep_ind][0]))  +'\t'+prestr+ orignial[currep_ind][2]);
-                #logging.debug('\t'+str(currep[0]) + ':' + str(len(orignial[currep_ind][0]))  +'\t'+orignial[currep_ind][2]);
-                logging.debug('\t'+str(currep[0]) + ' p:' + str(len(currep[1])) +'\t' + prestr+ (currep[1][:aaprinindex]))
-        '''
-        #p2, allocr = get2Peaks(rptrue)
-
         return [repeatgene, ref_repeat, p2, allocr, len(rptrue), len(rpfalse)+wrongalign]
 
 def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
-#def getRepeatForGivenGene(chr, repeatgene, gene_start_end, repeat_orig_start_end, bamfile, repPat, forw_rerv, isAlign, isupdown, isExtend, unique_file_id, analysis_file_id):
         chr = moreOptions['chr']
         repeatgene = moreOptions['repeatgene']
         gene_start_end = moreOptions['gene_start_end']
@@ -1482,16 +793,16 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
         isRemInDel = commonOptions['isRemInDel']
         isupdown = commonOptions['isupdown']
         isExtend = commonOptions['isExtend']
-        SeqDepth = commonOptions['SeqDepth']
+        MinSup = commonOptions['MinSup']
 
+        len_repPat = printHMMmatrix.get_len_repPat(repPat, commonOptions)
+        logging.info("len_repPat="+str(len_repPat))
         #print repeatgene,
         alignfolder = 'align/'
         if not os.path.isdir(alignfolder): os.system('mkdir '+alignfolder)
 
-        ref_repeat = (repeat_orig_start_end[1]-repeat_orig_start_end[0]+1)/float(len(repPat)) #3.0
-        #repeat_start_end[1] += 1;
+        ref_repeat = (repeat_orig_start_end[1]-repeat_orig_start_end[0]+1)/float(len_repPat) #3.0
 
-        ##unique_file_id = simulation_file_id + analysis_file_id
         alignfile = alignfolder + repeatgene + unique_file_id +'.alignment.txt'
         get_alg_cmd = 'samtools view '+bamfile+' ' + chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+alignfile
         logging.info('Running '+get_alg_cmd)
@@ -1512,50 +823,24 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
 
         mfadata = getGene(repeatgene, chr, gene_start_end, unique_file_id, analysis_file_id, commonOptions['hgfile'])
 
-        #fastafile = alignfolder + repeatgene+'.1.fasta'
-        #get_alg_cmd = 'samtools faidx ./hg38/Homo_sapiens_assembly38.fasta '+ chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+fastafile
-        #os.system(get_alg_cmd)
-        #if not os.path.isfile(fastafile):
-        #        logging.error('Cannot produce '+fastafile+' for '+repeatgene)
-        #        sys.exit(1)
-        #fastadata = myReadTxtFile(fastafile)
-        #mfadata = ''
-        #for li in fastadata:
-        #    if li[0]=='>': continue;
-        #    if li[-1]=='\n': li = li[:-1]
-        #    mfadata = mfadata + li
-
         covermorebeforeafter = 30
-        repregion_len_threhold = len(repPat) #3;
+        repregion_len_threhold = len_repPat #3;
         repeatbeforeafter = isupdown - isExtend
         repeat_start_end = [repeat_orig_start_end[0], repeat_orig_start_end[1]]
         repeat_start_end[0] -= isExtend; repeat_start_end[1] += isExtend;
         if isExtend>0 and repeat_start_end[0]<1: repeat_start_end[0]=1
 
-        check = False; #True;
         wrongalign = 0;
-        if check: repeat_beforeafter = [];
 
-        hmmoptions = getHMMOptions(repeatbeforeafter, repPat, forw_rerv)
+        hmmoptions = getHMMOptions(repeatbeforeafter, repPat, forw_rerv, commonOptions)
 
         repeats = [];
         for line in aligndata:
-                if check:
-                   beforematch = {}; aftermatch = {}; inmatch = 0; allmatch = 0; neighbeforeafter = 200;
-                   beforematch[50] = 0; aftermatch[50] = 0
-                   beforematch[100] = 0; aftermatch[100] = 0
-                   beforematch[150] = 0; aftermatch[150] = 0
-                   beforematch[200] = 0; aftermatch[200] = 0
-                   beforematch[250] = 0; aftermatch[250] = 0
-                   beforematch[300] = 0; aftermatch[300] = 0
-
                 lsp = line.split('\t')
                 cchr = lsp[2]
                 pos = int(lsp[3])
                 aligninfo = lsp[5]
                 aainfo = lsp[9]
-                #qualifyinfo = lsp[12]
-                #print 'qualifyinfo', qualifyinfo[:100]
 
                 if pos > repeat_start_end[0] - covermorebeforeafter:
                         wrongalign += 1;
@@ -1572,52 +857,20 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
                 if not len(numinfo)==len(mdiinfo):
                         logging.error('Num is equal to mid' +str(len(numinfo)) + ' '+ str(len(mdiinfo))); continue;
 
-                queryind = 0;
+                queryind = 0; hpadd = 0;
                 queryrep = '';
                 longer = False;
-                if check:
-                   totalbefore = 0; totalafter = 0;  matchinfo = '';
-                   neighmatch = 0; neighref=''; neightest = ''
 
                 for n1ind in range(len(numinfo)):
                         n1 = int(numinfo[n1ind])
                         mdi = mdiinfo[n1ind];
 
                         for n1i in range(n1):
-                                if check:
-                                   if totalbefore<repeat_start_end[0]-pos:
-                                      totalbefore=repeat_start_end[0]-pos;
-                                   if totalafter<pos-repeat_start_end[1]:
-                                      totalafter=pos-repeat_start_end[1]
-
                                 qrepadd = False;
                                 if mdi=='M':
-                                        if check:
-                                           faind = pos - (repeat_start_end[0] -  neighbeforeafter)
-                                           if (faind>=0 and pos-repeat_start_end[0]<0) or \
-                                              (pos-repeat_start_end[1]>=0 and pos-(repeat_start_end[1]+neighbeforeafter)<=0):
-                                                if mfadata[faind] == aainfo[queryind]: neighmatch += 1;
-                                                neighref = neighref + mfadata[faind]
-                                                neightest = neightest + aainfo[queryind]
-
                                         pos = pos + 1;
                                         queryind = queryind + 1;
                                         qrepadd = True;
-
-                                        if check:
-                                           allmatch += 1;
-                                           if pos-1 < repeat_start_end[0]:
-                                                bef = repeat_start_end[0] - pos + 1
-                                                bmkeys = beforematch.keys(); bmkeys.sort();
-                                                for bmk in bmkeys:
-                                                    if bmk>=bef: beforematch[bmk] += 1;
-                                           elif pos-1 > repeat_start_end[1]:
-                                                aft = pos-1 - repeat_start_end[1]
-                                                afkeys = aftermatch.keys(); afkeys.sort();
-                                                for afk in afkeys:
-                                                    if afk >= aft: aftermatch[afk] += 1;
-                                           else: inmatch += 1;
-
                                 elif mdi =='I':
                                         qrepadd = True;
                                         queryind = queryind + 1;
@@ -1627,81 +880,32 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
                                         queryind = queryind + 1;
                                         qrepadd = True;
                                 elif mdi == 'H':
-                                        pass;
+                                        if qrepadd: hpadd += 1; #pass;
                                 elif mdi == 'P':
-                                        pass;
+                                        if qrepadd: hpadd += 1; #pass;
                                 else:
                                         logging.warning('Warning unknow CIGAR element ' + str(n1) + ' ' + mdi)
                                 if qrepadd:
                                         if pos-1 >= repeat_start_end[0]-repeatbeforeafter and pos-1 <= repeat_start_end[1]+repeatbeforeafter:
                                                 queryrep = queryrep + aainfo[queryind-1]
-                                if check and pos-1 >= repeat_start_end[0]-repeatbeforeafter and pos-1 <= repeat_start_end[1]+repeatbeforeafter: matchinfo += mdi
                         if pos-1 > repeat_start_end[1] + covermorebeforeafter: longer = True;
-
-                if check and len(queryrep)>=repregion_len_threhold:
-                   bmkeys = beforematch.keys(); bmkeys.sort(); befstr = '';
-                   for bmk in bmkeys:
-                       befstr += (str(bmk)+'='+str(beforematch[bmk])+';');
-                   afkeys = aftermatch.keys(); afkeys.sort(); aftstr = '';
-                   for afk in afkeys:
-                       aftstr += (str(afk)+'='+str(aftermatch[afk])+';');
-
-                   print repeatgene, repeat_start_end, len(queryrep), queryrep, gene_start_end
-
-                   newstr = '';
-                   print repPat, ':', 'MI', matchinfo
-                   if len(queryrep)<1000:
-                        newstr, pre0, predstats = getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, queryrep)
-
-                        #unewstr = getAlignment.myUnsymmetricPairAlignment(repPat, queryrep[repeatbeforeafter:(len(queryrep)-repeatbeforeafter)], forw_rerv);
-                        #if repeatbeforeafter>0: unewstr =  queryrep[:repeatbeforeafter]+ unewstr + queryrep[(len(queryrep)-repeatbeforeafter):]
-                        #newstr, pre0, predstats = myHMM.hmmpred(unewstr, repPat, forw_rerv, repeatbeforeafter)
-
-                        #newstr, pre0, predstats = myHMM.hmmpred(queryrep, repPat, forw_rerv, repeatbeforeafter)
-                   print ('Gene %s(%s:%d-%d) Match for repeat(%s%s):INmatch=%d/%d(%d) test_rep=%d; beforematch:%s(%d) aftermatch:%s(%d)' % (repeatgene, chr, repeat_start_end[0], repeat_start_end[1], repPat, forw_rerv[0], inmatch, len(queryrep), neighmatch, len(newstr)/float(len(repPat)), befstr, totalbefore, aftstr, totalafter)), longer
-                   #print neighref;
-                   #print neightest;
-
-                   if longer: repeat_beforeafter.append([len(newstr)/float(len(repPat)), totalbefore, totalafter, neighmatch])
 
                 if len(queryrep)>=repregion_len_threhold: repeats.append([longer, queryrep, lsp[0]])
 
-        if check:
-           for rbf in repeat_beforeafter:
-                print ('%6d %6d %6d %6d' % (rbf[0], rbf[1], rbf[2], rbf[3]))
-
         rptrue = []; rpfalse = []; orignial = [];
         for currep in repeats:
-                #print chr, repeatgene, repPat, len(currep[1]),
                 newstr = currep[1]
 
                 pre0 = 0; predstats=''
-                if len(newstr)<1000:
-                        #newstr = getAlignment.correctSeq(repPat, currep[1], forw_rerv);
-                        if isRemInDel>0: #isAlign>0:
-                                newstr, pre0, predstats = getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, currep[1])
-
-                                #unewstr = getAlignment.myUnsymmetricPairAlignment(repPat, currep[1][repeatbeforeafter:(len(currep[1])-repeatbeforeafter)], forw_rerv);
-                                #if repeatbeforeafter>0: unewstr =  currep[1][:repeatbeforeafter]+ unewstr + currep[1][(len(currep[1])-repeatbeforeafter):]
-                                #
-                                ##newstr, pre0, predstats = myHMM.hmmpred(currep[1], repPat, forw_rerv, repeatbeforeafter)
-                                #newstr, pre0, predstats = myHMM.hmmpred(unewstr, repPat, forw_rerv, repeatbeforeafter)
-
-
-                        else:
-                                newstr, pre0, predstats = myHMM.hmmpred(newstr, repPat, forw_rerv, hmmoptions, repeatbeforeafter)
-                else: logging.warning('The sequence is too long: '+str(len(newstr))+' '+chr+' '+repeatgene+' '+repPat+' '+str(currep[0])+' reads name:'+currep[2])
+                if len(newstr)<commonOptions['MaxRep']*len_repPat:
+                      newstr, pre0, predstats = getUnsymAlignAndHMM(repPat, forw_rerv, repeatbeforeafter, hmmoptions, currep[1], commonOptions)
+                else: logging.warning('The sequence is too long: '+str(len(newstr))+' '+chr+' '+repeatgene+' '+repPat+' '+str(currep[0])+' reads name:'+currep[2]+" "+str(commonOptions['MaxRep'])+" "+str(commonOptions['MaxRep']*len_repPat))
                 orignial.append([currep[1], pre0, predstats]);
                 currep[1] = newstr
-                #if len(currep[1])==0: continue;
-                if currep[0]: #repPat, forw_rerv
-                        #rptrue.append(len(newstr)/3.0-repeatbeforeafter/3);
-                        #if isHMM: rptrue.append(len(currep[1])/3.0);
-                        rptrue.append(len(currep[1])/float(len(repPat))) #3.0);
+                if currep[0]: 
+                        rptrue.append(len(currep[1])/float(len_repPat)) #3.0);
                 else:
-                        #rpfalse.append(len(newstr)/3.0-repeatbeforeafter/3);
-                        #if isHMM: rpfalse.append(len(currep[1])/3.0);
-                        rpfalse.append(len(currep[1])/float(len(repPat))) #3.0);
+                        rpfalse.append(len(currep[1])/float(len_repPat)) #3.0);
 
         rptrue.sort(); rpfalse.sort()
         trstr = 'true ' + str(len(rptrue)) + ' [';
@@ -1710,8 +914,7 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
         trstr = trstr[:-1] + ']'
         logging.debug(trstr)
 
-        #print repeatgene, repPat, rptrue
-        p2, allocr = get2Peaks(rptrue, SeqDepth)
+        p2, allocr = get2Peaks(rptrue, MinSup, commonoptions=commonOptions)
 
         if len(rpfalse)>0:
                 flstr = 'fals ' + str(len(rpfalse)) + ' ['
@@ -1731,16 +934,27 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
                 logging.debug('\t'+str(currep[0]) + ' o:' + str(len(orignial[currep_ind][0]))  +'\t'+ orignial[currep_ind][0][:aaprinindex]);
                 prestr = '';
                 for i in range(orignial[currep_ind][1]): prestr += ' ';
-                #logging.debug('\t'+str(currep[0]) + ':' + str(len(orignial[currep_ind][0]))  +'\t'+prestr+ orignial[currep_ind][2]);
-                #logging.debug('\t'+str(currep[0]) + ':' + str(len(orignial[currep_ind][0]))  +'\t'+orignial[currep_ind][2]);
                 logging.debug('\t'+str(currep[0]) + ' p:' + str(len(currep[1])) +'\t' + prestr+ (currep[1][:aaprinindex]))
-
-        #p2, allocr = get2Peaks(rptrue)
 
         return [repeatgene, ref_repeat, p2, allocr, len(rptrue), len(rpfalse)+wrongalign]
 
+def fixsize2(p2, ind):
+	if len(p2[ind])>1: pass
+	elif len(p2[ind])==1:
+		p2[ind].append(p2[ind][0])
+	else: 
+		p2[ind].append(0); 
+		p2[ind].append(0);
+
+def addSumForAGene(p2, myret, myretdetail, mstr, ind=2):
+	fixsize2(p2, ind)
+	myretdetail[mstr] = (('%10s' % mstr)+' '+str(p2));
+	print mstr, p2
+	logging.info(mstr+' '+str(p2)+'\n')
+	sys.stdout.flush()
+	myret[mstr] = p2[ind]
+ 
 def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
-#def getRepeatForKnownGene(gLoc, repeatgene, bamfile, isAlign, isupdown, isExtend, unique_file_id, analysis_file_id):
         if moreOptions.has_key('repeatgene'): 
            repeatgene = moreOptions['repeatgene'].lower(); #repeatgene.lower()
         else: 
@@ -1748,12 +962,38 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
            moreOptions['repeatgene'] = repeatgene
         
         gLoc = commonOptions['gLoc'];
-        mgloc = get_gLoc(repeatgene, gLoc);
-        print mgloc
+        repeatgene = commonOptions['repeatgene'].lower()
+        repeatgene = moreOptions['repeatgene'].lower()
+        newinfo = commonOptions['specifiedGeneInfo']
+
+        infospt = newinfo.split('/')
+        repeatgene = repeatgene.lower()
+        if gLoc.has_key(repeatgene):
+           logging.info(repeatgene)
+           mgloc = gLoc[repeatgene]
+        else: mgloc = ['','','', '','', '','','']
+
+        if len(infospt)<len(mgloc):
+           logging.error("Error: wrong input for the gene of interes: %s whose length is %d less than the expected length %d" % (newinfo, len(infospt), len(mgloc)));
+           sys.exit(101);
+
+        for i in range(len(mgloc)):
+           curnew = string.strip(infospt[i]);
+           if not curnew=='':
+              mgloc[i] = curnew
+        errorstr = ''
+        for i in range(len(mgloc)):
+           if string.strip(mgloc[i])=='' and i<len(mgloc)-1:
+              errorstr += ('Error no information for %d\n' % i)
+        if not errorstr=='':
+           logging.error(errorstr);
+           print errorstr, mgloc, repeatgene
+           sys.exit(102);
+
+        print 'mgloc', mgloc
 
         gene_start_end = [int(mgloc[1]), int(mgloc[2])]
         repeat_start_end = [int(mgloc[3]), int(mgloc[4])]
-        #      getRepeatForGivenGene(chr, repeatgene, gene_start_end, repeat_orig_start_end, bamfile, repPat, forw_rerv, isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
         
         moreOptions['chr'] = mgloc[0]
         moreOptions['gene_start_end'] = gene_start_end
@@ -1761,17 +1001,44 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
         moreOptions['repPat'] = mgloc[5]
         moreOptions['forw_rerv']= mgloc[6]
         moreOptions['mgloc'] = mgloc
+        
+        myHMM.produce_for_repPat(commonOptions, moreOptions)
 
         if not specifiedOptions["SepbamfileTemp"]==None: 
            specifiedOptions["bamfile"] = (specifiedOptions["SepbamfileTemp"] % moreOptions['chr'][3:])
 
-        res = getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions) #mgloc[0], repeatgene, gene_start_end, repeat_start_end, bamfile, mgloc[5], mgloc[6],isAlign, isupdown, isExtend, unique_file_id, analysis_file_id)
-        res.append(mgloc[7])
-        return res;
+        myret = {}; myretdetail = {}
+        if testall:
+           start_time = time.time();
+           print 'p2bamself start'
+           p2bamself = getRepeatForGivenGene2(commonOptions, specifiedOptions, moreOptions)
+           memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
+           addSumForAGene(p2bamself, myret, myretdetail, 'p2bamself', 2)
+           end_time = time.time();
+           print ('p2bamself end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+        if (commonOptions['SplitAndReAlign'] in [0,2]) or testall:
+           start_time = time.time();
+           print 'p2bamhmm start'
+           p2bamhmm = getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions) 
+           memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
+           addSumForAGene(p2bamhmm, myret, myretdetail, 'p2bamhmm', 2)
+           end_time = time.time();
+           print ('p2bamhmm end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+        if (commonOptions['SplitAndReAlign'] in [1,2]) or testall:
+           start_time = time.time();
+           print 'p2sp start'
+           moreOptions['fafqfile'] = specifiedOptions["bamfile"]
+           moreOptions['fafqtype'] = 'bam'
+           p2sp = myRepeatReAlignment.getRepeatCounts(commonOptions, specifiedOptions, moreOptions)
+           memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
+           addSumForAGene(p2sp, myret, myretdetail, 'p2sp', 2)
+           end_time = time.time();
+           print ('p2sp end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+
+        return [myret, myretdetail];
 
 def getRepeat(commonOptions, specifiedOptions):
-#def getRepeat(gLoc, bamfile, isAlign, isupdown, isExtend, unique_file_id, analysis_file_id):
-        summary = []
+        summary = {};
 
         gLoc = commonOptions['gLoc']
         moreOptions = {}
@@ -1779,7 +1046,10 @@ def getRepeat(commonOptions, specifiedOptions):
         glkeys = gLoc.keys(); glkeys.sort()
         for glk in glkeys:
                 moreOptions['repeatgene'] = glk
-                summary.append(getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions)); #getRepeatForKnownGene(gLoc, glk, bamfile, isAlign, isupdown, isExtend, unique_file_id, analysis_file_id));
+                #print 'commonOptions', commonOptions
+                #print 'specifiedOptions', specifiedOptions
+                #print 'moreOptions', moreOptions
+                summary[glk] = getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions)
 
         return summary;
 

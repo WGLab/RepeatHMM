@@ -6,137 +6,142 @@ import string
 
 import numpy as np;
 
-import getTransition_start_emission_prob_without0
 import printHMMmatrix
-
-import getTransition_start_emission_prob_2
-import getTransition_start_emission_prob_3
-import getTransition_start_emission_prob_4
-import getTransition_start_emission_prob_5
-import getTransition_start_emission_prob_6
-
-import getTransition_start_emission_prob_x_without0
 
 from myheader import *
 
-def getTransition_start_emission_prob_x(repPat, forprint=False):
-	if len(repPat)<1: return None
+def getTransition_start_emission_prob_x(repPat, commonOptions, forprint=False):
+	repPat = string.strip(repPat);
+	if (commonOptions['CompRep']=='0' and len(repPat)<1) and (len(commonOptions['CompRep'])<1 and (not commonOptions['CompRep']=='0')): return None
+
+	len_repPat = printHMMmatrix.get_len_repPat(repPat, commonOptions)
+	if commonOptions['CompRep']=='0': CompRepPat = printHMMmatrix.getCompRepFromSimple(repPat)
+	else: CompRepPat = commonOptions['CompRep']
 
 	avgsub = 0.0005
-	avgsub = hmm_random_rep_transit/len(repPat)
-	repPat = string.strip(repPat);
+	avgsub = hmm_random_rep_transit/len_repPat
+	avgsub = 1e-9
 	
 	typeOfRepEle = ['', 'I', 'D'];
 	repEle = [];
-	for rp_ind in range(len(repPat)):
+	for rp_ind in range(len_repPat):
 		repEle.append(''.join(['r', str(rp_ind+1)]));
 	states = ['N'];
 	for typRE in typeOfRepEle:
 		for rp in repEle:
 			states.append(''.join([typRE, rp]));
 
-	trainsmat = np.full((len(states), len(states)), 1e-9);	
-	#for N to N
-	trainsmat[0][0] = 0.96;
-	#for N to rep;
-	if not len(repPat)<2:
-		trainsmat[0][1] = 0.02;
-	else: trainsmat[0][1] = 0.04;
-	if not len(repPat)<2:
-		trainsmat[0][1+len(repEle)*2] = 0.02;
-	#for rep to N;
-	trainsmat[len(repEle)][0] = 0.02;
-	trainsmat[len(repEle)*2][0] = 0.02;
-	trainsmat[len(repEle)*3][0] = 0.02;
-	if not len(repPat)<2:
-		trainsmat[len(repEle)*3-1][0] = 0.02;
-	#avgsub
-	for i in range(1, len(states)):
-		for j in range(len(repEle)):
-			trainsmat[i][j+1] = avgsub
-	#for insertion
-	add_index = len(repEle)+1;
-	for typ_ind in range(len(typeOfRepEle)):
-		for j in range(len(repEle)):
-			if typ_ind<len(typeOfRepEle)-1:
-				jind = j
-			else:
-				jind = j+1;
-				if jind > len(repEle)-1:
-					jind = 0;
-			trainsmat[len(repEle)*typ_ind+j+1][jind+add_index] = 0.11
-	#for deletion
-	add_index = len(repEle)*2+1;
-	for typ_ind in range(len(typeOfRepEle)):
-		for j in range(len(repEle)):
-			if len(repPat)<2: continue;
-			if typ_ind<len(typeOfRepEle)-1:
-				jind = j+1;
-				if jind > len(repEle)-1:
-					jind = 0;
-			else:
-				jind = j+2
-				if jind > len(repEle)-1:
-					jind -= len(repEle)
-			trainsmat[len(repEle)*typ_ind+j+1][jind+add_index] = 0.02
-	#for between rep
-	add_index = 1;
-	for typ_ind in range(len(typeOfRepEle)):
-		for j in range(len(repEle)):
-			if typ_ind<len(typeOfRepEle)-1:
-				jind = j+1;
-				if jind > len(repEle)-1:
-					jind = 0;
-			else:
-				jind = j+2
-				if jind > len(repEle)-1:
-					jind -= len(repEle)
-			restprob = 1;
-			for jstat in range(len(states)):
-				if jstat==jind+add_index: pass
-				else: restprob -= trainsmat[len(repEle)*typ_ind+j+1][jstat];
-			trainsmat[len(repEle)*typ_ind+j+1][jind+add_index] = restprob
+	if commonOptions.has_key('transitionm') and (not commonOptions['transitionm']==None):
+		trainsmat = commonOptions['transitionm']
+	else:
+		trainsmat = np.full((len(states), len(states)), 1e-9);
+		#for N to N
+		trainsmat[0][0] = 0.96;
+		#for N to rep;
+		if not len_repPat<2:
+			trainsmat[0][1] = 0.02;
+		else: trainsmat[0][1] = 0.04;
+		if not len_repPat<2:
+			trainsmat[0][1+len(repEle)*2] = 0.02;
+		#for rep to N;
+		trainsmat[len(repEle)][0] = 0.02;
+		trainsmat[len(repEle)*2][0] = 0.02;
+		if not len_repPat<2:
+			trainsmat[len(repEle)*3-1][0] = 0.02;
+		#avgsub
+		for i in range(1, len(states)):
+			for j in range(len(repEle)):
+				trainsmat[i][j+1] = avgsub
+		#for insertion
+		add_index = len(repEle)+1;
+		for typ_ind in range(len(typeOfRepEle)):
+			for j in range(len(repEle)):
+				if typ_ind<len(typeOfRepEle)-1:
+					jind = j
+				else:
+					jind = j+1;
+					if jind > len(repEle)-1:
+						jind = 0;
+				trainsmat[len(repEle)*typ_ind+j+1][jind+add_index] = commonOptions['hmm_insert_rate'] #0.11
+		#for deletion
+		add_index = len(repEle)*2+1;
+		for typ_ind in range(len(typeOfRepEle)):
+			for j in range(len(repEle)):
+				for k in range(1, len(repEle)):
+					if typ_ind<len(typeOfRepEle)-1:
+						jind = j+k
+					else:
+						if k>=len(repEle)-1: continue
+						jind = j+k+1
+					if jind > len(repEle)-1: jind -= len(repEle);
+					trainsmat[len(repEle)*typ_ind+j+1][jind+add_index] = commonOptions['hmm_del_rate']**k # 
+					if trainsmat[len(repEle)*typ_ind+j+1][jind+add_index]<1e-9: 
+						trainsmat[len(repEle)*typ_ind+j+1][jind+add_index] = 1e-9
+		#for between rep
+		add_index = 1;
+		for typ_ind in range(len(typeOfRepEle)):
+			for j in range(len(repEle)):
+				if typ_ind<len(typeOfRepEle)-1:
+					jind = j+1;
+					if jind > len(repEle)-1:
+						jind = 0;
+				else:
+					jind = j+2
+					if jind > len(repEle)-1:
+						jind -= len(repEle)
+				restprob = 1;
+				for jstat in range(len(states)):
+					if jstat==jind+add_index: pass
+					else: restprob -= trainsmat[len(repEle)*typ_ind+j+1][jstat];
+				trainsmat[len(repEle)*typ_ind+j+1][jind+add_index] = restprob
 	
 	startprob = []
 	for i in range(len(states)):
 		startprob.append(1e-9)
 	startprob[0] = 0.96;
-	if len(repPat)<2:
+	if len_repPat<2:
 		startprob[1] = 0.04
 	else:
 		startprob[1] = 0.02
 		startprob[1+len(repEle)*2] = 0.02
 	startprob = np.array(startprob)
 
-	emisionmat = np.full((len(repEle)*len(typeOfRepEle)+1, 4), 0.005);
-	randrow = [0]
-	for j in range(len(repEle)):
-		randrow.append(j+len(repEle)+1);
-	if len(repPat)<2: randrow.append(len(repEle)*len(typeOfRepEle))
-	#print randrow
-	for rdr in randrow:
-		for jcol in range(4):
-			emisionmat[rdr][jcol] = 0.25;
+	if commonOptions.has_key('emissionm') and (not commonOptions['emissionm']==None):
+		emisionmat = commonOptions['emissionm']
+	else:
+		emisionmat = np.full((len(repEle)*len(typeOfRepEle)+1, 4), commonOptions['hmm_sub_rate']/4)
+		randrow = [0]
+		for j in range(len(repEle)):
+			randrow.append(j+len(repEle)+1);
+		if len_repPat<2: randrow.append(len(repEle)*len(typeOfRepEle))
+		#print randrow
+		for rdr in randrow:
+			for jcol in range(4):
+				emisionmat[rdr][jcol] = 0.25;
+		
+		obs_symbols = np.array(['A', 'C', 'G', 'T'])
+		for naind in range(len_repPat):
+			CompRepPatkeys1 = CompRepPat[naind].keys();
+			for k1 in CompRepPatkeys1:
+				emind = (np.where(obs_symbols==k1))[0][0]
+				emisionmat[naind+1][emind] += (1-commonOptions['hmm_sub_rate'])*CompRepPat[naind][k1]
+			if len_repPat<2: continue;
+			if naind<len_repPat-1:
+				afterd = naind + 1;
+			else:
+				afterd = 0;
+			CompRepPatkeys2 = CompRepPat[afterd].keys();
+			for k2 in CompRepPatkeys2:
+				emind = (np.where(obs_symbols==k2))[0][0]
+				emisionmat[naind+1+len_repPat*2][emind] += (1-commonOptions['hmm_sub_rate'])*CompRepPat[afterd][k2]
 
-        obs_symbols = np.array(['A', 'C', 'G', 'T'])
-        for naind in range(len(repPat)):
-                emind = (np.where(obs_symbols==repPat[naind]))[0][0]
-                emisionmat[naind+1][emind] = 0.985
-		if len(repPat)<2: continue;
-                if naind<len(repPat)-1:
-                        afterd = naind + 1;
-                else:
-                        afterd = 0;
-                emind = (np.where(obs_symbols==repPat[afterd]))[0][0]
-                emisionmat[naind+1+len(repPat)*2][emind] = 0.985
+	if forprint:
+		print 'HMMmatrix1'
+		printHMMmatrix.printHMMmatrix(states, obs_symbols, trainsmat, emisionmat, startprob)
 
-        if getTransition_start_emission_prob_without0.outputm or forprint:
-                print 'HMMmatrix1'
-                printHMMmatrix.printHMMmatrix(states, obs_symbols, trainsmat, emisionmat, startprob)
+	state3class = [range(1, len_repPat+1), range(len_repPat+1, 2*len_repPat+1), range(2*len_repPat+1, 3*len_repPat+1)]
 
-        state3class = [range(1, len(repPat)+1), range(len(repPat)+1, 2*len(repPat)+1), range(2*len(repPat)+1, 3*len(repPat)+1)]
-
-        return [trainsmat, startprob, emisionmat, obs_symbols, np.array(states), len(states), len(obs_symbols), state3class]
+	return [trainsmat, startprob, emisionmat, obs_symbols, np.array(states), len(states), len(obs_symbols), state3class]
 
 def compareTwoFloat(a, b):
 	if isinstance(a, float) and isinstance(b, float):
@@ -176,7 +181,6 @@ def compareTwoMat1(a1, a2):
 		if compareTwoFloat(a1[i], a2[i]): pass;
 		else:
 			isSame = False;
-			#print ('\t <%d> 1=%.10f, 2=%.10f' % (i, a1[i], a2[i]))
 			print ('\t <%d> 1=%s, 2=%s' % (i, a1[i], a2[i]))
 	return isSame
 def CompareTwoNumpyArrays(matnames, matindex, fun, matorg, matx):
@@ -208,37 +212,38 @@ def compareMat(matorg, matx):
 	
 
 if __name__=='__main__':
-	wouldprint = False; #True;
+	wouldprint = False; 
 
+	commonOptions = {}
+	commonOptions['CompRep'] = '0'
+	commonOptions['hmm_sub_rate'] = 0.02
+	commonOptions['hmm_del_rate'] = 0.02
+	commonOptions['hmm_insert_rate'] = 0.11
+	
 	print 'len(Pattern) = 4'
-	matorg4 = getTransition_start_emission_prob_4.getTransition_start_emission_prob_4('TATC', wouldprint)
-	matx4   = getTransition_start_emission_prob_x('TATC', wouldprint);
-	compareMat(matorg4, matx4)
-
+	matx4   = getTransition_start_emission_prob_x('TATC', commonOptions, wouldprint);
 	print '\nlen(Pattern) = 3'
-	matorg3 = getTransition_start_emission_prob_3.getTransition_start_emission_prob_3('CAG', wouldprint)
-	matx3   = getTransition_start_emission_prob_x('CAG', wouldprint);
-	compareMat(matorg3, matx3)
-
+	matx3   = getTransition_start_emission_prob_x('CAG', commonOptions, wouldprint);
 	print '\nlen(Pattern) = 2'
-	matorg2 = getTransition_start_emission_prob_2.getTransition_start_emission_prob_2('CG', wouldprint)
-	matx2   = getTransition_start_emission_prob_x('CG', wouldprint);
-	compareMat(matorg2, matx2)
+	matx2   = getTransition_start_emission_prob_x('CG', commonOptions, wouldprint);
 	
 	print '\nlen(Pattern) = 5'
-	matorg5 = getTransition_start_emission_prob_5.getTransition_start_emission_prob_5('TATCG', wouldprint)
-	matx5   = getTransition_start_emission_prob_x('TATCG', wouldprint);
-	compareMat(matorg5, matx5)
+	matx5   = getTransition_start_emission_prob_x('TATCG', commonOptions, wouldprint);
 
 	print '\nlen(Pattern) = 6'
-	matorg6 = getTransition_start_emission_prob_6.getTransition_start_emission_prob_6('TATCGG', wouldprint)
-	matx6   = getTransition_start_emission_prob_x('TATCGG', wouldprint);
-	compareMat(matorg6, matx6)
+	matx6   = getTransition_start_emission_prob_x('TATCGG', commonOptions, wouldprint);
 
 	wouldprint = True; 
-	getTransition_start_emission_prob_x_without0.getTransition_start_emission_prob_x_without0('CAG', wouldprint)
 	
-	matx1   = getTransition_start_emission_prob_x('G', wouldprint);
+	matx1   = getTransition_start_emission_prob_x('G', commonOptions, wouldprint);
 
-	#etTransition_start_emission_prob_without0.getTransition_start_emission_prob_without0('TATC')
+	commonOptions['CompRep'] = 'AlTlT50/C50lClT/C'
+	commonOptions['CompRep'] = printHMMmatrix.getCompRep(commonOptions['CompRep'])
 
+	print '\n\ncomplex'
+	matxy = getTransition_start_emission_prob_x('', commonOptions, wouldprint)
+
+	commonOptions['CompRep'] = '0'
+	matx1   = getTransition_start_emission_prob_x('CG', commonOptions, wouldprint);
+	matx6   = getTransition_start_emission_prob_x('TATCGG', commonOptions, wouldprint)
+	print matx6[0][-1]
