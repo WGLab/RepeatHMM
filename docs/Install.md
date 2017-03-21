@@ -8,6 +8,7 @@
 	* SWIG
 	* make
 	* Tandem Repeat Finder (TRF): please use 'ln -s XXX myTRF' where XXX is your TRF program.
+	* BWA MEM
 
 ## Step 1:
 	* go to bin/scripts
