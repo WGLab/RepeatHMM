@@ -1,5 +1,5 @@
 
-##Prerequisites:
+## Prerequisites:
 	* Python 2.7
 	* GCC 4.4.7
 	* python packages:
@@ -7,6 +7,7 @@
 		+ hmmlearn
 	* SWIG
 	* make
+	* Tandem Repeat Finder (TRF): please use 'ln -s XXX myTRF' where XXX is your TRF program.
 
 ## Step 1:
 	* go to bin/scripts
