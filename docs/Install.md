@@ -5,6 +5,7 @@
 	* python packages:
 		+ peakutils 1.0.3
 		+ hmmlearn
+		+ sklearn (sklearn.mixture.GaussianMixture)
 	* SWIG
 	* make
 	* Tandem Repeat Finder (TRF): please use 'ln -s XXX myTRF' where XXX is your TRF program.
