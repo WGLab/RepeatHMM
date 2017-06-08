@@ -1,6 +1,6 @@
 # The options for repeatHMM.py
 
-There are two options below for repeatHMM.py: `BAMinput` and`FASTQinput`.
+There are two options below for repeatHMM.py: `BAMinput` and`FASTQinput`. Please note that users do not need to provide all parameters below. Most of them have default values.
 
 ```
 usage: repeatHMM.py [-h] {BAMinput,FASTQinput,Scan} ...
