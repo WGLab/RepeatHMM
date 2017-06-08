@@ -506,7 +506,7 @@ parser_bam = subparsers.add_parser('BAMinput', parents=[parent_parser], help="De
 python %(prog)s --bamfile XXX.bam --repeatName HTT; \n \
 python %(prog)s --bamfile XXX.bam --repeatName HTT --GapCorrection 1 FlankLength 30; \n \
 python %(prog)s --bamfile freeze4-all-merge.sort.bam --repeatName HTT; \n \
-Final results was stored in logbam/TrinRepBAM*.log \n \
+Final results was stored in logbam/RepBAM_*.log \n \
 Note!!!!!! \n \
 BAM file should be produced with the same version of 'hg' if '--hg' or '--hgfile' is specified. \n \
 ", formatter_class=RawTextHelpFormatter)
@@ -523,7 +523,7 @@ python %(prog)s --fastq XXX.fq --repeatName HTT; \n \
 python %(prog)s --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 ; \n \
 python %(prog)s --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID PCR1; \n \
 python %(prog)s --repeatName atxn3 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID sca3_pcr25_raw_test --fastq atxn3_data/rawdata/sam025.raw.fastq  \n \
-Final results was stored in logfq/TrinRepFQ*.log \n \
+Final results was stored in logfq/RepFQ_*.log \n \
 ", formatter_class=RawTextHelpFormatter)
 
 parser_fasta.add_argument("--fastq", help="The file name for fasta sequences");
@@ -535,7 +535,7 @@ python %(prog)s --region chr4 --GapCorrection 1 --FlankLength 30 ; \n \
 python %(prog)s --region chr4 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID PCR1; \n \
 python %(prog)s --region chr4 --GapCorrection 1 --FlankLength 30 \n \
 python %(prog)s --region chr4 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID pcr1 \n \
-Final results was stored in logscan/TrinRepSim*.log \n \
+Final results was stored in logscan/scan_res/*.log \n \
 ", formatter_class=RawTextHelpFormatter)
 
 parser_scan.add_argument("--region", default=None, help="The region where microsatellites are located. 'All' means all microsatellites (<10 nucleotides in repeat units), 'chrZ:X:Y' indicates a chromosome region where all microsatellites would be automatically searche. 'None': will only detect microsatellites predined in 'repeatName'");
