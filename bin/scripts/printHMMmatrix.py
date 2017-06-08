@@ -1,4 +1,6 @@
 
+from myheader import *
+
 def getCompRep(comprep):
    if comprep=='0': return comprep
 
@@ -16,7 +18,7 @@ def getCompRep(comprep):
       for curR in cursall:
          CompRepPat[-1][curR[0]] = CompRepPat[-1][curR[0]]/float(CompRepPat[-1]['all'])
       del CompRepPat[-1]['all']
-   print 'CompRepPatc', comprep, CompRepPat
+   if cur_M_STAT <= M_WARNING: print 'CompRepPatc', comprep, CompRepPat
    return CompRepPat
 
 
@@ -26,7 +28,7 @@ def getCompRepFromSimple(repPat):
       CompRepPat.append({})
       CompRepPat[-1][repPat[i]] = 1
 
-   print 'CompRepPats', repPat, CompRepPat
+   if cur_M_STAT <= M_INFO: print 'CompRepPats', repPat, CompRepPat
    return CompRepPat
 
 

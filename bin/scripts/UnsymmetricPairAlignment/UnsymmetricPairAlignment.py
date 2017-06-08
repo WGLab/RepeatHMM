@@ -91,12 +91,12 @@ except AttributeError:
 
 
 
-def unsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint):
-    return _UnsymmetricPairAlignment.unsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint)
+def unsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint, mmismatch, mislen, mismnum):
+    return _UnsymmetricPairAlignment.unsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint, mmismatch, mislen, mismnum)
 unsymmetricPairWiseAlignment = _UnsymmetricPairAlignment.unsymmetricPairWiseAlignment
 
-def correctedByunsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint):
-    return _UnsymmetricPairAlignment.correctedByunsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint)
+def correctedByunsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint, mmismatch, mislen, mismnum):
+    return _UnsymmetricPairAlignment.correctedByunsymmetricPairWiseAlignment(perfectRepeat, lenPerfRep, read, lenRead, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandWidth, isprint, mmismatch, mislen, mismnum)
 correctedByunsymmetricPairWiseAlignment = _UnsymmetricPairAlignment.correctedByunsymmetricPairWiseAlignment
 # This file is compatible with both classic and new-style classes.
 

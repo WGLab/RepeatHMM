@@ -35,28 +35,18 @@ def getPattern(na3, forw_rerv):
 
 def getPerfRep(querystr, na3):
 	t = int(len(querystr)/2);
-	t = int(len(querystr)*1.2/len(na3))
+	t = int(len(querystr)*1.5/len(na3))
 	return na3*t
 
 
-def correctSeq(na3, querystr, forw_rerv, match=2, mismatch=-10, gap=-1, gap_extension=-1):
-	na3 = getPattern(na3, forw_rerv)
-	perfectstr = getPerfRep(querystr, na3);
-	                                                 
-	la = pairwise2.align.localms(perfectstr, querystr, match, mismatch, gap, gap_extension)
-	newstr = ''; score=0;
-	for a in la:
-		p,q,s,b,e=a;
-		q = string.strip(q, '-')
-		if score<s: score = s; newstr = q;
-
-	return newstr; 
-
-def myUnsymmetricPairAlignment(na3, querystr, forw_rerv, match=2, mismatch=-2, gap_in_perf=-2, gap_in_read=-12, gap_before_after = -3, bandw=1000, isprint=0):
+def myUnsymmetricPairAlignment(na3, querystr, forw_rerv, match=3, mismatch=-2, gap_in_perf=-2, gap_in_read=-15, gap_before_after = -1, bandw=1000, isprint=0, mismatchstr='', mismnum=0):
 	na3 = getPattern(na3, forw_rerv)
 	perfectstr = getPerfRep(querystr, na3);
 
-	newstr = UnsymmetricPairAlignment.correctedByunsymmetricPairWiseAlignment(perfectstr, len(perfectstr), querystr, len(querystr), match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw,isprint);
+	#print 'mismatchstr', mismatchstr
+
+	newstr = UnsymmetricPairAlignment.correctedByunsymmetricPairWiseAlignment(perfectstr, len(perfectstr), querystr, len(querystr), match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw,isprint,mismatchstr,len(mismatchstr),mismnum);
+	#print querystr, '\n', newstr 
 	if len(newstr)<len(querystr)/3:
 		print 'In (myUnsymmetricPairAlignment) Warning!!!! too short string from alignment\n', querystr, '\n', newstr
 		return querystr
@@ -74,11 +64,9 @@ if __name__=='__main__':
 	forw_rerv = '+'
 
 	bandw = 50;
-	#match=2, mismatch=-10, gap=-1, gap_extension=-1)
-	newstr = correctSeq(pat, querystr, '+', match, mismatch, gap_in_perf, gap_in_perf);
+	match=2; mismatch=-10; gap=-1; gap_extension=-1
 	print pat*(int(len(querystr)/2))
-	print newstr;
 	print querystr
 	
-	print '\n', myUnsymmetricPairAlignment(pat, querystr, forw_rerv, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, 0)
+	print '\n', myUnsymmetricPairAlignment(pat, querystr, forw_rerv, match, mismatch, gap_in_perf, gap_in_read, gap_before_after, bandw, mismatchstr="jlasdjfkl")
 

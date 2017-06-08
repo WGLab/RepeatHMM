@@ -51,15 +51,16 @@ def produce_for_repPat(commonOptions, moreOptions):
 	if not commonOptions['CompRep']=='0':
 		repplist = []
 		for i in range(len(commonOptions['CompRep'])):
-			compkeys = commonOptions['CompRep'][i].keys();
+			compkeys = commonOptions['CompRep'][i].keys(); compkeys.sort()
 			repplist.append(compkeys[0])
 			for ck in compkeys:
 				if commonOptions['CompRep'][i][ck]>commonOptions['CompRep'][i][repplist[-1]]:
 					repplist[-1] = ck
 		moreOptions['repPat'] = ''.join(repplist)
 
-	print 'produce_for_repPat', moreOptions['repPat'], commonOptions['CompRep']
-	logging.info('produce_for_repPat ' + str(moreOptions['repPat']) +' ' + str(commonOptions['CompRep']))
+	if commonOptions['outlog'] <= M_INFO:
+		print 'produce_for_repPat', moreOptions['repPat'], commonOptions['CompRep']
+		logging.info('produce_for_repPat ' + str(moreOptions['repPat']) +' ' + str(commonOptions['CompRep']))
 
 def getTransition_start_emission_prob(repPat, commonOptions, forprint=False):
 	return getTransition_start_emission_prob_x.getTransition_start_emission_prob_x(repPat, commonOptions, forprint);
@@ -104,11 +105,11 @@ def getPred(predstats, obs_seq, state3class, patlen):
 					if del_str<0: del_str = 0
 					del_end = stind_ind+3
 					if del_end>=len(predstats): del_end = len(predstats)-1
-					print 'mutiple deletion: ', stind_ind, pre_stind, stind, predstats[del_str:del_end], obs_seq[del_str:del_end]
+					if cur_M_STAT <= M_INFO: print 'mutiple deletion: ', stind_ind, pre_stind, stind, predstats[del_str:del_end], obs_seq[del_str:del_end]
 			#
 			newstr[-1].append(obs_seq[stind_ind])
 		else:
-			print 'Warning!!! in hmm Wrong state '+str(stind)
+			if cur_M_STAT <= M_WARNING: print 'Warning!!! in hmm Wrong state '+str(stind)
 
 
 	#remove isolated regions
@@ -146,24 +147,24 @@ def getPred(predstats, obs_seq, state3class, patlen):
 
 	return [''.join(large_rep), ''.join(ststar), pre0]
 
-def add_start(large_start_ind, large_end_ind, newstr, predstats, patlen, stategrouplist, repover0=2):
+def add_start(large_start_ind, large_end_ind, newstr, predstats, patlen, stategrouplist, repover0=0.7): #repover0=0.7): #repover0=2):
 	rem = False;
 	if large_start_ind+1<large_end_ind:
 		cur_rep_len = len(newstr[large_start_ind])
 		if not stategrouplist[large_start_ind+1]==0:
-			print 'In hmm Wrong split f', predstats, newstr, large_start_ind, large_start_ind+1, large_end_ind
+			if cur_M_STAT <= M_WARNING: print 'In hmm Wrong split f', predstats, newstr, large_start_ind, large_start_ind+1, large_end_ind
 		next_0_len = len(newstr[large_start_ind+1])
 		if cur_rep_len/float(next_0_len)<repover0 and cur_rep_len/float(patlen)<len_isolated_repeat:
 			large_start_ind += 2;
 			rem = True;
 	return [large_start_ind, large_end_ind, rem]
 
-def add_end(large_start_ind, large_end_ind, newstr, predstats, patlen, stategrouplist, repover0=2):
+def add_end(large_start_ind, large_end_ind, newstr, predstats, patlen, stategrouplist, repover0=0.7): #repover0=0.7): #repover0=2):
 	rem = False;
 	if large_start_ind<large_end_ind-1:
 		cur_rep_len = len(newstr[large_end_ind])
 		if not stategrouplist[large_end_ind-1]==0:
-			print 'In hmm Wrong split b', predstats, newstr, large_start_ind, large_end_ind-1, large_end_ind
+			if cur_M_STAT <= M_WARNING: print 'In hmm Wrong split b', predstats, newstr, large_start_ind, large_end_ind-1, large_end_ind
 		next_0_len = len(newstr[large_end_ind-1])
 		if cur_rep_len/float(next_0_len)<repover0 and cur_rep_len/float(patlen)<len_isolated_repeat:
 			large_end_ind -= 2
@@ -172,12 +173,12 @@ def add_end(large_start_ind, large_end_ind, newstr, predstats, patlen, stategrou
 
 def hmmpred(obs_seq, na3, forw_rerv, hmmoptions, commonOptions):
 	obs_seq = obs_seq.replace('-', '')
-	obs_seq = obs_seq.replace('N', ''); obs_seq = obs_seq.replace('n', '');
+	#obs_seq = obs_seq.replace('N', ''); obs_seq = obs_seq.replace('n', '');
 	
 	bp = getBasePair()
 	len_repPat = printHMMmatrix.get_len_repPat(na3, commonOptions)
 
-	trainsmat, startprob, emisionmat, obs_symbols, states, numStates, numSymbols, state3class = hmmoptions
+	trainsmat, startprob, emisionmat, obs_symbols, states, numStates, numSymbols, state3class, tol_info = hmmoptions
 	hmmmodel = hmm.MultinomialHMM(numStates)
 	hmmmodel.transmat_ = trainsmat;
 	hmmmodel.startprob_ = startprob;
@@ -191,6 +192,11 @@ def hmmpred(obs_seq, na3, forw_rerv, hmmoptions, commonOptions):
 	logprob, predstats = hmmmodel.decode(np.array([myobs]).T, algorithm="viterbi")
 
 	newstr, ststar, pre0 = getPred(predstats, obs_seq, state3class, len_repPat)
+	if cur_M_STAT <= M_DEBUG: #int(len(newstr)/float(len_repPat)+0.5)<14: #False: #True: #False: #int(len(newstr)/float(len_repPat)) in [8,13]:
+		print 'hmmB:', obs_seq, int(len(newstr)/float(len_repPat)+0.5)
+		psstr = []
+		for ps in predstats: psstr.append(str(ps))
+		print 'hmmB:', ''.join(psstr)
 
 	return [newstr, pre0, ststar]
 

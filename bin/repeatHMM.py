@@ -14,18 +14,19 @@ import logging
 
 from argparse import RawTextHelpFormatter
 
-from scripts import trinucleotideRepeatRealSimulation
-from scripts import findTrinucleotideRepeats
-from scripts import mySCA3
+from scripts import myBAMhandler #
+from scripts import myFASTQhandler
 from scripts.myheader import *
 from scripts import printHMMmatrix
+from scripts import myPredefinedPatternReader
+from scripts import myScanWholeGenome
+from scripts import myCommonFun
 
 
-
-parser = argparse.ArgumentParser(description="Determine microsatellite repeat for (a) gene(s) of interests or for all genes.", epilog="For example, \n \
+parser = argparse.ArgumentParser(description="Determine microsatellite repeat of interests or for all microsatellites.", epilog="For example, \n \
 \tpython %(prog)s BAMinput: with a BAM file as input\n \
 \tpython %(prog)s FASTQinput: with a FASTQ file as input \n \
-\tpython %(prog)s Simulate: for simulation", formatter_class=RawTextHelpFormatter);
+\tpython %(prog)s Scan: for Scaning whole genome", formatter_class=RawTextHelpFormatter);
 
 
 originalError = '!!!Error: !!!!!! \n'
@@ -101,45 +102,64 @@ def setInsDelSub(comOpt):
    elif comOpt['SeqTech']=="Illumina":
       comOpt['hmm_insert_rate'], comOpt['hmm_del_rate'], comOpt['hmm_sub_rate'] = 0.002, 0.002, 0.002
 
-def getCommonOptions(margs):
+def printOptions(op):
+	opkeys = op.keys(); opkeys.sort();
+	for opk in opkeys:
+		if (opk not in ['gLoc']): #(not op[opk]==None) and (opk not in ['gLoc']):
+			print ''.join([('%20s' % opk), '\t(', str(op[opk]), ');'])
+	print ''
+
+def getCommonOptions(margs, cominfo=None):
+   random.seed(7);
+   commonOptions = {}
    errorStr = ""
-  
-   isRemInDel, isupdown, isExtend = margs.RemInDel, margs.updown, margs.extend
-   errorStr += non_negative(isRemInDel, 'isRemInDel');
-   errorStr += non_negative(isupdown, 'isupdown');
-   errorStr += non_negative(isExtend, 'isExtend');
+ 
+   if margs.outlog<0:
+      commonOptions['outlog'] = M_WARNING
+   else: commonOptions['outlog'] = margs.outlog
+ 
+   isGapCorrection, repeatFlankLength = margs.GapCorrection, margs.FlankLength
+   errorStr += non_negative(isGapCorrection, 'isGapCorrection');
+   errorStr += non_negative(repeatFlankLength, 'repeatFlankLength');
 
    MinSup = margs.MinSup;
    errorStr += non_negative(MinSup, 'MinSup');
 
+   MatchInfo = margs.MatchInfo
+   if MatchInfo==None:
+      #commonOptions['MatchInfo'] = [3, -2, -2, -15, -1]
+      commonOptions['MatchInfo'] = [2, -1, -2, -13, -1]
+   else:
+      mi_sp = MatchInfo.split(';')
+      for i in range(len(mi_sp)):
+         mi_sp[i] = int(mi_sp[i])
+         if i==0:
+            errorStr += non_negative(mi_sp[i], 'MatchInfo['+str(i+1)+']');
+         else:
+            errorStr += non_negative(-mi_sp[i], 'MatchInfo['+str(i+1)+']');
+      commonOptions['MatchInfo'] = mi_sp
+
    analysis_file_id_common = ''
-   if isRemInDel>0: analysis_file_id_common += '_RemInDel'
-   else: analysis_file_id_common += '_non_RemInDel'
-
-   if isupdown>0: analysis_file_id_common += '_updn'+str(isupdown)
-   else: analysis_file_id_common += '_non_updn'
-
-   if isExtend>0: analysis_file_id_common += '_ext'+str(isExtend)
-   else: analysis_file_id_common += '_non_ext'
+   analysis_file_id_common += '_GapCorrection' + str(isGapCorrection)
+   analysis_file_id_common += '_FlankLength'+str(repeatFlankLength)
 
    if not os.path.isfile(hg_reference_and_index+'/'+margs.hg+'.fa'):
       errorStr += '\tNo reference genome under the folder '+hg_reference_and_index+' with the filename '+margs.hg+'.fa\n'
-   gLoc = findTrinucleotideRepeats.getDiseseGeneInRefGenomeLocation(margs.hg)
    
-   specifiedGeneName = margs.UserDefinedGeneName
-   knownGeneName = margs.repeatgene
-   specifiedGeneInfo = margs.UserDefinedGene
+   UserDefinedUniqID = margs.UserDefinedUniqID
+   RepeatName = margs.repeatName
+   specifiedRepeatInfo = margs.UserDefinedRepeat
 
-   if UserDefinedGenedefault==specifiedGeneInfo and knownGeneName==None:
-      errorStr += '\tNone gene information is given. \n'
-   if (not specifiedGeneInfo==UserDefinedGenedefault) and knownGeneName=='all':
-      errorStr += '\t"repeatgene" cannot be "all" when specifying "UserDefinedGene"\n'
+   if RepeatName==None and (cominfo==None or ((not cominfo==None) and (cominfo.has_key('scan') and not cominfo['scan']==1))):
+      errorStr += '\tNone gene/repeat information is given. \n'
+   if (not specifiedRepeatInfo==UserDefinedRepeatdefault) and RepeatName=='all':
+      errorStr += '\t"repeatName" cannot be "all" when specifying "UserDefinedRepeat"\n'
 
    SplitAndReAlign = margs.SplitAndReAlign
    TRFOptions = margs.TRFOptions
    if not SplitAndReAlign==0:
       errorStr += check_TRFOptions(TRFOptions)
-      analysis_file_id_common += '_SplitAndReAlign'
+      analysis_file_id_common += '_SplitAndReAlign'+str(SplitAndReAlign)
       analysis_file_id_common += '_'+TRFOptions
 
    minTailSize = margs.minTailSize
@@ -156,25 +176,18 @@ def getCommonOptions(margs):
    if MaxRep<14: MaxRep = 14;
    CompRep = printHMMmatrix.getCompRep(margs.CompRep)
 
-   commonOptions = {}
    commonOptions['MinSup'] = MinSup
-   commonOptions['isRemInDel'] = isRemInDel
-   commonOptions['isupdown'] = isupdown
-   commonOptions['isExtend'] = isExtend
-   commonOptions['specifiedGeneName'] = specifiedGeneName
-   commonOptions['knownGeneName'] = knownGeneName
-   commonOptions['specifiedGeneInfo'] = specifiedGeneInfo
-   if knownGeneName == None:
-      if (not specifiedGeneName==None): 
-         commonOptions['repeatgene'] = specifiedGeneName
-      else: commonOptions['repeatgene'] = None;
-   else: commonOptions['repeatgene'] = knownGeneName
+   commonOptions['isGapCorrection'] = isGapCorrection
+   commonOptions['repeatFlankLength'] = repeatFlankLength
+
+   commonOptions['UserDefinedUniqID'] = UserDefinedUniqID
+   commonOptions['repeatName'] = RepeatName
+   commonOptions['specifiedRepeatInfo'] = specifiedRepeatInfo
    commonOptions['hg'] = margs.hg
    if margs.hgfile==None or margs.hgfile=='':
       commonOptions['hgfile'] = commonOptions['hg']+'.fa'
    else:
       commonOptions['hgfile'] = margs.hgfile
-   commonOptions['gLoc'] = gLoc
 
    commonOptions['SplitAndReAlign'] = SplitAndReAlign
    commonOptions['TRFOptions'] = TRFOptions
@@ -185,11 +198,16 @@ def getCommonOptions(margs):
    commonOptions['BWAMEMOptions'] = BWAMEMOptions
    commonOptions['MaxRep'] = MaxRep
    commonOptions['CompRep'] = CompRep
+   commonOptions['Tolerate_mismatch'] = margs.Tolerate
 
    analysis_file_id_common += '_'+commonOptions['hg']+'_comp'
 
-   if not commonOptions['specifiedGeneName']==None:
-      analysis_file_id_common += '_def'+commonOptions['specifiedGeneName']
+   if not commonOptions['UserDefinedUniqID']==None:
+      commonOptions['UserDefinedUniqID'] = commonOptions['UserDefinedUniqID'].replace(':', '_')
+      commonOptions['UserDefinedUniqID'] = commonOptions['UserDefinedUniqID'].replace('/', '_')
+      commonOptions['UserDefinedUniqID'] = commonOptions['UserDefinedUniqID'].replace('\\', '_')
+      commonOptions['UserDefinedUniqID'] = commonOptions['UserDefinedUniqID'].replace('-', '_')
+      analysis_file_id_common += '_'+commonOptions['UserDefinedUniqID']
 
    hmm_insert_rate = margs.hmm_insert_rate
    hmm_del_rate = margs.hmm_del_rate
@@ -218,106 +236,88 @@ def getCommonOptions(margs):
       if not cerrstr=="": errorStr += ''.join(['\t', cerrstr, '\n'])
    else: commonOptions['emissionm'] = emissionm
 
+   commonOptions['stsBasedFolder'] = stsBasedFolder
+   moptions = {}
+   Patternfile = margs.Patternfile
+   if not Patternfile==None:
+      commonOptions['Patternfile'] = Patternfile.split(';')
+      for fi in commonOptions['Patternfile']:
+         if fi[-3:]=='.pa':
+            moptions['pafile'] = fi
+   else: commonOptions['Patternfile'] = None
+
+   moptions['stsBasedFolder'] = stsBasedFolder
+   moptions['hg'] = margs.hg
+   commonOptions['gLoc'] = myPredefinedPatternReader.getPredefinedMicrosatellites(moptions)
+
    return commonOptions, errorStr, analysis_file_id_common
 
-def simulation(margs):
+def scan(margs):
+   cominfo = {}
+   cominfo['scan'] = 1;
+   #print margs;
    specifiedOptions = {}
-   simulation_file_id = ""
    analysis_file_id = ""
 
    errorStr = originalError
-   commonOptions, errorStr_com, analysis_file_id_com = getCommonOptions(margs)
+   commonOptions, errorStr_com, analysis_file_id_com = getCommonOptions(margs, cominfo)
    errorStr += errorStr_com
   
-   isUnsymAlign = margs.UnsymAlign; specifiedOptions['isUnsymAlign'] = isUnsymAlign
-   if isUnsymAlign: analysis_file_id += "_unsymalign"
    analysis_file_id += analysis_file_id_com
 
-   insert_rate=margs.insert_rate; errorStr += non_negative(insert_rate, 'insert_rate');
-   del_rate=margs.del_rate;  errorStr += non_negative(del_rate, 'del_rate');
-   sub_rate=margs.sub_rate;  errorStr += non_negative(sub_rate, 'sub_rate');
-   coverage = margs.coverage; errorStr += non_negative(coverage, 'coverage');
-   randTimes = margs.randTimes; errorStr += non_negative(randTimes, 'randTimes');
-
-   specifiedOptions['insert_rate'] = insert_rate
-   specifiedOptions['del_rate'] = del_rate
-   specifiedOptions['sub_rate'] = sub_rate
-   specifiedOptions['coverage'] = coverage
-   specifiedOptions['randTimes'] = randTimes
-
-   repeatSizeDif = margs.RepeatSizeDif; 
-   if not repeatSizeDif==None:
-      repeatSizeDifArray = repeatSizeDif.split('_'); usedRepeatSizeDifArray= []
-      for irsda in range(len(repeatSizeDifArray)):
-         if len(repeatSizeDifArray[irsda])>0: 
-            usedRepeatSizeDifArray.append(int(repeatSizeDifArray[irsda]))
-            errorStr += non_negative(usedRepeatSizeDifArray[-1], 'repeatSizeDif'+str(irsda));
-      specifiedOptions['repeatSizeDif'] = usedRepeatSizeDifArray
-      if len(usedRepeatSizeDifArray)>1:
-         if usedRepeatSizeDifArray[0]>=usedRepeatSizeDifArray[1]:
-            errorStr += ("\tError!!! the first repeat size difference (%s) must be smaller than the second (%s)" % (usedRepeatSizeDifArray[0], usedRepeatSizeDifArray[1]))+'\n'
-   else:
-      specifiedOptions['repeatSizeDif'] = []
-
    if not errorStr==originalError:
-      print errorStr; #BAMinput|FASTQinput|Simulate
+      print errorStr; #BAMinput|FASTQinput|Scan
       parser.print_help();
-      parser.parse_args(['Simulate', '--help']);
+      parser.parse_args(['Scan', '--help']);
       sys.exit(140)
 
-   simulation_file_id += ('_ins%.2f_del%.2f_sub%.2f_cov%d' % (insert_rate, del_rate, sub_rate, coverage))
-   if not repeatSizeDif==None:
-      simulation_file_id += ('_repeatSizeDif%s' % (repeatSizeDif))
-   analysis_file_id += ('_times%d' % randTimes)
-   if commonOptions['specifiedGeneName']==None:
-      pass; #simulation_file_id = ("_def%s" % (commonOptions['repeatgene'])) + simulation_file_id
-   else: simulation_file_id = ("_def%s" % (commonOptions['specifiedGeneName'])) + simulation_file_id
+   scan_region = margs.region;
+   specifiedOptions['scan_region'] = scan_region
+   if scan_region==None:
+      specifiedOptions['analysis_file_id'] = 'gmm' + analysis_file_id
+   else:
+      scan_region_rp = scan_region.replace(':','_')
+      scan_region_rp = scan_region_rp.replace('-','_')
+      if analysis_file_id.find(scan_region_rp)==-1:		
+         specifiedOptions['analysis_file_id'] = 'gmm_'+ scan_region_rp + analysis_file_id
+      else: specifiedOptions['analysis_file_id'] = 'gmm'+ analysis_file_id
 
-   unique_file_id =  simulation_file_id+analysis_file_id
+   specifiedOptions['unique_file_id'] = specifiedOptions['analysis_file_id']
 
-   specifiedOptions['simulation_file_id'] = commonOptions['repeatgene'] + simulation_file_id
-   specifiedOptions['analysis_file_id'] = commonOptions['repeatgene'] + analysis_file_id
-   specifiedOptions['unique_file_id'] = commonOptions['repeatgene'] + unique_file_id
+   specifiedOptions["SepbamfileTemp"] = margs.SepbamfileTemp;
+   specifiedOptions["Onebamfile"] = margs.Onebamfile
 
-   logfolder = 'logsim/'
+   if not specifiedOptions["Onebamfile"]==None:
+      specifiedOptions['bamfile'] = specifiedOptions["Onebamfile"]
+      if not os.path.isfile(specifiedOptions['bamfile']):  errorStr += '\tThe bam file ('+specifiedOptions['bamfile']+') does not exit\n';
+   else:
+      specifiedOptions['bamfile'] = specifiedOptions["SepbamfileTemp"]
+   if specifiedOptions['bamfile']==None: errorStr += '\tNo bam file provided\n';
+
+   specifiedOptions['align'] = margs.outFolder
+   if not os.path.isdir(margs.outFolder):
+      os.system('mkdir '+margs.outFolder)
+   commonOptions['outlog'] = M_WARNING
+   logfolder = 'logscan/'
    if not os.path.isdir(logfolder):
         os.system('mkdir '+logfolder)
-   filename = logfolder + 'TrinRepSim_' + unique_file_id + '.log'
+   filename = logfolder + 'RepScan_' + specifiedOptions['analysis_file_id'] + '.log'
    LOG_FILENAME = filename
    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,filemode='w',format="%(levelname)s: %(message)s")
 
-   random.seed(7);
+   print 'The following options are used (included default):'
+   printOptions(commonOptions)
+   printOptions(specifiedOptions)
 
-   if not commonOptions['specifiedGeneInfo'] == UserDefinedGenedefault:
-      summary= trinucleotideRepeatRealSimulation.getSimforKnownGeneWithPartialRev(commonOptions, specifiedOptions)
+   specifiedOptions['thread'] = margs.thread
+   specifiedOptions['continue'] = margs.conted
+   specifiedOptions['scanresfolder'] = 'logscan/scan_res/'
+   if margs.thread==1:
+      mres, mdetail = myScanWholeGenome.scan(commonOptions, specifiedOptions)
+      myCommonFun.myWriteScanResults(specifiedOptions, mres, mdetail, procss_info='')
    else:
-      summary = trinucleotideRepeatRealSimulation.getSimforKnownGene(commonOptions, specifiedOptions)
-
-   printRepInfo(summary)
-
-   simresfolder = 'logsim/sim_res/'
-   if not os.path.isdir(simresfolder):
-      os.system('mkdir '+simresfolder)
-
-   curfilename = simresfolder + commonOptions['repeatgene'] + unique_file_id + '_comp.txt'
-   allres = []
-   summarykeys = summary.keys(); summarykeys.sort()
-   for sumk in summarykeys:
-      if sumk==summarykeys[0]:
-         titstr = ['#No']
-      methtypekeys = summary[sumk][0].keys(); methtypekeys.sort();
-      curres = [str(sumk)]
-      for methk in methtypekeys:
-         if sumk==summarykeys[0]:
-            titstr.append(methk)
-         res1 = summary[sumk][0][methk]
-         curres.append('%s %s' % (str(res1[0]), str(res1[1])))
-      if sumk==summarykeys[0]:
-         allres.append(' '.join(titstr))
-      allres.append(' '.join(curres))
-		
-   findTrinucleotideRepeats.myWriteTxtFile(allres, curfilename);
-
+      mres, mdetail = myScanWholeGenome.scan_multiprocess(commonOptions, specifiedOptions)
+      myCommonFun.myWriteScanResults(specifiedOptions, mres, mdetail, procss_info='_all')
 
 def FASTQinput(margs):
    specifiedOptions = {}
@@ -327,8 +327,6 @@ def FASTQinput(margs):
    commonOptions, errorStr_com, analysis_file_id_com = getCommonOptions(margs)
    errorStr += errorStr_com
 
-   isUnsymAlign = margs.UnsymAlign; specifiedOptions['isUnsymAlign'] = isUnsymAlign
-   if isUnsymAlign: analysis_file_id += "_unsymalign"
    analysis_file_id += analysis_file_id_com
 
    specifiedOptions['fastafile'] = margs.fastq
@@ -336,24 +334,30 @@ def FASTQinput(margs):
    elif not os.path.isfile(specifiedOptions['fastafile']):  errorStr += '\tThe fasta file ('+specifiedOptions['fastafile']+') does not exit\n';
 
    if not errorStr==originalError:
-      print errorStr; #BAMinput|FASTQinput|Simulate
+      print errorStr; #BAMinput|FASTQinput|Scan
       parser.print_help();
       parser.parse_args(['FASTQinput', '--help']);
       sys.exit(140)
 
-   unique_file_id =  commonOptions['specifiedGeneName']+analysis_file_id
+   if not commonOptions['UserDefinedUniqID']==None:
+      unique_file_id =  commonOptions['UserDefinedUniqID']+analysis_file_id
+   else: unique_file_id = analysis_file_id
+   unique_file_id = '.gmm' + unique_file_id
    specifiedOptions['unique_file_id'] = unique_file_id
    specifiedOptions['analysis_file_id'] = analysis_file_id
 
    logfolder = 'logfq/'
    if not os.path.isdir(logfolder):
         os.system('mkdir '+logfolder)
-   filename = logfolder + 'TrinRepFQ_' + commonOptions['repeatgene'] + unique_file_id + '.log'
+   filename = logfolder + 'RepFQ_' + commonOptions['repeatName'] + unique_file_id + '.log'
    LOG_FILENAME = filename
    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,filemode='w',format="%(levelname)s: %(message)s")
 
+   print 'The following options are used (included default):'
+   printOptions(commonOptions)
+   printOptions(specifiedOptions)
    summary = {}
-   summary[commonOptions['repeatgene']] = mySCA3.getSCA3forKnownGeneWithPartialRev(commonOptions, specifiedOptions)
+   summary[commonOptions['repeatName']] = myFASTQhandler.getSCA3forKnownGeneWithPartialRev(commonOptions, specifiedOptions)
    print '\nfor output'; logging.info('\nfor output')
    printRepInfo(summary)
 
@@ -377,37 +381,35 @@ def BAMinput(margs):
    if specifiedOptions['bamfile']==None: errorStr += '\tNo bam file provided\n';
 
    if not errorStr==originalError:
-      print errorStr; #BAMinput|FASTQinput|Simulate
+      print errorStr; #BAMinput|FASTQinput|Scan
       parser.print_help();
       parser.parse_args(['BAMinput', '--help']);
       sys.exit(140)
 
    analysis_file_id += analysis_file_id_com
-   if not specifiedOptions["Onebamfile"]==None:
-      pass #analysis_file_id += ("_for_%s" % (specifiedOptions['bamfile'].replace('/', '_')))
-   else: 
-      bamstr = specifiedOptions['bamfile'].replace('/', '_')
-      bamstr = bamstr.replace('%s', '')
-      #analysis_file_id += ("_for_%s" % bamstr)
 
-   unique_file_id = analysis_file_id
+   unique_file_id = '.gmm' + analysis_file_id
    specifiedOptions['analysis_file_id'] = analysis_file_id
    specifiedOptions['unique_file_id'] = unique_file_id
 
    logfolder = 'logbam/'
    if not os.path.isdir(logfolder):
         os.system('mkdir '+logfolder)
-   filename = logfolder + 'TrinRepBAM_' + commonOptions['repeatgene'] + unique_file_id + '.log'
+   filename = logfolder + 'RepBAM_' + commonOptions['repeatName'] + unique_file_id + '.log'
    LOG_FILENAME = filename
    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,filemode='w',format="%(levelname)s: %(message)s")
 
    logging.info('Input BAM file is '+specifiedOptions['bamfile']);
 
-   if margs.repeatgene=='all':
-      summary = findTrinucleotideRepeats.getRepeat(commonOptions, specifiedOptions)
+   print 'The following options are used (included default):'
+   printOptions(commonOptions)
+   printOptions(specifiedOptions)
+
+   if margs.repeatName=='all':
+      summary = myBAMhandler.getRepeat(commonOptions, specifiedOptions)
    else:
       summary = {}
-      summary[margs.repeatgene] = findTrinucleotideRepeats.getRepeatForKnownGene(commonOptions, specifiedOptions)
+      summary[margs.repeatName] = myBAMhandler.getRepeatForKnownGene(commonOptions, specifiedOptions)
 
    printRepInfo(summary)
 
@@ -421,8 +423,8 @@ def printRepInfo(summary):
 			logging.info(summary[sumk][1][mk]+'')
 
 	print ''; logging.info('')
-	print ''; logging.info('')
-	print ''; logging.info('')
+	#print ''; logging.info('')
+	#print ''; logging.info('')
 
 	for sumk in sumkeys:
 		if sumk==sumkeys[0]:
@@ -455,27 +457,30 @@ subparsers = parser.add_subparsers()
 parent_parser = argparse.ArgumentParser(add_help=False)
 
 ########################################
-
+# --hg --hgfile --GapCorrection --FlankLength --MatchInfo
 com_group_for_align = parent_parser.add_argument_group('Common options for alignment')
-com_group_for_align.add_argument("--hg", default='hg38', help="The reference genome is used. Currently, hg38 and hg19 are supported")
+com_group_for_align.add_argument("--hg", default='hg38', help="The reference genome is used. Currently, some repeat information in hg38 and hg19 are pre-defined. The default folder is ./mhgversion/")
 com_group_for_align.add_argument("--hgfile", default='', help="The file name of reference genome. It could be empty and the default file name is 'hg'.fa")
-com_group_for_align.add_argument("--RemInDel", type=int, default=1, help="Is unsymmetrical alignment used for error correction. 1: yes(Default), 0: no");
-com_group_for_align.add_argument("--updown", type=int, default=18, help="Is upstream/downstream used for repeat length inference. non-0: yes(Default: 18), 0: no");
-com_group_for_align.add_argument("--extend", type=int, default=3, help="Is upstream/downstream extended as repeat region. non-0: yes, 0: no(Default)");
+com_group_for_align.add_argument("--GapCorrection", type=int, default=1, help="Is unsymmetrical alignment used for error correction of detected repeat region in reads. 1: yes(Default), 0: no");
+com_group_for_align.add_argument("--FlankLength", type=int, default=30, help="Is flanking sequence used for repeat region detection. non-0: yes(Default: 30), 0: no");
+com_group_for_align.add_argument("--MatchInfo", default="3;-2;-2;-15;-1", help="The match strategy for gap correction.");
 
-##################################--BWAMEMOptions --MaxRep --CompRep
+################################## --Tolerate --MinSup --MaxRep --CompRep
 com_group_for_others = parent_parser.add_argument_group('Common options')
+com_group_for_others.add_argument("--outlog", default=M_WARNING, help="The level for output of running information")
+com_group_for_others.add_argument("--Tolerate",  default=None, help="Tolerate mismatch, e.g., CTG:TTG:0:2 or CTG:CTT:-2:0.")
 com_group_for_others.add_argument("--MinSup", type=int, default=5, help="The minimum reads associated with peaks.")
 com_group_for_others.add_argument("--MaxRep", type=int, default=4000, help="The maximum repeat size. The smallest MaxRep should not be less than 14.")
 com_group_for_others.add_argument("--CompRep", default='0', help="Whether the repeat pattern is simple ('0') or complex (nonzeo-'0': AlTlT50/C50lClT/C). For complex patterns, all patterns are required to have the same length, each position is seperated by `l` and the nucleotides at the same position is seperated by '/' where a nucleotide can by followed by a number specify relative frequency (cannot be float).")
 
-####################################
-
+#################################### --repeatName --UserDefinedUniqID --Patternfile
 com_group_for_gene = parent_parser.add_argument_group('Common options for gene information')
-com_group_for_gene.add_argument("--repeatgene", default=None, help="A gene name which you want to analyze(Default: None), such as HTT for huntington's disease. 'all': all known genes associated with trinucleotide repeat disorders will be analyzed;");
-com_group_for_gene.add_argument("--UserDefinedGene", default=UserDefinedGenedefault, help="The gene information defined by users. If this option is given, the default gene information will be revised. Default: ///////");
-com_group_for_gene.add_argument("--UserDefinedGeneName", default=None, help="The name for storing results. Default: Pcr1");
+com_group_for_gene.add_argument("--repeatName", default=None, help="A gene name which you want to analyze(Default: None), such as HTT for huntington's disease. 'all': all pre-defined genes will be analyzed;");
+com_group_for_gene.add_argument("--UserDefinedUniqID", default=None, help="The name for storing results. Default: Pcr1. Must be different when simultaneously running RepeatHMM many times with the same setting for a same file");
+com_group_for_gene.add_argument("--Patternfile", default=None, help="The file storing all predefined microsatellites (e.g., './reference_sts/hg38/hg38.trf.bed'). '.bed' for bed files and '.pa' for pa file. More than one files can be provided seperated by ';'. ");
+com_group_for_gene.add_argument("--UserDefinedRepeat", default=UserDefinedRepeatdefault, help="The repeat information defined by users. If this option is given, the default repeat information will be revised. Default: ///////");
 
+####################### --SplitAndReAlign --TRFOptions --minTailSize --minRepBWTSize --RepeatTime --BWAMEMOptions
 com_group_for_splitalign = parent_parser.add_argument_group('Common options for re-alignment after splitting long reads using repeat regions')
 com_group_for_splitalign.add_argument("--SplitAndReAlign", type=int, choices=[0, 1, 2], default=0, help="Split long reads using repeat region in long reads and re-align the non-repeat regions using BWA MEM. Default=0: not use SplitAndReAlign; 1: use SplitAndReAlign only; 2: combine 0 and 1")
 com_group_for_splitalign.add_argument("--TRFOptions",  default="2_7_4_80_10_100", help="The options used for detecting repeat region in a read using Tandem Repeat Finder. The options are merging using _. Default='2_7_4_80_10_100_500' or '2_7_4_80_10_100'. The last parameter will be twice of the length of repeat if not given.")
@@ -483,6 +488,7 @@ com_group_for_splitalign.add_argument("--minTailSize", type=int, default=70, hel
 com_group_for_splitalign.add_argument("--minRepBWTSize", type=int, default=70, help="After the split using repeat regions, merge any two non-repeat sub-sequences if they distance is less than --minRepBWTSize bps. Must not be less than 10. Default=70")
 com_group_for_splitalign.add_argument("--RepeatTime", type=int, default=5, help="The minimum repeat time for a microsatellite detected by Tandem Repeat Finder. Must not be less than 2. Default=5")
 com_group_for_splitalign.add_argument("--BWAMEMOptions",  default="k8_W8_r7", help="The options used for BWA MEM to align sub-reads after splitting. The options are merging using _. Default='k8_W8_r7'. For example: 'k8_W8_r7'")
+
 
 #fafqfile\|fafqtype
 #hmm_insert_rate hmm_del_rate hmm_sub_rate SeqTech transitionm emissionm
@@ -492,14 +498,14 @@ com_group_for_hmm.add_argument("--hmm_del_rate", type=float, default=0.02, help=
 com_group_for_hmm.add_argument("--hmm_sub_rate", type=float, default=0.02, help="Substitution error rate in long reads. Default: 0.02");
 com_group_for_hmm.add_argument("--SeqTech", choices=["Pacbio", "Nanopore", "Illumina", None], default=None, help="The sequencing techniques, Pacbio or Nanopore or Illumina, used to generate reads data. Default: None. Setting this option will override the setting for --hmm_insert_rate, --hmm_del_rate and --hmm_sub_rate");
 com_group_for_hmm.add_argument("--transitionm", default=None, help="User-specified transition matrix for HMM. The number of rows and columns must be the same as the 3*L+1 where L is the size of repeat unit. Probabilities in a row is separated by ',' and their sum must be 1. Probabilities of different rows are separated by ';'. Please pay more attention when providing this parameter. For CG repeat, the example of this matrix is '0.96,0.02,0,0,0,0.02,0;0,0.001,0.869,0.11,0,0,0.02;0.02,0.849,0.001,0,0.11,0.02,0;0,0.001,0.869,0.11,0,0,0.02;0.02,0.849,0.001,0,0.11,0.02,0;0.02,0.849,0.001,0,0.11,0.02,0;0.02,0.001,0.849,0.11,0,0,0.02'. Setting this option will override the setting of --hmm_insert_rate, --hmm_del_rate, --hmm_sub_rate and --SeqTech for transition matrix.");
-com_group_for_hmm.add_argument("--emissionm", default=None, help="User-specified emission matrix for HMM. The number of rows must be the same as the 3*L+1 where L is the size of repeat unit and the number of columns must be 4. Probabilities in a row is separated by ',' and their sum must be 1. Probabilities of different rows are separated by ';'. Please pay more attention when providing this parameter. For CG repeat, the example of this matrix is '0.25,0.25,0.25,0.25;0.005,0.985,0.005,0.005;0.005,0.005,0.985,0.005;0.25,0.25,0.25,0.25;0.25,0.25,0.25,0.25;0.005,0.005,0.985,0.005;0.005,0.985,0.005,0.005'. Setting this option will override the setting of --hmm_insert_rate, --hmm_del_rate, --hmm_sub_rate and --SeqTech for emission matrix.");
+com_group_for_hmm.add_argument("--emissionm", default=None, help="User-specified emission matrix for HMM. The number of rows must be the same as the 3*L+1 where L is the size of repeat unit and the number of columns must be 5. Probabilities in a row is separated by ',' and their sum must be 1. Probabilities of different rows are separated by ';'. Please pay more attention when providing this parameter. For CG repeat, the example of this matrix is '0.2,0.2,0.2,0.2,0.2;0.005,0.985,0.005,0.005,0;0.005,0.005,0.985,0.005,0;0.25,0.25,0.25,0.25,0;0.25,0.25,0.25,0.25,0;0.005,0.005,0.985,0.005,0;0.005,0.985,0.005,0.005,0'. Setting this option will override the setting of --hmm_insert_rate, --hmm_del_rate, --hmm_sub_rate and --SeqTech for emission matrix.");
 
 #####################################
-
+# --Onebamfile --SepbamfileTemp
 parser_bam = subparsers.add_parser('BAMinput', parents=[parent_parser], help="Detect trinucleotide repeats from a BAM file", description="Detect trinucleotide repeats from a BAM file", epilog="For example, \n \
-python %(prog)s --bamfile XXX.bam --repeatgene HTT; \n \
-python %(prog)s --bamfile XXX.bam --repeatgene HTT --RemInDel 1 --updown 18 --extend 0; \n \
-python %(prog)s --bamfile freeze4-all-merge.sort.bam --repeatgene HTT; \n \
+python %(prog)s --bamfile XXX.bam --repeatName HTT; \n \
+python %(prog)s --bamfile XXX.bam --repeatName HTT --GapCorrection 1 FlankLength 30; \n \
+python %(prog)s --bamfile freeze4-all-merge.sort.bam --repeatName HTT; \n \
 Final results was stored in logbam/TrinRepBAM*.log \n \
 Note!!!!!! \n \
 BAM file should be produced with the same version of 'hg' if '--hg' or '--hgfile' is specified. \n \
@@ -511,39 +517,37 @@ bamgroup.add_argument("--SepbamfileTemp", default=None, help="A separated BAM fi
 
 parser_bam.set_defaults(func=BAMinput)
 
-######################################
-
+###################################### --fastq
 parser_fasta = subparsers.add_parser('FASTQinput', parents=[parent_parser], help="Detect trinucleotide repeats from a FASTQ file", description="Detect trinucleotide repeats from a FASTQ file", epilog="For example, \n \
-python %(prog)s --fastq XXX.fq --repeatgene HTT --UnsymAlign 1; \n \
-python %(prog)s --fastq XXX.fq --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1; \n \
-python %(prog)s --fastq XXX.fq --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName PCR1; \n \
-python %(prog)s --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName sca3_pcr25_raw_test --fastq atxn3_data/rawdata/sam025.raw.fastq  \n \
+python %(prog)s --fastq XXX.fq --repeatName HTT; \n \
+python %(prog)s --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 ; \n \
+python %(prog)s --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID PCR1; \n \
+python %(prog)s --repeatName atxn3 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID sca3_pcr25_raw_test --fastq atxn3_data/rawdata/sam025.raw.fastq  \n \
 Final results was stored in logfq/TrinRepFQ*.log \n \
 ", formatter_class=RawTextHelpFormatter)
 
-parser_fasta.add_argument("--UnsymAlign", type=int, default=1, help="Whether unsymmetrical alignment (1) rather than bwa mem (0) would be used. Default: 1");
 parser_fasta.add_argument("--fastq", help="The file name for fasta sequences");
 parser_fasta.set_defaults(func=FASTQinput)
 
-##############################################
-
-parser_sim = subparsers.add_parser('Simulate', parents=[parent_parser], help="For simulation", description="Simulate for a given gene", epilog="For example, \n \
-python %(prog)s --repeatgene HTT --UnsymAlign 1; \n \
-python %(prog)s --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1; \n \
-python %(prog)s --repeatgene HTT --RemInDel 1 --updown 18 --extend 0 --UnsymAlign 1 --coverage 100 --randTimes 100 -UserDefinedGene /92070888/92072403///// --UserDefinedGeneName PCR1; \n \
-python %(prog)s --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --randTimes 100 --coverage 50 \n \
-python %(prog)s --repeatgene atxn3 --UnsymAlign 1 --RemInDel 1 --updown 18 --extend 0 --randTimes 100 --coverage 50 --UserDefinedGene /92070888/92072403///// --UserDefinedGeneName pcr1 \n \
-Final results was stored in logsim/TrinRepSim*.log \n \
+############################################## --region 
+parser_scan = subparsers.add_parser('Scan', parents=[parent_parser], help="For scanning whole data", description="Scan for a whole genome or a whole region given", epilog="For example, \n \
+python %(prog)s --region chr4 --GapCorrection 1 --FlankLength 30 ; \n \
+python %(prog)s --region chr4 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID PCR1; \n \
+python %(prog)s --region chr4 --GapCorrection 1 --FlankLength 30 \n \
+python %(prog)s --region chr4 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID pcr1 \n \
+Final results was stored in logscan/TrinRepSim*.log \n \
 ", formatter_class=RawTextHelpFormatter)
 
-parser_sim.add_argument("--insert_rate", type=float, default=0.12, help="Insert error rate. Default: 0.12");
-parser_sim.add_argument("--del_rate", type=float, default=0.02, help="Deletion error rate. Default: 0.02");
-parser_sim.add_argument("--sub_rate", type=float, default=0.02, help="Substitution error rate. Default: 0.02");
-parser_sim.add_argument("--coverage", type=int, default=300, help="The number of reads produced after mutations. Default: 300");
-parser_sim.add_argument("--randTimes", type=int, default=100, help="The number of simulation times. Default: 100");
-parser_sim.add_argument("--UnsymAlign", type=int, default=1, help="Whether unsymmetrical alignment (1) rather than bwa mem (0) would be used. Default: 1");
-parser_sim.add_argument("--RepeatSizeDif", default=None, help="The absolute difference of repeat size in two alleles: Default: None; could be 1, 2, or 3_4 and so on. Must be positive numbers.");
-parser_sim.set_defaults(func=simulation)
+parser_scan.add_argument("--region", default=None, help="The region where microsatellites are located. 'All' means all microsatellites (<10 nucleotides in repeat units), 'chrZ:X:Y' indicates a chromosome region where all microsatellites would be automatically searche. 'None': will only detect microsatellites predined in 'repeatName'");
+parser_scan.add_argument("--thread", default=1, type=int, help="How many additional threads are used. Default: 1");
+parser_scan.add_argument("--outFolder", default='align/', help="How many additional threads are used. Default: 1");
+parser_scan.add_argument("--conted", default=0, type=int, help="Whether continue the running last time. Default: 0");
+
+bam2group = parser_scan.add_mutually_exclusive_group(); #required=True)
+bam2group.add_argument("--Onebamfile", default=None, help="A BAM file storing all alignments")
+bam2group.add_argument("--SepbamfileTemp", default=None, help="A separated BAM file template storing all alignments; separated by chromosome ids. For example, '--SepbamfileTemp'=mybam_Chr%%s_sorted.bam where '%%s' is chromosome id (1....22,x,y)")
+
+parser_scan.set_defaults(func=scan)
 
 
 if len(sys.argv)<2:

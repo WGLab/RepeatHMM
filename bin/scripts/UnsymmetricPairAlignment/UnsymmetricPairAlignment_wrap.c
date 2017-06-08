@@ -3018,8 +3018,8 @@ static swig_module_info swig_module = {swig_types, 1, 0, 0, 0, 0};
 
 /* put header files here or function declarations like below*/
 
-extern char* unsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRep, char* read, int lenRead, int match, int mismatch, int gap_in_perf, int gap_in_read, int gap_before_after, int bandWidth, int isprint);
-extern char * correctedByunsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRep, char* read, int lenRead, int match, int mismatch, int gap_in_perf, int gap_in_read, int gap_before_after, int bandWidth, int isprint);
+extern char* unsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRep, char* read, int lenRead, int match, int mismatch, int gap_in_perf, int gap_in_read, int gap_before_after, int bandWidth, int isprint, char* mmismatch, int mislen, int mismnum);
+extern char * correctedByunsymmetricPairWiseAlignment(char* perfectRepeat, int lenPerfRep, char* read, int lenRead, int match, int mismatch, int gap_in_perf, int gap_in_read, int gap_before_after, int bandWidth, int isprint, char* mmismatch, int mislen, int mismnum);
 
 
 SWIGINTERN swig_type_info*
@@ -3335,6 +3335,9 @@ SWIGINTERN PyObject *_wrap_unsymmetricPairWiseAlignment(PyObject *SWIGUNUSEDPARM
   int arg9 ;
   int arg10 ;
   int arg11 ;
+  char *arg12 = (char *) 0 ;
+  int arg13 ;
+  int arg14 ;
   int res1 ;
   char *buf1 = 0 ;
   int alloc1 = 0 ;
@@ -3359,6 +3362,13 @@ SWIGINTERN PyObject *_wrap_unsymmetricPairWiseAlignment(PyObject *SWIGUNUSEDPARM
   int ecode10 = 0 ;
   int val11 ;
   int ecode11 = 0 ;
+  int res12 ;
+  char *buf12 = 0 ;
+  int alloc12 = 0 ;
+  int val13 ;
+  int ecode13 = 0 ;
+  int val14 ;
+  int ecode14 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -3370,9 +3380,12 @@ SWIGINTERN PyObject *_wrap_unsymmetricPairWiseAlignment(PyObject *SWIGUNUSEDPARM
   PyObject * obj8 = 0 ;
   PyObject * obj9 = 0 ;
   PyObject * obj10 = 0 ;
+  PyObject * obj11 = 0 ;
+  PyObject * obj12 = 0 ;
+  PyObject * obj13 = 0 ;
   char *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOOO:unsymmetricPairWiseAlignment",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9,&obj10)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOOOOOO:unsymmetricPairWiseAlignment",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9,&obj10,&obj11,&obj12,&obj13)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "unsymmetricPairWiseAlignment" "', argument " "1"" of type '" "char *""'");
@@ -3428,15 +3441,32 @@ SWIGINTERN PyObject *_wrap_unsymmetricPairWiseAlignment(PyObject *SWIGUNUSEDPARM
     SWIG_exception_fail(SWIG_ArgError(ecode11), "in method '" "unsymmetricPairWiseAlignment" "', argument " "11"" of type '" "int""'");
   } 
   arg11 = (int)(val11);
-  result = (char *)unsymmetricPairWiseAlignment(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+  res12 = SWIG_AsCharPtrAndSize(obj11, &buf12, NULL, &alloc12);
+  if (!SWIG_IsOK(res12)) {
+    SWIG_exception_fail(SWIG_ArgError(res12), "in method '" "unsymmetricPairWiseAlignment" "', argument " "12"" of type '" "char *""'");
+  }
+  arg12 = (char *)(buf12);
+  ecode13 = SWIG_AsVal_int(obj12, &val13);
+  if (!SWIG_IsOK(ecode13)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode13), "in method '" "unsymmetricPairWiseAlignment" "', argument " "13"" of type '" "int""'");
+  } 
+  arg13 = (int)(val13);
+  ecode14 = SWIG_AsVal_int(obj13, &val14);
+  if (!SWIG_IsOK(ecode14)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode14), "in method '" "unsymmetricPairWiseAlignment" "', argument " "14"" of type '" "int""'");
+  } 
+  arg14 = (int)(val14);
+  result = (char *)unsymmetricPairWiseAlignment(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14);
   resultobj = SWIG_FromCharPtr((const char *)result);
   if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
   if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
+  if (alloc12 == SWIG_NEWOBJ) free((char*)buf12);
   free((char*)result);
   return resultobj;
 fail:
   if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
   if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
+  if (alloc12 == SWIG_NEWOBJ) free((char*)buf12);
   return NULL;
 }
 
@@ -3454,6 +3484,9 @@ SWIGINTERN PyObject *_wrap_correctedByunsymmetricPairWiseAlignment(PyObject *SWI
   int arg9 ;
   int arg10 ;
   int arg11 ;
+  char *arg12 = (char *) 0 ;
+  int arg13 ;
+  int arg14 ;
   int res1 ;
   char *buf1 = 0 ;
   int alloc1 = 0 ;
@@ -3478,6 +3511,13 @@ SWIGINTERN PyObject *_wrap_correctedByunsymmetricPairWiseAlignment(PyObject *SWI
   int ecode10 = 0 ;
   int val11 ;
   int ecode11 = 0 ;
+  int res12 ;
+  char *buf12 = 0 ;
+  int alloc12 = 0 ;
+  int val13 ;
+  int ecode13 = 0 ;
+  int val14 ;
+  int ecode14 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -3489,9 +3529,12 @@ SWIGINTERN PyObject *_wrap_correctedByunsymmetricPairWiseAlignment(PyObject *SWI
   PyObject * obj8 = 0 ;
   PyObject * obj9 = 0 ;
   PyObject * obj10 = 0 ;
+  PyObject * obj11 = 0 ;
+  PyObject * obj12 = 0 ;
+  PyObject * obj13 = 0 ;
   char *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOOO:correctedByunsymmetricPairWiseAlignment",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9,&obj10)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOOOOOO:correctedByunsymmetricPairWiseAlignment",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9,&obj10,&obj11,&obj12,&obj13)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "correctedByunsymmetricPairWiseAlignment" "', argument " "1"" of type '" "char *""'");
@@ -3547,15 +3590,32 @@ SWIGINTERN PyObject *_wrap_correctedByunsymmetricPairWiseAlignment(PyObject *SWI
     SWIG_exception_fail(SWIG_ArgError(ecode11), "in method '" "correctedByunsymmetricPairWiseAlignment" "', argument " "11"" of type '" "int""'");
   } 
   arg11 = (int)(val11);
-  result = (char *)correctedByunsymmetricPairWiseAlignment(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+  res12 = SWIG_AsCharPtrAndSize(obj11, &buf12, NULL, &alloc12);
+  if (!SWIG_IsOK(res12)) {
+    SWIG_exception_fail(SWIG_ArgError(res12), "in method '" "correctedByunsymmetricPairWiseAlignment" "', argument " "12"" of type '" "char *""'");
+  }
+  arg12 = (char *)(buf12);
+  ecode13 = SWIG_AsVal_int(obj12, &val13);
+  if (!SWIG_IsOK(ecode13)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode13), "in method '" "correctedByunsymmetricPairWiseAlignment" "', argument " "13"" of type '" "int""'");
+  } 
+  arg13 = (int)(val13);
+  ecode14 = SWIG_AsVal_int(obj13, &val14);
+  if (!SWIG_IsOK(ecode14)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode14), "in method '" "correctedByunsymmetricPairWiseAlignment" "', argument " "14"" of type '" "int""'");
+  } 
+  arg14 = (int)(val14);
+  result = (char *)correctedByunsymmetricPairWiseAlignment(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14);
   resultobj = SWIG_FromCharPtr((const char *)result);
   if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
   if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
+  if (alloc12 == SWIG_NEWOBJ) free((char*)buf12);
   free((char*)result);
   return resultobj;
 fail:
   if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
   if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
+  if (alloc12 == SWIG_NEWOBJ) free((char*)buf12);
   return NULL;
 }
 
