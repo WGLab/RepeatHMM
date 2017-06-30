@@ -253,6 +253,10 @@ def getCommonOptions(margs, cominfo=None):
    return commonOptions, errorStr, analysis_file_id_common
 
 def scan(margs):
+   print 'This function is disenabled now.'
+   print 'We will publish this function later.'
+   sys.exit(140)
+
    cominfo = {}
    cominfo['scan'] = 1;
    #print margs;
