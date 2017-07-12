@@ -34,3 +34,6 @@ For release history, please visit [here](https://github.com/WGLab/RepeatHMM/rele
 
 If you have any questions/issues/bugs, please post them on [GitHub](https://github.com/WGLab/RepeatHMM/issues). They would also be helpful to other users. 
 
+## Reference
+
+Liu Q, Zhang P, Wang D, Gu W, Wang K. Interrogating the "unsequenceable" genomic trinucleotide repeat disorders by long-read sequencing. Genome Medicine, in press, 2017
