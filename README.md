@@ -4,11 +4,13 @@ RepeatHMM is a novel computational tool to detect any microsatellites (including
 
 ## Features
 
-* Prefined more than 10 trinucleotide repeats: AFF2, AR, ATN1, ATXN1, ATXN2, ATXN3, ATXN7, ATXN8OS, CACNA1A, DMPK, FMR1, FXN, HTT, PPP2R2B, TBP
+* Accurate and efficient estimation of repeat counts from long-read sequencing data
+
+* Analysis of all types of simple repeats
+
+* Prefined models are included for more than 10 well known trinucleotide repeats: AFF2, AR, ATN1, ATXN1, ATXN2, ATXN3, ATXN7, ATXN8OS, CACNA1A, DMPK, FMR1, FXN, HTT, PPP2R2B, TBP
 
 * Easy to install and use
-
-* Accurate and efficient estimation
 
 ## Methodology of RepeatHMM
 
@@ -32,6 +34,3 @@ For release history, please visit [here](https://github.com/WGLab/RepeatHMM/rele
 
 If you have any questions/issues/bugs, please post them on [GitHub](https://github.com/WGLab/RepeatHMM/issues). They would also be helpful to other users. 
 
-## More information
-
-Copyright 2016 [USC Wang Lab](http://wglab.org/)
