@@ -1,4 +1,4 @@
-# RepeatHMM: to Detect microsatellites/trinucleotide repeats from long reads of DNA sequencing
+# RepeatHMM: estimation of repeat counts on microsatellites from long-read sequencing data
 
 RepeatHMM is a novel computational tool to detect any microsatellites (including trinucleotide repeats in trinucleotide repeat disorders (TRD)) from given long reads for a subject of interests. It is able to accurately estimate estimate expansion counts according to the evaluation performance on both simulation data and real data. It is user friendly and easy to install and use.
 
