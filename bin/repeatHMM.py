@@ -365,6 +365,7 @@ def FASTQinput(margs):
    print '\nfor output'; logging.info('\nfor output')
    printRepInfo(summary)
 
+   print 'The result is in', filename
 
 def BAMinput(margs):
    specifiedOptions = {}
@@ -416,6 +417,8 @@ def BAMinput(margs):
       summary[margs.repeatName] = myBAMhandler.getRepeatForKnownGene(commonOptions, specifiedOptions)
 
    printRepInfo(summary)
+
+   print 'The result is in', filename
 
 def printRepInfo(summary):
 	print ''; logging.info('')
@@ -486,7 +489,7 @@ com_group_for_gene.add_argument("--UserDefinedRepeat", default=UserDefinedRepeat
 
 ####################### --SplitAndReAlign --TRFOptions --minTailSize --minRepBWTSize --RepeatTime --BWAMEMOptions
 com_group_for_splitalign = parent_parser.add_argument_group('Common options for re-alignment after splitting long reads using repeat regions')
-com_group_for_splitalign.add_argument("--SplitAndReAlign", type=int, choices=[0, 1, 2], default=0, help="Split long reads using repeat region in long reads and re-align the non-repeat regions using BWA MEM. Default=0: not use SplitAndReAlign; 1: use SplitAndReAlign only; 2: combine 0 and 1")
+com_group_for_splitalign.add_argument("--SplitAndReAlign", type=int, choices=[0, 1, 2], default=1, help="Split long reads using repeat region in long reads and re-align the non-repeat regions using BWA MEM. Default=0: not use SplitAndReAlign; 1: use SplitAndReAlign only; 2: combine 0 and 1")
 com_group_for_splitalign.add_argument("--TRFOptions",  default="2_7_4_80_10_100", help="The options used for detecting repeat region in a read using Tandem Repeat Finder. The options are merging using _. Default='2_7_4_80_10_100_500' or '2_7_4_80_10_100'. The last parameter will be twice of the length of repeat if not given.")
 com_group_for_splitalign.add_argument("--minTailSize", type=int, default=70, help="After the split using repeat regions, discard the leftmost/rightmost non-repeat sub-sequences if they have less than --minTailSize bps. Must not be less than 10. Default=70")
 com_group_for_splitalign.add_argument("--minRepBWTSize", type=int, default=70, help="After the split using repeat regions, merge any two non-repeat sub-sequences if they distance is less than --minRepBWTSize bps. Must not be less than 10. Default=70")

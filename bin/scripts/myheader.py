@@ -39,6 +39,6 @@ template_bwamem_cmd2 = 'bwa mem -k17 -W40 -r10 -A1 -B1 -O1 -E1 -L0 -t '+mthreads
 len_isolated_repeat = 20
 
 testall = False;
-testall = True;
+#testall = True;
 
 
