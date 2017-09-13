@@ -1033,6 +1033,8 @@ def findRepeatCountALongRead(commonOptions, specifiedOptions, moreOptions):
 
 	rep_predata, rep_mfadata, rep_sufdata = myBAMhandler.getGene(repeatName, chr, repeat_start_end, specifiedOptions['unique_file_id'], specifiedOptions['analysis_file_id'], commonOptions['hgfile'], repeatFlankLength, specifiedOptions)
 
+	commonOptions['rep_flanking_data'] = rep_predata, rep_sufdata
+
 	rptrue = []; rpfalse = []; orignial = [];
 	repeatsKeys = expRegionInLongRead.keys(); repeatsKeys.sort()
 	for currep_key in repeatsKeys:

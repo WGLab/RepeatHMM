@@ -12,7 +12,7 @@
 	* BWA MEM
 
 ## Step 1:
-	* go to bin/scripts
+	* go to bin/scripts/UnsymmetricPairAlignment
 	* type "make" and then enter
 
 ## Usage:

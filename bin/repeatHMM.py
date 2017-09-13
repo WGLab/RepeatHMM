@@ -26,7 +26,8 @@ from scripts import myCommonFun
 parser = argparse.ArgumentParser(description="Determine microsatellite repeat of interests or for all microsatellites.", epilog="For example, \n \
 \tpython %(prog)s BAMinput: with a BAM file as input\n \
 \tpython %(prog)s FASTQinput: with a FASTQ file as input \n \
-\tpython %(prog)s Scan: for Scaning whole genome", formatter_class=RawTextHelpFormatter);
+", formatter_class=RawTextHelpFormatter);
+#\tpython %(prog)s Scan: for Scaning whole genome", formatter_class=RawTextHelpFormatter);
 
 
 originalError = '!!!Error: !!!!!! \n'
