@@ -6,11 +6,11 @@
 		+ peakutils 1.0.3
 		+ hmmlearn
 		+ sklearn (sklearn.mixture.GaussianMixture)
+		+ biopython (strongly recommend 1.66 if possible)
 	* SWIG
 	* make
 	* Tandem Repeat Finder (TRF): please use 'ln -s XXX myTRF' where XXX is your TRF program.
 	* BWA MEM
-	* biopython (strongly recommend 1.66 if possible)
 
 ## Step 1:
 	* go to bin/scripts/UnsymmetricPairAlignment
