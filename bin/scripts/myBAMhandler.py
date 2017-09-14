@@ -19,6 +19,7 @@ from scipy.stats import norm
 import heapq
 
 from Bio import pairwise2;
+import Bio
 
 import getAlignment
 import myHMM
@@ -105,7 +106,10 @@ def insert_n_for_flanking(oldstr, rep_predata, rep_sufdata, repeatFlankLength, r
 	query_pos = [[0, repeatFlankLength+lengthmore], [-repeatFlankLength-lengthmore,] ]
 	query_pre_suf = [oldstr[query_pos[0][0]:query_pos[0][1]], oldstr[query_pos[1][0]:]]
 	
-	match, mismatch, gap, gap_extension = 2, -1, -1, -10 	#from Bio import pairwise2;
+	if Bio.__version__=='1.66':
+		match, mismatch, gap, gap_extension = 2, -1, -1, -10 	#from Bio import pairwise2;
+	else:
+		match, mismatch, gap, gap_extension = 1, -1, -1, -1
 	twopairs = [[query_pre_suf[0], rep_predata], [query_pre_suf[1], rep_sufdata] ]
 	detectpos = []; detail2 = []
 	for curp_ind in range(len(twopairs)):

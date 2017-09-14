@@ -10,6 +10,7 @@
 	* make
 	* Tandem Repeat Finder (TRF): please use 'ln -s XXX myTRF' where XXX is your TRF program.
 	* BWA MEM
+	* biopython (strongly recommend 1.66 if possible)
 
 ## Step 1:
 	* go to bin/scripts/UnsymmetricPairAlignment
