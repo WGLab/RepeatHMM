@@ -511,9 +511,9 @@ com_group_for_hmm.add_argument("--emissionm", default=None, help="User-specified
 #####################################
 # --Onebamfile --SepbamfileTemp
 parser_bam = subparsers.add_parser('BAMinput', parents=[parent_parser], help="Detect trinucleotide repeats from a BAM file", description="Detect trinucleotide repeats from a BAM file", epilog="For example, \n \
-python %(prog)s --bamfile XXX.bam --repeatName HTT; \n \
-python %(prog)s --bamfile XXX.bam --repeatName HTT --GapCorrection 1 FlankLength 30; \n \
-python %(prog)s --bamfile freeze4-all-merge.sort.bam --repeatName HTT; \n \
+python %(prog)s --Onebamfile XXX.bam --repeatName HTT; \n \
+python %(prog)s --Sepbamfile XXX%s.bam --repeatName HTT --GapCorrection 1 FlankLength 30; \n \
+python %(prog)s --Onebamfile freeze4-all-merge.sort.bam --repeatName HTT; \n \
 Final results was stored in logbam/RepBAM_*.log \n \
 Note!!!!!! \n \
 BAM file should be produced with the same version of 'hg' if '--hg' or '--hgfile' is specified. \n \
