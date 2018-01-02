@@ -220,9 +220,9 @@ Common options for setting HMM matrices:
 ### Example
 ```
 For example,
-     python repeatHMM.py BAMinput --bamfile XXX.bam --repeatName HTT;
-     python repeatHMM.py BAMinput --bamfile XXX.bam --repeatName HTT --GapCorrection 1 FlankLength 30;
-     python repeatHMM.py BAMinput --bamfile freeze4-all-merge.sort.bam --repeatName HTT;
+     python repeatHMM.py BAMinput --Onebamfile XXX.bam --repeatName HTT;
+     python repeatHMM.py BAMinput --Sepbamfile XXX%s.bam --repeatName HTT --GapCorrection 1 FlankLength 30;
+     python repeatHMM.py BAMinput --Onebamfile freeze4-all-merge.sort.bam --repeatName HTT;
 ```
 Please note that BAM file should be produced with the same version of 'hg' if '--hg' or '--hgfile' is specified.
 
