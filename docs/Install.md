@@ -13,6 +13,9 @@
 	* BWA MEM
 
 ## Step 1:
+	* git clone https://github.com/WGLab/RepeatHMM
+
+## Step 2:
 	* go to bin/scripts/UnsymmetricPairAlignment
 	* type "make" and then enter
 
