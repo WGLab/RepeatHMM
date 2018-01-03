@@ -144,8 +144,20 @@ def getCommonOptions(margs, cominfo=None):
    analysis_file_id_common += '_GapCorrection' + str(isGapCorrection)
    analysis_file_id_common += '_FlankLength'+str(repeatFlankLength)
 
-   if not os.path.isfile(hg_reference_and_index+'/'+margs.hg+'.fa'):
-      errorStr += '\tNo reference genome under the folder '+hg_reference_and_index+' with the filename '+margs.hg+'.fa\n'
+   commonOptions['hg'] = margs.hg
+   if margs.hgfile==None or margs.hgfile=='':
+      #commonOptions['hgfile'] = commonOptions['hg']+'.fa'
+      #if not os.path.isfile(hg_reference_and_index+'/'+margs.hg+'.fa'):
+      #   errorStr += '\tNo reference genome under the folder '+hg_reference_and_index+' with the filename '+margs.hg+'.fa\n'
+      #else: 
+      commonOptions['hgfile'] = hg_reference_and_index+'/'+margs.hg+'.fa'
+   else:
+      commonOptions['hgfile'] = margs.hgfile
+   if not os.path.isfile(commonOptions['hgfile']):
+      errorStr += '\tA reference file is needed (specified by "--hgfile" or under the folder '+hg_reference_and_index+' with the filename '+margs.hg+'.fa\n'
+
+   #if not os.path.isfile(hg_reference_and_index+'/'+margs.hg+'.fa'):
+   #   errorStr += '\tNo reference genome under the folder '+hg_reference_and_index+' with the filename '+margs.hg+'.fa\n'
    
    UserDefinedUniqID = margs.UserDefinedUniqID
    RepeatName = margs.repeatName
@@ -184,11 +196,13 @@ def getCommonOptions(margs, cominfo=None):
    commonOptions['UserDefinedUniqID'] = UserDefinedUniqID
    commonOptions['repeatName'] = RepeatName
    commonOptions['specifiedRepeatInfo'] = specifiedRepeatInfo
-   commonOptions['hg'] = margs.hg
-   if margs.hgfile==None or margs.hgfile=='':
-      commonOptions['hgfile'] = commonOptions['hg']+'.fa'
-   else:
-      commonOptions['hgfile'] = margs.hgfile
+   #commonOptions['hg'] = margs.hg
+   #if margs.hgfile==None or margs.hgfile=='':
+   #   commonOptions['hgfile'] = commonOptions['hg']+'.fa'
+   #else:
+   #   commonOptions['hgfile'] = margs.hgfile
+   #if not os.path.isfile(commonOptions['hgfile']):
+   #   errorStr += '\tA reference file is needed (specified by "--hgfile").\n'
 
    commonOptions['SplitAndReAlign'] = SplitAndReAlign
    commonOptions['TRFOptions'] = TRFOptions
@@ -251,6 +265,12 @@ def getCommonOptions(margs, cominfo=None):
    moptions['hg'] = margs.hg
    commonOptions['gLoc'] = myPredefinedPatternReader.getPredefinedMicrosatellites(moptions)
 
+   if not margs.outFolder[-1]=='/': 
+      commonOptions['align'] = margs.outFolder + '/'
+   else: commonOptions['align'] = margs.outFolder
+   if not os.path.isdir(margs.outFolder):
+      os.system('mkdir '+margs.outFolder)
+
    return commonOptions, errorStr, analysis_file_id_common
 
 def scan(margs):
@@ -299,9 +319,10 @@ def scan(margs):
       specifiedOptions['bamfile'] = specifiedOptions["SepbamfileTemp"]
    if specifiedOptions['bamfile']==None: errorStr += '\tNo bam file provided\n';
 
-   specifiedOptions['align'] = margs.outFolder
-   if not os.path.isdir(margs.outFolder):
-      os.system('mkdir '+margs.outFolder)
+   specifiedOptions['align'] = commonOptions['align']
+   #specifiedOptions['align'] = margs.outFolder
+   #if not os.path.isdir(margs.outFolder):
+   #   os.system('mkdir '+margs.outFolder)
    commonOptions['outlog'] = M_WARNING
    logfolder = 'logscan/'
    if not os.path.isdir(logfolder):
@@ -358,6 +379,8 @@ def FASTQinput(margs):
    LOG_FILENAME = filename
    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,filemode='w',format="%(levelname)s: %(message)s")
 
+   specifiedOptions['align'] = commonOptions['align']
+
    print 'The following options are used (included default):'
    printOptions(commonOptions)
    printOptions(specifiedOptions)
@@ -406,6 +429,8 @@ def BAMinput(margs):
    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,filemode='w',format="%(levelname)s: %(message)s")
 
    logging.info('Input BAM file is '+specifiedOptions['bamfile']);
+
+   specifiedOptions['align'] = commonOptions['align']
 
    print 'The following options are used (included default):'
    printOptions(commonOptions)
@@ -475,11 +500,13 @@ com_group_for_align.add_argument("--MatchInfo", default="3;-2;-2;-15;-1", help="
 
 ################################## --Tolerate --MinSup --MaxRep --CompRep
 com_group_for_others = parent_parser.add_argument_group('Common options')
-com_group_for_others.add_argument("--outlog", default=M_WARNING, help="The level for output of running information")
+com_group_for_others.add_argument("--outlog", default=M_WARNING, help="The level for output of running information: 0:DEBUG; 1:INFO; 2:WARNING; 3:ERROR; 4:FATAL")
 com_group_for_others.add_argument("--Tolerate",  default=None, help="Tolerate mismatch, e.g., CTG:TTG:0:2 or CTG:CTT:-2:0.")
 com_group_for_others.add_argument("--MinSup", type=int, default=5, help="The minimum reads associated with peaks.")
 com_group_for_others.add_argument("--MaxRep", type=int, default=4000, help="The maximum repeat size. The smallest MaxRep should not be less than 14.")
 com_group_for_others.add_argument("--CompRep", default='0', help="Whether the repeat pattern is simple ('0') or complex (nonzeo-'0': AlTlT50/C50lClT/C). For complex patterns, all patterns are required to have the same length, each position is seperated by `l` and the nucleotides at the same position is seperated by '/' where a nucleotide can by followed by a number specify relative frequency (cannot be float).")
+
+com_group_for_others.add_argument("--outFolder", default='align/', help="The default folder for temporary output. Default: align/");
 
 #################################### --repeatName --UserDefinedUniqID --Patternfile
 com_group_for_gene = parent_parser.add_argument_group('Common options for gene information')
@@ -511,9 +538,9 @@ com_group_for_hmm.add_argument("--emissionm", default=None, help="User-specified
 #####################################
 # --Onebamfile --SepbamfileTemp
 parser_bam = subparsers.add_parser('BAMinput', parents=[parent_parser], help="Detect trinucleotide repeats from a BAM file", description="Detect trinucleotide repeats from a BAM file", epilog="For example, \n \
-python %(prog)s --Onebamfile XXX.bam --repeatName HTT; \n \
-python %(prog)s --Sepbamfile XXX%s.bam --repeatName HTT --GapCorrection 1 FlankLength 30; \n \
-python %(prog)s --Onebamfile freeze4-all-merge.sort.bam --repeatName HTT; \n \
+python %(prog)s --Onebamfile XXX.bam --repeatName HTT --hgfile XXX.fa \n \
+python %(prog)s --Sepbamfile XXX%%s.bam --repeatName HTT --GapCorrection 1 FlankLength 30 --hgfile XXX.fa \n \
+python %(prog)s --Onebamfile freeze4-all-merge.sort.bam --repeatName HTT --hgfile XXX.fa \n \
 Final results was stored in logbam/RepBAM_*.log \n \
 Note!!!!!! \n \
 BAM file should be produced with the same version of 'hg' if '--hg' or '--hgfile' is specified. \n \
@@ -527,10 +554,10 @@ parser_bam.set_defaults(func=BAMinput)
 
 ###################################### --fastq
 parser_fasta = subparsers.add_parser('FASTQinput', parents=[parent_parser], help="Detect trinucleotide repeats from a FASTQ file", description="Detect trinucleotide repeats from a FASTQ file", epilog="For example, \n \
-python %(prog)s --fastq XXX.fq --repeatName HTT; \n \
-python %(prog)s --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 ; \n \
-python %(prog)s --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID PCR1; \n \
-python %(prog)s --repeatName atxn3 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID sca3_pcr25_raw_test --fastq atxn3_data/rawdata/sam025.raw.fastq  \n \
+python %(prog)s --fastq XXX.fq --repeatName HTT --hgfile XXX.fa \n \
+python %(prog)s --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 --hgfile XXX.fa \n \
+python %(prog)s --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID PCR1 --hgfile XXX.fa \n \
+python %(prog)s --repeatName atxn3 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID sca3_pcr25_raw_test --fastq atxn3_data/rawdata/sam025.raw.fastq --hgfile XXX.fa \n \
 Final results was stored in logfq/RepFQ_*.log \n \
 ", formatter_class=RawTextHelpFormatter)
 
@@ -548,7 +575,7 @@ Final results was stored in logscan/scan_res/*.log \n \
 
 parser_scan.add_argument("--region", default=None, help="The region where microsatellites are located. 'All' means all microsatellites (<10 nucleotides in repeat units), 'chrZ:X:Y' indicates a chromosome region where all microsatellites would be automatically searche. 'None': will only detect microsatellites predined in 'repeatName'");
 parser_scan.add_argument("--thread", default=1, type=int, help="How many additional threads are used. Default: 1");
-parser_scan.add_argument("--outFolder", default='align/', help="How many additional threads are used. Default: 1");
+#parser_scan.add_argument("--outFolder", default='align/', help="How many additional threads are used. Default: 1");
 parser_scan.add_argument("--conted", default=0, type=int, help="Whether continue the running last time. Default: 0");
 
 bam2group = parser_scan.add_mutually_exclusive_group(); #required=True)

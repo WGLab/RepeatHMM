@@ -246,7 +246,8 @@ def getGene(repeatName, chr, gene_start_end, unique_file_id, analysis_file_id, h
 		if cur_pos[0]<0: cur_pos[0] = 0;
 		if cur_pos[1]<0: cur_pos[1] = 0;
 		
-		get_alg_cmd = 'samtools faidx '+hg_reference_and_index+'/'+hgfn+' '+ chr+':'+str(cur_pos[0])+'-'+str(cur_pos[1])+' > '+fastafile
+		#get_alg_cmd = 'samtools faidx '+hg_reference_and_index+'/'+hgfn+' '+ chr+':'+str(cur_pos[0])+'-'+str(cur_pos[1])+' > '+fastafile
+		get_alg_cmd = 'samtools faidx '+hgfn+' '+ chr+':'+str(cur_pos[0])+'-'+str(cur_pos[1])+' > '+fastafile
 		#print get_alg_cmd
 
 		os.system(get_alg_cmd)

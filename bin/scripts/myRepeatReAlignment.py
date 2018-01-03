@@ -187,7 +187,8 @@ def runTRF(fafn, TRFOptions, minRepBWTSize, RepeatTimeThr, moreOptions, commonOp
 	trf_suf = TRFOptions.replace('_', ' ')
 	
 	resfn = getNewFileName(fafn, moreOptions['unique_file_id'], [fafn, '_', TRFOptions, '.res'], specifiedOptions)
-	trf_cmd = ''.join(['myTRF ', fafn, ' ', trf_suf, ' -h -ngs > ', resfn])
+	#trf_cmd = ''.join(['myTRF ', fafn, ' ', trf_suf, ' -h -ngs > ', resfn])
+	trf_cmd = ''.join(['trf ', fafn, ' ', trf_suf, ' -h -ngs > ', resfn])
 
 	patset = getSamePattern(moreOptions, commonOptions)
 	if commonOptions['outlog'] <= M_WARNING:
@@ -519,7 +520,9 @@ def splitBAM(uniq_id, commonOptions, moreOptions, specifiedOptions):
 	return res;
 
 def reAlign(splitfn, hgfile, splitfn_sorted, moreOptions, commonOptions, specifiedOptions):
-	cmd = (template_bwamem_cmd % (commonOptions['BWAMEMOptions'], hg_reference_and_index, hgfile, splitfn, splitfn_sorted))
+	#cmd = (template_bwamem_cmd % (commonOptions['BWAMEMOptions'], hg_reference_and_index, hgfile, splitfn, splitfn_sorted))
+	cmd = (template_bwamem_cmd % (commonOptions['BWAMEMOptions'], '', hgfile, splitfn, splitfn_sorted))
+	#print 't1', cmd
 	
 	if (not specifiedOptions.has_key('thread')):
 		if commonOptions['outlog'] <= M_INFO:	print cmd
@@ -1135,7 +1138,9 @@ def getNonRepeatAlignment(commonOptions, specifiedOptions, moreOptions):
 		nonRepeat_alignfn_bam = getNewFileName(moreOptions['fafile'], specifiedOptions['unique_file_id'], [moreOptions['fafile'], '_nonRepeat.sam'] , specifiedOptions)
 		split_norep_fn = moreOptions['split_norep_fn']
 		
-		cmd = (template_bwamem_cmd2 % (hg_reference_and_index, commonOptions['hgfile'], split_norep_fn, nonRepeat_alignfn_bam))
+		#cmd = (template_bwamem_cmd2 % (hg_reference_and_index, commonOptions['hgfile'], split_norep_fn, nonRepeat_alignfn_bam))
+		cmd = (template_bwamem_cmd2 % ('', commonOptions['hgfile'], split_norep_fn, nonRepeat_alignfn_bam))
+		#print 't2', cmd
 		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
 			print cmd;
 			logging.info('getNonRepeatAlignment: '+cmd)
