@@ -107,8 +107,8 @@ def printOptions(op):
 	opkeys = op.keys(); opkeys.sort();
 	for opk in opkeys:
 		if (opk not in ['gLoc']): #(not op[opk]==None) and (opk not in ['gLoc']):
-			print ''.join([('%20s' % opk), '\t(', str(op[opk]), ');'])
-	print ''
+			print(''.join([('%20s' % opk), '\t(', str(op[opk]), ');']))
+	print('')
 
 def getCommonOptions(margs, cominfo=None):
    random.seed(7);
@@ -274,8 +274,8 @@ def getCommonOptions(margs, cominfo=None):
    return commonOptions, errorStr, analysis_file_id_common
 
 def scan(margs):
-   print 'This function is disenabled now.'
-   print 'We will publish this function later.'
+   print('This function is disenabled now.')
+   print('We will publish this function later.')
    sys.exit(140)
 
    cominfo = {}
@@ -291,7 +291,7 @@ def scan(margs):
    analysis_file_id += analysis_file_id_com
 
    if not errorStr==originalError:
-      print errorStr; #BAMinput|FASTQinput|Scan
+      print(errorStr); #BAMinput|FASTQinput|Scan
       parser.print_help();
       parser.parse_args(['Scan', '--help']);
       sys.exit(140)
@@ -331,7 +331,7 @@ def scan(margs):
    LOG_FILENAME = filename
    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,filemode='w',format="%(levelname)s: %(message)s")
 
-   print 'The following options are used (included default):'
+   print('The following options are used (included default):')
    printOptions(commonOptions)
    printOptions(specifiedOptions)
 
@@ -360,7 +360,7 @@ def FASTQinput(margs):
    elif not os.path.isfile(specifiedOptions['fastafile']):  errorStr += '\tThe fasta file ('+specifiedOptions['fastafile']+') does not exit\n';
 
    if not errorStr==originalError:
-      print errorStr; #BAMinput|FASTQinput|Scan
+      print(errorStr); #BAMinput|FASTQinput|Scan
       parser.print_help();
       parser.parse_args(['FASTQinput', '--help']);
       sys.exit(140)
@@ -381,15 +381,15 @@ def FASTQinput(margs):
 
    specifiedOptions['align'] = commonOptions['align']
 
-   print 'The following options are used (included default):'
+   print('The following options are used (included default):')
    printOptions(commonOptions)
    printOptions(specifiedOptions)
    summary = {}
    summary[commonOptions['repeatName']] = myFASTQhandler.getSCA3forKnownGeneWithPartialRev(commonOptions, specifiedOptions)
-   print '\nfor output'; logging.info('\nfor output')
+   print('\nfor output'); logging.info('\nfor output')
    printRepInfo(summary)
 
-   print 'The result is in', filename
+   print('The result is in', filename)
 
 def BAMinput(margs):
    specifiedOptions = {}
@@ -410,7 +410,7 @@ def BAMinput(margs):
    if specifiedOptions['bamfile']==None: errorStr += '\tNo bam file provided\n';
 
    if not errorStr==originalError:
-      print errorStr; #BAMinput|FASTQinput|Scan
+      print(errorStr); #BAMinput|FASTQinput|Scan
       parser.print_help();
       parser.parse_args(['BAMinput', '--help']);
       sys.exit(140)
@@ -432,7 +432,7 @@ def BAMinput(margs):
 
    specifiedOptions['align'] = commonOptions['align']
 
-   print 'The following options are used (included default):'
+   print('The following options are used (included default):')
    printOptions(commonOptions)
    printOptions(specifiedOptions)
 
@@ -444,18 +444,18 @@ def BAMinput(margs):
 
    printRepInfo(summary)
 
-   print 'The result is in', filename
+   print('The result is in', filename)
 
 def printRepInfo(summary):
-	print ''; logging.info('')
+	print(''); logging.info('')
 	sumkeys = summary.keys(); sumkeys.sort()
 	for sumk in sumkeys:
 		methkeys = summary[sumk][1].keys(); methkeys.sort()
 		for mk in methkeys:
-			print summary[sumk][1][mk]
+			print(summary[sumk][1][mk])
 			logging.info(summary[sumk][1][mk]+'')
 
-	print ''; logging.info('')
+	print(''); logging.info('')
 	#print ''; logging.info('')
 	#print ''; logging.info('')
 
@@ -471,11 +471,11 @@ def printRepInfo(summary):
 			if sumk==sumkeys[0]:
 				titstr.append(mk)
 		if sumk==sumkeys[0]:
-			print '\t'.join(titstr)
+			print('\t'.join(titstr))
 			logging.info(('\t'.join(titstr))+'')
-		print '\t'.join(prstr)
+		print('\t'.join(prstr))
 		logging.info(('\t'.join(prstr))+'')
-	print ''; logging.info('')	
+	print(''); logging.info('')	
 
 
 ##############################################################################
@@ -584,12 +584,19 @@ bam2group.add_argument("--SepbamfileTemp", default=None, help="A separated BAM f
 
 parser_scan.set_defaults(func=scan)
 
-
-if len(sys.argv)<2:
-   parser.print_help();
+if sys.version_info[0]>2:
+	print("RepeatHMM does not support python 3 now. \n We will improve RepeatHMM for python 3 later.")
+elif sys.version_info[0]<2:
+	print("RepeatHMM could not be run with lower version than python 2.7.")
 else:
-   args = parser.parse_args()
-   args.func(args);
+   if sys.version_info[1]<6:
+      print("RepeatHMM could be run with python 2.7.")
+   else:
+      if len(sys.argv)<2:
+         parser.print_help();
+      else:
+         args = parser.parse_args()
+         args.func(args);
 
 
 
