@@ -10,6 +10,7 @@
 	* SWIG
 	* make
 	* BWA MEM
+	* Tandem Repeat Finder
 
 ## Step 1:
 	* git clone https://github.com/WGLab/RepeatHMM
