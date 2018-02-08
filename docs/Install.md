@@ -11,6 +11,7 @@
 	* make
 	* BWA MEM
 	* Tandem Repeat Finder
+	* samtools 
 
 ## Step 1:
 	* git clone https://github.com/WGLab/RepeatHMM
