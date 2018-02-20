@@ -8,7 +8,7 @@
 		+ sklearn (sklearn.mixture.GaussianMixture)
 		+ biopython (strongly recommend 1.66 if possible)
 	  installation using pip:
-	   `pip install peakutils==1.0.3 hmmlearn sklearn biopython`
+	   pip install peakutils==1.0.3 hmmlearn sklearn biopython
 	* SWIG (see https://anaconda.org/anaconda/swig)
 	* make
 	* BWA MEM (see https://anaconda.org/bioconda/bwa)
