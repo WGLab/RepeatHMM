@@ -76,43 +76,48 @@ def checkM(mm, colnum=None):
             if yourcr[-1] < 1e-9:
                 yourcr[-1] = 1e-9
         yourm.append(yourcr)
-        if not rowsize.has_key(len(yourcr)):
+        if len(yourcr) not in rowsize:
             rowsize[len(yourcr)] = []
         rowsize[len(yourcr)].append(i)
         cursum = round(int(cursum + 0.5) / float(expnum), 3)
-        if not sumsize.has_key(cursum):
+        if cursum not in sumsize:
             sumsize[cursum] = []
         sumsize[cursum].append(i)
 
     errormsg = []
     wrongrowsize = False
     if len(rowsize) > 1:
-        errormsg.append('Error: size for each row is not the same:'); wrongrowsize = True;
+        errormsg.append('Error: size for each row is not the same:')
+        wrongrowsize = True
     elif len(rowsize) < 1:
-        errormsg.append('Error: size for each row is less than 1:'); wrongrowsize = True;
+        errormsg.append('Error: size for each row is less than 1:')
+        wrongrowsize = True
     else:
-        if (not colnum == None):
+        if colnum is not None:
             if rowsize.keys()[0] == colnum:
                 pass
             else:
-                errormsg.append('Error: the number of columns is not 4'); wrongrowsize = True;
+                errormsg.append('Error: the number of columns is not 4')
+                wrongrowsize = True
         else:
             if rowsize.keys()[0] == len(yourm):
                 pass
             else:
                 errormsg.append('Error: the number of columns (%d) is not equal to the number of rows (%d)' % (
-                    rowsize.keys()[0], len(yourm))); wrongrowsize = True;
+                    rowsize.keys()[0], len(yourm)))
+                wrongrowsize = True
     if wrongrowsize:
         errormsg.append(str(rowsize))
 
     if (not len(sumsize) == 1) or (len(sumsize) == 1 and not (expnum - 0.1 < sumsize.keys()[0] < expnum + 0.1)):
-        errormsg.append('Error: the sum of each row is not correct:'); errormsg.append(str(sumsize))
+        errormsg.append('Error: the sum of each row is not correct:')
+        errormsg.append(str(sumsize))
 
     return yourm, '\n'.join(errormsg)
 
 
 def setInsDelSub(comOpt):
-    #["Pacbio", "Nanopore", "Illumina", None]
+    # ["Pacbio", "Nanopore", "Illumina", None]
     if comOpt['SeqTech'] == "Pacbio":
         comOpt['hmm_insert_rate'], comOpt['hmm_del_rate'], comOpt['hmm_sub_rate'] = 0.110, 0.020, 0.020
     elif comOpt['SeqTech'] == "Nanopore":
@@ -148,8 +153,8 @@ def getCommonOptions(margs, cominfo=None):
     errorStr += non_negative(MinSup, 'MinSup')
 
     MatchInfo = margs.MatchInfo
-    if MatchInfo == None:
-        #commonOptions['MatchInfo'] = [3, -2, -2, -15, -1]
+    if MatchInfo is None:
+        # commonOptions['MatchInfo'] = [3, -2, -2, -15, -1]
         commonOptions['MatchInfo'] = [2, -1, -2, -13, -1]
     else:
         mi_sp = MatchInfo.split(';')
@@ -166,7 +171,7 @@ def getCommonOptions(margs, cominfo=None):
     analysis_file_id_common += '_FlankLength' + str(repeatFlankLength)
 
     commonOptions['hg'] = margs.hg
-    if margs.hgfile == None or margs.hgfile == '':
+    if margs.hgfile is None or margs.hgfile == '':
         #commonOptions['hgfile'] = commonOptions['hg']+'.fa'
         # if not os.path.isfile(hg_reference_and_index+'/'+margs.hg+'.fa'):
         #   errorStr += '\tNo reference genome under the folder '+hg_reference_and_index+' with the filename '+margs.hg+'.fa\n'
@@ -185,7 +190,7 @@ def getCommonOptions(margs, cominfo=None):
     RepeatName = margs.repeatName
     specifiedRepeatInfo = margs.UserDefinedRepeat
 
-    if RepeatName == None and (cominfo == None or ((not cominfo == None) and (cominfo.has_key('scan') and not cominfo['scan'] == 1))):
+    if RepeatName is None and (cominfo == None or ((not cominfo == None) and ('scan' in cominfo and not cominfo['scan'] == 1))):
         errorStr += '\tNone gene/repeat information is given. \n'
     if (not specifiedRepeatInfo == UserDefinedRepeatdefault) and RepeatName == 'all':
         errorStr += '\t"repeatName" cannot be "all" when specifying "UserDefinedRepeat"\n'
@@ -224,7 +229,7 @@ def getCommonOptions(margs, cominfo=None):
     commonOptions['UserDefinedUniqID'] = UserDefinedUniqID
     commonOptions['repeatName'] = RepeatName
     commonOptions['specifiedRepeatInfo'] = specifiedRepeatInfo
-    #commonOptions['hg'] = margs.hg
+    # commonOptions['hg'] = margs.hg
     # if margs.hgfile==None or margs.hgfile=='':
     #   commonOptions['hgfile'] = commonOptions['hg']+'.fa'
     # else:
@@ -245,7 +250,7 @@ def getCommonOptions(margs, cominfo=None):
 
     analysis_file_id_common += '_' + commonOptions['hg'] + '_comp'
 
-    if not commonOptions['UserDefinedUniqID'] == None:
+    if commonOptions['UserDefinedUniqID'] is not None:
         commonOptions['UserDefinedUniqID'] = commonOptions['UserDefinedUniqID'].replace(':', '_')
         commonOptions['UserDefinedUniqID'] = commonOptions['UserDefinedUniqID'].replace('/', '_')
         commonOptions['UserDefinedUniqID'] = commonOptions['UserDefinedUniqID'].replace('\\', '_')
@@ -262,7 +267,7 @@ def getCommonOptions(margs, cominfo=None):
     commonOptions['hmm_del_rate'] = hmm_del_rate
     commonOptions['hmm_sub_rate'] = hmm_sub_rate
     commonOptions['SeqTech'] = SeqTech
-    if not SeqTech == None:
+    if SeqTech is not None:
         analysis_file_id_common += '_' + SeqTech
         setInsDelSub(commonOptions)
 
@@ -270,13 +275,13 @@ def getCommonOptions(margs, cominfo=None):
     analysis_file_id_common += ('_D%.3f' % hmm_del_rate)
     analysis_file_id_common += ('_S%.3f' % hmm_sub_rate)
 
-    if not transitionm == None:
+    if transitionm is not None:
         commonOptions['transitionm'], cerrstr = checkM(commonOptions['transitionm'], None)
         if not cerrstr == "":
             errorStr += ''.join(['\t', cerrstr, '\n'])
     else:
         commonOptions['transitionm'] = transitionm
-    if not emissionm == None:
+    if emissionm is not None:
         commonOptions['emissionm'], cerrstr = checkM(commonOptions['emissionm'], 4)
         if not cerrstr == "":
             errorStr += ''.join(['\t', cerrstr, '\n'])
@@ -286,7 +291,7 @@ def getCommonOptions(margs, cominfo=None):
     commonOptions['stsBasedFolder'] = stsBasedFolder
     moptions = {}
     Patternfile = margs.Patternfile
-    if not Patternfile == None:
+    if Patternfile is not None:
         commonOptions['Patternfile'] = Patternfile.split(';')
         for fi in commonOptions['Patternfile']:
             if fi[-3:] == '.pa':
@@ -333,7 +338,7 @@ def scan(margs):
 
     scan_region = margs.region
     specifiedOptions['scan_region'] = scan_region
-    if scan_region == None:
+    if scan_region is None:
         specifiedOptions['analysis_file_id'] = 'gmm' + analysis_file_id
     else:
         scan_region_rp = scan_region.replace(':', '_')
@@ -348,17 +353,17 @@ def scan(margs):
     specifiedOptions["SepbamfileTemp"] = margs.SepbamfileTemp
     specifiedOptions["Onebamfile"] = margs.Onebamfile
 
-    if not specifiedOptions["Onebamfile"] == None:
+    if specifiedOptions["Onebamfile"] is not None:
         specifiedOptions['bamfile'] = specifiedOptions["Onebamfile"]
         if not os.path.isfile(specifiedOptions['bamfile']):
             errorStr += '\tThe bam file (' + specifiedOptions['bamfile'] + ') does not exit\n'
     else:
         specifiedOptions['bamfile'] = specifiedOptions["SepbamfileTemp"]
-    if specifiedOptions['bamfile'] == None:
+    if specifiedOptions['bamfile'] is not None:
         errorStr += '\tNo bam file provided\n'
 
     specifiedOptions['align'] = commonOptions['align']
-    #specifiedOptions['align'] = margs.outFolder
+    # specifiedOptions['align'] = margs.outFolder
     # if not os.path.isdir(margs.outFolder):
     #   os.system('mkdir '+margs.outFolder)
     commonOptions['outlog'] = M_WARNING
@@ -396,7 +401,7 @@ def FASTQinput(margs):
     analysis_file_id += analysis_file_id_com
 
     specifiedOptions['fastafile'] = margs.fastq
-    if specifiedOptions['fastafile'] == None:
+    if specifiedOptions['fastafile'] is None:
         errorStr += '\tNo fasta file provided\n'
     elif not os.path.isfile(specifiedOptions['fastafile']):
         errorStr += '\tThe fasta file (' + specifiedOptions['fastafile'] + ') does not exit\n'
@@ -407,7 +412,7 @@ def FASTQinput(margs):
         parser.parse_args(['FASTQinput', '--help'])
         sys.exit(140)
 
-    if not commonOptions['UserDefinedUniqID'] == None:
+    if commonOptions['UserDefinedUniqID'] is not None:
         unique_file_id = commonOptions['UserDefinedUniqID'] + analysis_file_id
     else:
         unique_file_id = analysis_file_id
@@ -449,13 +454,13 @@ def BAMinput(margs):
     specifiedOptions["SepbamfileTemp"] = margs.SepbamfileTemp
     specifiedOptions["Onebamfile"] = margs.Onebamfile
 
-    if not specifiedOptions["Onebamfile"] == None:
+    if specifiedOptions["Onebamfile"] is not None:
         specifiedOptions['bamfile'] = specifiedOptions["Onebamfile"]
         if not os.path.isfile(specifiedOptions['bamfile']):
             errorStr += '\tThe bam file (' + specifiedOptions['bamfile'] + ') does not exit\n'
     else:
         specifiedOptions['bamfile'] = specifiedOptions["SepbamfileTemp"]
-    if specifiedOptions['bamfile'] == None:
+    if specifiedOptions['bamfile'] is None:
         errorStr += '\tNo bam file provided\n'
 
     if not errorStr == originalError:
@@ -658,10 +663,10 @@ Final results was stored in logscan/scan_res/*.log \n \
 
 parser_scan.add_argument("--region", default=None, help="The region where microsatellites are located. 'All' means all microsatellites (<10 nucleotides in repeat units), 'chrZ:X:Y' indicates a chromosome region where all microsatellites would be automatically searche. 'None': will only detect microsatellites predined in 'repeatName'");
 parser_scan.add_argument("--thread", default=1, type=int,
-                         help="How many additional threads are used. Default: 1");
+                         help="How many additional threads are used. Default: 1")
 #parser_scan.add_argument("--outFolder", default='align/', help="How many additional threads are used. Default: 1");
 parser_scan.add_argument("--conted", default=0, type=int,
-                         help="Whether continue the running last time. Default: 0");
+                         help="Whether continue the running last time. Default: 0")
 
 bam2group = parser_scan.add_mutually_exclusive_group()  # required=True)
 bam2group.add_argument("--Onebamfile", default=None, help="A BAM file storing all alignments")
