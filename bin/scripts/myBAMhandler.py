@@ -83,7 +83,7 @@ def get_gLoc(repeatname, commonOptions):
     if not errorstr == '':
         logging.error(errorstr)
         if commonOptions['outlog'] <= M_WARNING:
-            print(errorstr, curloc, repeatName)
+            print(errorstr, curloc, repeatname)
         sys.exit(102)
 
     return get_Loc1(curloc, commonOptions)
