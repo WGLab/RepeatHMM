@@ -870,7 +870,7 @@ def getExpRegionInLongRead(commonOptions, specifiedOptions, moreOptions):
 				n1 = int(numinfo[n1ind])
 				mdi = mdiinfo[n1ind];
 				for n1i in range(n1):
-					if mdi=='M':
+					if mdi=='M' or mdi == '=' or mdi == 'X':
 						pos_ref = pos_ref + 1;
 						queryind = queryind + 1;
 					elif mdi =='I':
@@ -885,8 +885,8 @@ def getExpRegionInLongRead(commonOptions, specifiedOptions, moreOptions):
 						pass;
 					else:
 						if commonOptions['outlog'] <= M_WARNING:
-							logging.warning('Warning unknow CIGAR element ' + str(n1) + ' ' + mdi)
-							print 'Warning unknow CIGAR element ' + str(n1) + ' ' + mdi
+							logging.warning('Warning unknown CIGAR element ' + str(n1) + ' ' + mdi)
+							print 'Warning unknown CIGAR element ' + str(n1) + ' ' + mdi
 
 					if pos_ref-1 < repeat_start_end[0]-repeatFlankLength:
 						cur_start_pos_longread = queryind-1
@@ -1255,7 +1255,7 @@ def getNonRepeatinLongRead(commonOptions, specifiedOptions, moreOptions):
 			n1 = int(numinfo[n1ind])
 			mdi = mdiinfo[n1ind];
 			for n1i in range(n1):
-				if mdi=='M':
+				if mdi=='M' or mdi == '=' or mdi == 'X':
 					pos_ref = pos_ref + 1;
 					queryind = queryind + 1;
 				elif mdi =='I':
@@ -1270,8 +1270,8 @@ def getNonRepeatinLongRead(commonOptions, specifiedOptions, moreOptions):
 					pass;
 				else:
 					if commonOptions['outlog'] <= M_WARNING:
-						logging.warning('Warning unknow CIGAR element ' + str(n1) + ' ' + mdi)
-						print 'Warning unknow CIGAR element ' + str(n1) + ' ' + mdi
+						logging.warning('Warning unknown CIGAR element ' + str(n1) + ' ' + mdi)
+						print 'Warning unknown CIGAR element ' + str(n1) + ' ' + mdi
 
 				if pos_ref-1 < repeat_start_end[0]-repeatFlankLength:
 					cur_start_pos_longread = queryind-1;
