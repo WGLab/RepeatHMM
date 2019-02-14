@@ -446,7 +446,7 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
 
             for n1i in range(n1):
                 qrepadd = False
-                if mdi == 'M':
+                if mdi == 'M' or mdi == '=' or mdi == 'X':
                     pos = pos + 1
                     queryind = queryind + 1
                     qrepadd = True
@@ -465,7 +465,7 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
                     if qrepadd:
                         hpadd += 1  # pass
                 else:
-                    logging.warning('Warning unknow CIGAR element ' + str(n1) + ' ' + mdi)
+                    logging.warning('Warning unknown CIGAR element ' + str(n1) + ' ' + mdi)
                 if qrepadd:
                     if pos - 1 >= repeat_start_end[0] - repeatFlankLength and pos - 1 <= repeat_start_end[1] + repeatFlankLength:
                         queryrep = queryrep + aainfo[queryind - 1]
