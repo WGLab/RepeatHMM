@@ -36,4 +36,4 @@ If you have any questions/issues/bugs, please post them on [GitHub](https://gith
 
 ## Reference
 
-Liu Q, Zhang P, Wang D, Gu W, Wang K. Interrogating the "unsequenceable" genomic trinucleotide repeat disorders by long-read sequencing. Genome Med. 9(1):65, 2017. doi: 10.1186/s13073-017-0456-7.
+Qian Liu, Peng Zhang, Depeng Wang, Weihong Gu and Kai Wang Interrogating the "unsequenceable" genomic trinucleotide repeat disorders by long-read sequencing. Genome Med. 9(1):65, 2017. doi: 10.1186/s13073-017-0456-7.
