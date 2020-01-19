@@ -4,11 +4,11 @@
 	* GCC 4.4.7
 	* python packages:
 		+ peakutils 1.0.3
-		+ hmmlearn
+		+ hmmlearn 0.2.1
 		+ sklearn (sklearn.mixture.GaussianMixture)
 		+ biopython (strongly recommend 1.66 if possible)
 	  installation using pip:
-	   pip install peakutils==1.0.3 hmmlearn sklearn biopython
+	   pip install peakutils==1.0.3 hmmlearn==0.2.1 sklearn biopython=1.66
 	* SWIG (see https://anaconda.org/anaconda/swig)
 	* make
 	* BWA MEM (see https://anaconda.org/bioconda/bwa)
