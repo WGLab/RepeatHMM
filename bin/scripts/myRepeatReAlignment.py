@@ -497,7 +497,7 @@ def splitBAM(uniq_id, commonOptions, moreOptions, specifiedOptions):
 	if os.path.getsize(samfn)==0:
 		if commonOptions['outlog'] <= M_WARNING:
 			logging.info(mview+'\n')
-			logging.info('The file %s have zero size\nTry without chr' % samfn)
+			logging.info('The file %s have zero size in the first occurrence of splitBAM.\nTry without chr' % samfn)
 			#print ('The file %s have zero size\nTry without chr' % samfn)
 		if chr==None or startpos==None or endpos==None:
 			mview = ''.join(['samtools view ', bamfn, '>', samfn])
@@ -509,7 +509,7 @@ def splitBAM(uniq_id, commonOptions, moreOptions, specifiedOptions):
 		os.system(mview)
 
 	if os.path.getsize(samfn)==0:
-		logging.info('The file %s have zero size: %s\n' % (samfn, mview))
+		logging.info('The file %s have zero size: %s in the second occurrence of splitBAM.\n' % (samfn, mview))
 		#print ('The file %s have zero size: %s' % (samfn, mview))
 		moreOptions[FATAL_key] = True
 		#os.system('rm '+samfn)
@@ -578,7 +578,7 @@ def getRegioinInBAM(commonOptions, specifiedOptions, moreOptions):
 	os.system(get_alg_cmd);
 	if os.path.getsize(alignfile)==0:
 		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread')):
-			logging.info('The file %s have zero size\nTry without chr' % alignfile)
+			logging.info('The file %s have zero size in the function of getRegioinInBAM.\nTry without chr' % alignfile)
 			#print ('The file %s have zero size\nTry without chr' % alignfile)
 		get_alg_cmd = 'samtools view '+spfnbam+' ' + chr[3:]+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+alignfile
 		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
