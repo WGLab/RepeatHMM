@@ -367,7 +367,7 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
     if os.path.getsize(alignfile) == 0:
         if commonOptions['outlog'] <= M_WARNING:
             logging.info(get_alg_cmd + '\n')
-            logging.info('The file %s have zero size\nTry without chr' % alignfile)
+            logging.info('The file %s have zero size in the function of getRepeatForGivenGene.\nTry without chr' % alignfile)
             #print ('The file %s have zero size\nTry without chr' % alignfile)
         get_alg_cmd = 'samtools view ' + bamfile + ' ' + \
             chr[3:] + ':' + str(gene_start_end[0]) + '-' + \
