@@ -335,6 +335,7 @@ def scan(margs):
     specifiedOptions['scan_region'] = scan_region
     specifiedOptions['max_len'] = margs.max_len
     specifiedOptions['StopFail'] = margs.StopFail
+    specifiedOptions['envset'] = margs.envset
     if scan_region is None:
         specifiedOptions['analysis_file_id'] = 'gmm' + analysis_file_id
     else:
@@ -679,6 +680,8 @@ parser_scan.add_argument("--cluster", default=0, type=int, help="Whether cluster
 parser_scan.add_argument("--clusterOption", default="qsub -V -cwd -pe smp 1 -l h_vmem=8G -e %s -o %s -N %s", help="Options for job submission to cluter. Default: 'qsub -V -cwd -pe smp 1 -l h_vmem=8G -q all.q,bigmem -e %%s -o %%s -N %%s'");
 parser_scan.add_argument("--max_len", default=1000, type=int, help="The maximum length of repeat regions which will be detected. Default: 0");
 parser_scan.add_argument("--StopFail", default=0, type=int, help="Whether stop when a job failed. Default: 0(not stop)");
+parser_scan.add_argument("--avergnum", default=100, type=int, help="The number of repeat regions for each jobs. Default:100.");
+parser_scan.add_argument("--envset", default='', type=str, help="Whether virtual environment is created for running RepeatHMM. Default: None. Can set 'repeathmmenv'");
 
 bam2group = parser_scan.add_mutually_exclusive_group()  # required=True)
 bam2group.add_argument("--Onebamfile", default=None, help="A BAM file storing all alignments")

@@ -209,6 +209,8 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 	avergnum = avergnum1
 	if avergnum>maxrepin1job: avergnum = maxrepin1job;
 	moreOptions['avergnum'] = avergnum
+   if commonOptions['avergnum']>0:
+      moreOptions['avergnum'] = commonOptions['avergnum']
 	minfostr = ('Average microsatellites per thread: %d(%d)=%d/%d' % (avergnum1, avergnum, micronum, specifiedOptions['thread']))
 	print minfostr
 	logging.info(minfostr)
@@ -325,7 +327,7 @@ def distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict,
 						else: specifiedOptions['curmicrosatellites'] = allmicro[ti][mi][chrk]
 
 						#moreOptions['mpid'] = pk_ind
-						p = multiprocessing.Process(target=scan_part, args=(commonOptions, specifiedOptions, moreOptions, pk,))
+						p = multiprocessing.Process(target=scan_part, args=(commonOptions, specifiedOptions, moreOptions, pk, partitiondict[pk],))
 						jobs[pk] = p
 						p.start()
 					else:
@@ -354,7 +356,10 @@ def distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict,
 									fwpat.write(sep1.join(allmicro[ti][mi][chrk][sk][ek][-1])+'\n')
 						fwpat.close();
 						
-						optstr = ' '.join(['echo "python repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
+						if commonOptions['envset']=='':
+							optstr = ' '.join(['echo "python repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
+						else:
+							optstr = ' '.join(['echo "source activate', commonOptions['envset'], '&& python repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
 						jobs[pk] = pk
 					
 						print 'submit job=', pk, optstr, datetime.now().strftime('%Y/%m/%d %H:%M:%S'),  'Current='+str(pk_ind) +'/' + str(len(partitiondictkeys)), 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90']
@@ -450,13 +455,13 @@ def checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, u
 	if len(jobskeys)==0: return True;
 	else: return False;
 
-def scan_part(commonOptions, specifiedOptions, moreOptions, pk):
+def scan_part(commonOptions, specifiedOptions, moreOptions, pk, curPartition):
 	old_analysis_file_id = specifiedOptions['analysis_file_id']
 	oldunique_file_id = specifiedOptions['unique_file_id']
 	specifiedOptions['analysis_file_id'] = specifiedOptions['analysis_file_id'] + pk
 	specifiedOptions['unique_file_id'] = specifiedOptions['unique_file_id'] + pk
 
-	curPartition = moreOptions['curPartition']
+	#curPartition = moreOptions['curPartition']
 	ti, mi, chrk = curPartition[-1]
 	allmicro = specifiedOptions['curmicrosatellites']
 	mres = {}; mdetail = {}
