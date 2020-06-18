@@ -52,7 +52,8 @@ def getString(margs):
 		else:
 			retstr.append('--'+df)
 			if isinstance(curv, str):
-				retstr.append('"'+str(curv)+'"')
+				#retstr.append('"'+str(curv)+'"')
+				retstr.append(str(curv))
 			else:
 				retstr.append(str(curv))
 	#print retstr

@@ -396,11 +396,13 @@ def scan(margs):
     specifiedOptions['continue'] = margs.conted
     specifiedOptions['scanresfolder'] = 'logscan/scan_res/'
     if margs.thread == 1:
-        mres, mdetail = myScanWholeGenome.scan(commonOptions, specifiedOptions)
-        myCommonFun.myWriteScanResults(specifiedOptions, mres, mdetail, procss_info='')
+        myScanWholeGenome.scan(commonOptions, specifiedOptions)
+        #mres, mdetail = myScanWholeGenome.scan(commonOptions, specifiedOptions)
+        #myCommonFun.myWriteScanResults(specifiedOptions, mres, mdetail, procss_info='')
     else:
-        mres, mdetail = myScanWholeGenome.scan_multiprocess(commonOptions, specifiedOptions)
-        myCommonFun.myWriteScanResults(specifiedOptions, mres, mdetail, procss_info='_all')
+        myScanWholeGenome.scan_multiprocess(commonOptions, specifiedOptions)
+        #mres, mdetail = myScanWholeGenome.scan_multiprocess(commonOptions, specifiedOptions)
+        #myCommonFun.myWriteScanResults(specifiedOptions, mres, mdetail, procss_info='_all')
 
 
 def FASTQinput(margs):

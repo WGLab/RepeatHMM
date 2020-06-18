@@ -332,11 +332,11 @@ def distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict,
 						jobs[pk] = p
 						p.start()
 					else:
-						clusterOption = (specifiedOptions['clusterOption'] % (specifiedOptions['outFolder']+'/'+pk+'.e', specifiedOptions['outFolder']+'/'+pk+'.o', pk))
+						clusterOption = (specifiedOptions['clusterOption'] % (specifiedOptions['outFolder']+'/'+pk+'.e', specifiedOptions['outFolder']+'/'+pk+'.e', pk))
 						if os.path.isfile(specifiedOptions['outFolder']+'/'+pk+'.e'): 
 							os.system('rm '+specifiedOptions['outFolder']+'/'+pk+'.e')
-						if os.path.isfile(specifiedOptions['outFolder']+'/'+pk+'.o'):
-							os.system('rm '+specifiedOptions['outFolder']+'/'+pk+'.o')
+						#if os.path.isfile(specifiedOptions['outFolder']+'/'+pk+'.o'):
+						#	os.system('rm '+specifiedOptions['outFolder']+'/'+pk+'.o')
 
 						optstr = mySetting.getString(commonOptions['margs'])
 						#ti, mi, chrk, curavergnum = moreOptions['curPartition'][-1]
