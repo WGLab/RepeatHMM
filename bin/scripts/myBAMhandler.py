@@ -626,36 +626,38 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
     myretdetail = {}
     if (commonOptions['SplitAndReAlign'] in [0, 2]) or testall:
         start_time = time.time()
-        if commonOptions['outlog'] <= M_INFO and 'thread' not in specifiedOptions:
+        if commonOptions['outlog'] <= M_INFO and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2bamhmm start')
         p2bamhmm = getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
         memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
         if p2bamhmm is None:
-            print('ERROR None detection', moreOptions['repeatName'], mgloc)
-            logging.error('ERROR None detection: ' +
+            if  (not specifiedOptions.has_key('thread')) or specifiedOptions['thread']<2:
+               print('ERROR None detection', moreOptions['repeatName'], mgloc)
+               logging.error('ERROR None detection: ' +
                           str(moreOptions['repeatName']) + ' ' + str(mgloc))
-        else:
-            addSumForAGene(p2bamhmm, myret, myretdetail, 'p2bamhmm', 2)
+        
+        addSumForAGene(p2bamhmm, myret, myretdetail, 'p2bamhmm', 2)
         end_time = time.time()
-        if commonOptions['outlog'] <= M_WARNING and 'thread' not in specifiedOptions:
+        if commonOptions['outlog'] <= M_WARNING and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2bamhmm end---running time%.0f mem%d' % (end_time - start_time, memres))
             sys.stdout.flush()
-    if (commonOptions['SplitAndReAlign'] in [1, 2]) or testall:
+    if ((commonOptions['SplitAndReAlign'] in [1, 2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
         start_time = time.time()
-        if commonOptions['outlog'] <= M_INFO and 'thread' not in specifiedOptions:
+        if commonOptions['outlog'] <= M_INFO and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2sp start')
         moreOptions['fafqfile'] = specifiedOptions["bamfile"]
         moreOptions['fafqtype'] = 'bam'
         p2sp = myRepeatReAlignment.getRepeatCounts(commonOptions, specifiedOptions, moreOptions)
         memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
         if p2sp is None:
-            print('ERROR None detection (sp)', moreOptions['repeatName'], mgloc)
-            logging.error('ERROR None detection (sp): ' +
+            if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
+               print('ERROR None detection (sp)', moreOptions['repeatName'], mgloc)
+               logging.error('ERROR None detection (sp): ' +
                           str(moreOptions['repeatName']) + ' ' + str(mgloc))
-        else:
-            addSumForAGene(p2sp, myret, myretdetail, 'p2sp', 2)
+        
+        addSumForAGene(p2sp, myret, myretdetail, 'p2sp', 2)
         end_time = time.time()
-        if commonOptions['outlog'] <= M_WARNING and 'thread' not in specifiedOptions:
+        if commonOptions['outlog'] <= M_WARNING and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2sp end---running time%.0f mem%d' % (end_time - start_time, memres))
             sys.stdout.flush()
 

@@ -35,6 +35,9 @@ mthreads = '1'
 template_bwamem_cmd  = 'bwa mem %s -A1 -B1 -O1 -E1 -L0 -t '+mthreads+' -v 2 %s/%s %s | samtools view -S -b | samtools sort > %s'
 template_bwamem_cmd2 = 'bwa mem -k17 -W40 -r10 -A1 -B1 -O1 -E1 -L0 -t '+mthreads+' -v 2 %s/%s %s | samtools view -S -b | samtools sort > %s'
 
+logscanfolder = 'logscan/'
+logfqfolder = 'logfq/'
+logbamfolder = 'logbam/'
 
 len_isolated_repeat = 20
 

@@ -3,10 +3,13 @@ import os;
 import sys;
 import string;
 
+from datetime import datetime
 import time
 import resource
 import logging
+import gc
 
+#from pympler import tracker
 
 from myheader import *
 
@@ -18,7 +21,7 @@ import myRepeatReAlignment
 import myCommonFun
 
 import multiprocessing
-
+import mySetting
 
 def getAllMicrosatellites(commonOptions, specifiedOptions):
 	moptions = {}
@@ -83,6 +86,8 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 					elif len(allmicro[ti][mi][repk][3])>max_unit_len:
 						#print '1.ele', repk, allmicro[ti][mi][repk], max_unit_len, micronum
 						del allmicro[ti][mi][repk]
+					elif int(allmicro[ti][mi][repk][2]) - int(allmicro[ti][mi][repk][1]) > commonOptions["max_len"]:
+						del allmicro[ti][mi][repk]
 					else: 
 						#print 'keep', repk, allmicro[ti][mi][repk], max_unit_len, moptions['pos'], micronum
 						micronum += 1
@@ -115,6 +120,8 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 								if commonOptions['outlog']<=M_WARNING:
 									print 'Warning end-pos del', chrk, sk, ek, allmicro[ti][mi][chrk][sk][ek]
 								del allmicro[ti][mi][chrk][sk][ek]
+							elif int(allmicro[ti][mi][chrk][sk][ek][2]) - int(allmicro[ti][mi][chrk][sk][ek][1]) > commonOptions["max_len"]:
+								del allmicro[ti][mi][chrk][sk][ek]
 							else: micronum += 1
 						if len(allmicro[ti][mi][chrk][sk])==0:
 							del allmicro[ti][mi][chrk][sk]
@@ -132,11 +139,26 @@ def printProgress(handlei, micronum, start_time):
 		print ('running time=%.0f (%d%%=%d/%d). Total estimation: %d' % (used_time, int(perc), handlei, micronum, tot_time)); 
 		sys.stdout.flush()	
 
-def remove_finished(specifiedOptions):
+def remove_finished(specifiedOptions, commonOptions):
 	maxind = {};
+	uid = '_'+commonOptions['UserDefinedUniqID']
+	uid_ind = specifiedOptions['analysis_file_id'].index(uid)
+	uid_endpos = uid_ind +len(uid)
+	firsthalf = ''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'][:uid_endpos]])
+	secondhalf = (''.join([specifiedOptions['analysis_file_id'][uid_endpos:], '.txt','.done'])).replace('_sub.txt','.txt')
+	commonOptions['firsthalf_analysis_file_id'] = specifiedOptions['analysis_file_id'][:uid_endpos]
+	commonOptions['secondhalf_analysis_file_id'] = ''.join([specifiedOptions['analysis_file_id'][uid_endpos:], '.txt']).replace('_sub.txt','.txt')
+	print 'firsthalf_analysis_file_id', commonOptions['firsthalf_analysis_file_id']
+	print 'secondhalf_analysis_file_id', commonOptions['secondhalf_analysis_file_id']
+
 	if not specifiedOptions['continue']==0:
 		allmicro = specifiedOptions['microsatellites']
-		allfs = os.listdir(''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], '*.txt','.done']));
+
+		if (not specifiedOptions['cluster']==0):
+			secondhalf = ''.join([specifiedOptions['analysis_file_id'][uid_endpos:], '.txt','.done'])
+			allfs = os.listdir(''.join([firsthalf, '*', secondhalf]));
+		else:
+			allfs = os.listdir(''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], '*.txt','.done']));
 		mres = {}; mdetail = {}
 
 		for curf in allfs:
@@ -178,13 +200,16 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 	moreOptions['moptions'] = moptions
 	micronum = filterMicrosatellites(commonOptions, specifiedOptions, moreOptions)
 	allmicro = specifiedOptions['microsatellites']
-	maxind = remove_finished(specifiedOptions)
+	maxind = remove_finished(specifiedOptions, commonOptions)
 	print 'maxind', maxind
 	del specifiedOptions['microsatellites']
 	
-	avergnum = micronum/specifiedOptions['thread']
-	if avergnum>1000: avergnum = 1000;
-	minfostr = ('Average microsatellites per thread: %d=%d/%d' % (avergnum, micronum, specifiedOptions['thread']))
+	avergnum1 = micronum/specifiedOptions['thread']; 
+	maxrepin1job = 100;
+	avergnum = avergnum1
+	if avergnum>maxrepin1job: avergnum = maxrepin1job;
+	moreOptions['avergnum'] = avergnum
+	minfostr = ('Average microsatellites per thread: %d(%d)=%d/%d' % (avergnum1, avergnum, micronum, specifiedOptions['thread']))
 	print minfostr
 	logging.info(minfostr)
 
@@ -202,21 +227,62 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 					splitTask(startkeys, avergnum, partitiondict, chrk+'_', maxind, ti, mi, chrk)
 
 	print 'split taks done', len(partitiondict); sys.stdout.flush()
-	unfinishedjobs, finishedjobs, finishedjob_times = distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict, allmicro)
+	unfinishedjobs, unfinishedjobs2, finishedjobs, finishedjob_times = distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict, allmicro)
+
+	os.system('grep "Failed to allocate" '+specifiedOptions['outFolder']+'/*.e')
+	os.system('grep -i "Error" '+specifiedOptions['outFolder']+'/*.e')
+
+	rem_temp(unfinishedjobs, unfinishedjobs2, finishedjobs, specifiedOptions)
+
+	print 'unfinishedjobs2', len(unfinishedjobs2), unfinishedjobs2; sys.stdout.flush()
 	print 'unfinishedjobs', len(unfinishedjobs), unfinishedjobs; sys.stdout.flush()
 	if len(unfinishedjobs)>0:
-		moreunfinishedjobs, morefinishedjobs, finishedjob_times = handle_unfinished_jobs(commonOptions, specifiedOptions, moreOptions, unfinishedjobs, partitiondict, avergnum, allmicro, finishedjob_times)
-		finishedjobs.update(morefinishedjobs)
-		moreunfinishedjobskeys = moreunfinishedjobs.keys()
-		if len(moreunfinishedjobskeys)>0:
-			print 'Unfinished:!!!!!!!!!!!!!!!!!!!'
-			for unf in moreunfinishedjobskeys:
-				print '\t', unf, moreunfinishedjobs[unf]
-	
+		unfinishedjobskeys = unfinishedjobs.keys()
+		print 'Unfinished:!!!!!!!!!!!!!!!!!!!'
+		for unf in unfinishedjobskeys:
+			print '\t', unf, unfinishedjobs[unf]
+
+	handle_rest(finishedjobs, specifiedOptions, commonOptions)
+
+def rem_temp(unfinishedjobs, unfinishedjobs2, finishedjobs, specifiedOptions):
+	if not specifiedOptions['cluster']==0:
+		alljobs = [unfinishedjobs, unfinishedjobs2, finishedjobs]
+		for curjobs in alljobs:
+			fjkeys = curjobs.keys(); fjkeys.sort()
+			for fjk in fjkeys:
+				temppatfile = specifiedOptions['outFolder']+'/'+fjk+'.*'
+				os.system('rm '+temppatfile)
+		
+
+def handle_rest(finishedjobs, specifiedOptions, commonOptions):	
 	mres = {}; mdetail = {}
 	fjkeys = finishedjobs.keys(); fjkeys.sort()
 	for fjk in fjkeys:
-		mres, mdetail = myCommonFun.myReadScanResults(specifiedOptions, mres, mdetail, fjk);
+		if specifiedOptions['cluster']==0:
+			mres, mdetail = myCommonFun.myReadScanResults(specifiedOptions, mres, mdetail, fjk);
+		else: mres, mdetail = myCommonFun.myReadScanResultsCluster(specifiedOptions, mres, mdetail, commonOptions, fjk);
+
+	if specifiedOptions['cluster']==0:
+		myCommonFun.myWriteScanResults(specifiedOptions, mres, mdetail, procss_info='_all')
+	else:
+		myCommonFun.myWriteScanResultsCluster(specifiedOptions, mres, mdetail, commonOptions, procss_info='_sub_all')
+
+	scanresfolder = specifiedOptions['scanresfolder']; defsuf='.txt'
+	for fjk in fjkeys:
+		if specifiedOptions['cluster']==0:
+			curresfilename = scanresfolder + 'res_'+ specifiedOptions['analysis_file_id'] + fjk + defsuf
+			curdetailfilename = scanresfolder + 'detail_'+ specifiedOptions['analysis_file_id'] + fjk + defsuf
+			curresfilenamedone = scanresfolder + 'res_'+ specifiedOptions['analysis_file_id'] + fjk + defsuf + '.done'
+			rmfiles = [curresfilename, curdetailfilename, curresfilenamedone]
+		else:
+			curresfilename = scanresfolder + 'res_'+ commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id']
+			curdetailfilename = scanresfolder + 'detail_'+ commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id']
+			curresfilenamedone = scanresfolder + 'res_'+ commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id'] + '.done'
+			curlogfile = logscanfolder + 'RepScan_' + commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id'][:-len('.txt')]+ '.log'
+			rmfiles = [curresfilename, curdetailfilename, curresfilenamedone, curlogfile]
+
+		for rmf in rmfiles:
+			os.system("rm " + rmf);
 
 	return [mres,mdetail]
 	
@@ -225,42 +291,81 @@ def distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict,
 	partitiondictkeys = partitiondict.keys(); partitiondictkeys.sort();
 	jobs = {}; usetimes = {}
 	finishedjobs = {};
-	unfinishedjobs = {}
+	unfinishedjobs = {}; unfinishedjobs2 = {};
 	if not finishedjob_times.has_key('N90'): finishedjob_times['N90'] = -1;
 	if not finishedjob_times.has_key('alltimes'): finishedjob_times['alltimes'] = []
 	if not finishedjob_times.has_key('CalNum'): finishedjob_times['CalNum'] = 0
 	start_time = time.time();
 	pk_ind = 0;
 
-	caltimethre = 25; minrepeatinjobs = 100; msp = 10; pre_usedtime = 0;
-	preprint = 0;
-	#while pk_ind<len(partitiondictkeys):
-	#	while True:
+	caltimethre = 25; minrepeatinjobs = 100; msp = 10; pre_usedtime = 0; n90 = 0.8; preprint = 0;
+	msleeptime = 10; printfre = 100; curfre = 0;
 	while True:
-			if checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, partitiondict, specifiedOptions) and (not pk_ind<len(partitiondictkeys)): break;
-
 			if len(jobs)<specifiedOptions['thread']:
 				#print 'distribute_jobs', len(finishedjob_times['alltimes']), caltimethre, finishedjob_times['N90']
 				if len(finishedjob_times['alltimes'])>caltimethre and finishedjob_times['CalNum']<len(finishedjob_times['alltimes']):
 					finishedjob_times['alltimes'].sort();
-					finishedjob_times['N90'] = finishedjob_times['alltimes'][int(len(finishedjob_times['alltimes'])*0.9)]
+					finishedjob_times['N90'] = round(finishedjob_times['alltimes'][int(len(finishedjob_times['alltimes'])*n90)], 2)
+					if finishedjob_times['N90']<100 or finishedjob_times['N90']<moreOptions['avergnum']/2: 
+						finishedjob_times['N90'] = -1
 					finishedjob_times['CalNum'] = len(finishedjob_times['alltimes']);
 				while pk_ind<len(partitiondictkeys) and len(jobs)<specifiedOptions['thread']:
 					pk = partitiondictkeys[pk_ind]
-					print 'dis', ''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], pk, '.txt','.done'])
-					if os.path.isfile(''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], pk, '.txt','.done'])) and specifiedOptions['continue']==0:
-						os.system(''.join(['rm ', specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], pk, '.txt','.done']))
-					moreOptions['curPartition'] = partitiondict[pk]
-					ti, mi, chrk = moreOptions['curPartition'][-1]
-					if ti==0: specifiedOptions['curmicrosatellites'] = allmicro[ti][mi]
-					else: specifiedOptions['curmicrosatellites'] = allmicro[ti][mi][chrk]
-					p = multiprocessing.Process(target=scan_part, args=(commonOptions, specifiedOptions, moreOptions, pk,))
-					jobs[pk] = p
-					usetimes[pk] = [time.time(),time.time()]
-					p.start()
-					pk_ind = pk_ind + 1
+					if specifiedOptions['cluster']==0:
+						#print 'dis', ''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], pk, '.txt','.done'])
+						donefile = ''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], pk, '.txt','.done'])
+					else: donefile  = ''.join([specifiedOptions['scanresfolder'], 'res_', commonOptions['firsthalf_analysis_file_id'], pk, commonOptions['secondhalf_analysis_file_id'], '.done'])
+					if os.path.isfile(donefile) and specifiedOptions['continue']==0:
+						os.system(''.join(['rm ', donefile]))
 
-				if len(partitiondict[partitiondictkeys[0]])>minrepeatinjobs:
+					moreOptions['curPartition'] = partitiondict[pk]
+					ti, mi, chrk, curavergnum = moreOptions['curPartition'][-1]
+					if specifiedOptions['cluster']==0:
+						if ti==0: specifiedOptions['curmicrosatellites'] = allmicro[ti][mi]
+						else: specifiedOptions['curmicrosatellites'] = allmicro[ti][mi][chrk]
+
+						#moreOptions['mpid'] = pk_ind
+						p = multiprocessing.Process(target=scan_part, args=(commonOptions, specifiedOptions, moreOptions, pk,))
+						jobs[pk] = p
+						p.start()
+					else:
+						clusterOption = (specifiedOptions['clusterOption'] % (specifiedOptions['outFolder']+'/'+pk+'.e', specifiedOptions['outFolder']+'/'+pk+'.o', pk))
+						if os.path.isfile(specifiedOptions['outFolder']+'/'+pk+'.e'): 
+							os.system('rm '+specifiedOptions['outFolder']+'/'+pk+'.e')
+						if os.path.isfile(specifiedOptions['outFolder']+'/'+pk+'.o'):
+							os.system('rm '+specifiedOptions['outFolder']+'/'+pk+'.o')
+
+						optstr = mySetting.getString(commonOptions['margs'])
+						#ti, mi, chrk, curavergnum = moreOptions['curPartition'][-1]
+						if ti==0:
+							sep1 = ',' 
+							temppatfile = specifiedOptions['outFolder']+'/'+pk+'.pa'
+						else:
+							sep1 = ' '
+							temppatfile = specifiedOptions['outFolder']+'/'+pk+'.bed'
+						fwpat = open(temppatfile, 'w')
+						if ti==0:
+							for repk in moreOptions['curPartition'][:-1]:
+								fwpat.write(sep1.join(allmicro[ti][mi][repk][-1])+'\n')
+						else:
+							for sk in moreOptions['curPartition'][:-1]:
+								elekeys = allmicro[ti][mi][chrk][sk].keys();
+								for ek in elekeys:
+									fwpat.write(sep1.join(allmicro[ti][mi][chrk][sk][ek][-1])+'\n')
+						fwpat.close();
+						
+						optstr = ' '.join(['echo "python repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
+						jobs[pk] = pk
+					
+						print 'submit job=', pk, optstr, datetime.now().strftime('%Y/%m/%d %H:%M:%S'),  'Current='+str(pk_ind) +'/' + str(len(partitiondictkeys)), 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90']
+						sys.stdout.flush() #exit(0)
+						os.system(optstr)
+
+					usetimes[pk] = [time.time(),time.time()]
+					pk_ind = pk_ind + 1
+					time.sleep(1);
+
+				if len(partitiondictkeys)>0 and len(partitiondict[partitiondictkeys[0]])>minrepeatinjobs:
 					cur_time = time.time();
 					used_time = cur_time - start_time;
 					if len(finishedjobs)>0 and (len(finishedjobs)/msp>preprint or used_time-pre_usedtime>1000):
@@ -268,65 +373,81 @@ def distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict,
 						perc = len(finishedjobs)/float(len(partitiondictkeys))
 						tot_time = used_time/perc
 						memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
-						print ('running time=%.0f (%d%%=%d/%d). Total estimation: %d. Mem=%d' % (used_time, int(perc*100), len(finishedjobs), len(partitiondictkeys), tot_time, memres));
+						print ('running time=%.0f (%d%%=%d/%d). Total estimation: %d. Mem=%d' % (used_time, int(perc*100), len(finishedjobs), len(partitiondictkeys), tot_time, memres)), datetime.now().strftime('%Y/%m/%d %H:%M:%S');
 						preprint = len(finishedjobs)/msp
 						sys.stdout.flush()
 
-			print 'jobs', len(jobs), specifiedOptions['thread'], 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90']; sys.stdout.flush()
-			time.sleep(600);
+
+			#msleeptime = 10; printfre = 100; curfre = 0;
+			if curfre==printfre:
+				print 'jobs', len(jobs), specifiedOptions['thread'], 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90'], datetime.now().strftime('%Y/%m/%d %H:%M:%S'); sys.stdout.flush()
+				curfre = 0
+			if checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, unfinishedjobs2, partitiondict, specifiedOptions, commonOptions, msleeptime, partitiondictkeys):
+				if (not pk_ind<len(partitiondictkeys)): break;
+			time.sleep(msleeptime);
+			curfre = curfre + 1;
 
 	#while True:
 	#	if checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, partitiondict, specifiedOptions): break;
 	#	else: time.sleep(60);
 	
-	return [unfinishedjobs, finishedjobs, finishedjob_times]
+	return [unfinishedjobs, unfinishedjobs2, finishedjobs, finishedjob_times]
 
-def handle_unfinished_jobs(commonOptions, specifiedOptions, moreOptions, old_unfinishedjobskeys, old_partitiondict, old_avergnum, allmicro, finishedjob_times):
-	avergnum = old_avergnum/10;
-	if avergnum<1: avergnum = 1
-	partiiondict = {}
-	for cur_unf_key in old_unfinishedjobskeys:
-		if len(old_partitiondict[cur_unf_key])>2:
-			ti, mi, chr = old_partitiondict[cur_unf_key][-1]
-			splitTask(old_partitiondict[cur_unf_key][:-1], avergnum, partitiondict, cur_unf_key+'_', ti, mi, chr)
-	unfinishedjobs, finishedjobs, finishedjob_times = distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict, allmicro, finishedjob_times)
-	if len(unfinishedjobs)>0:
-		moreunfinishedjobs, morefinishedjobs, finishedjob_times = handle_unfinished_jobs(commonOptions, specifiedOptions, moreOptions, unfinishedjobskeys, partitiondict, avergnum, allmicro, finishedjob_times)
-		finishedjobs.update(morefinishedjobs)
-		unfinishedjobs = moreunfinishedjobs
-	return [unfinishedjobs, finishedjobs, finishedjob_times]
-
-def checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, partitiondict, specifiedOptions):
+def checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, unfinishedjobs2, partitiondict, specifiedOptions, commonOptions, msleeptime, partitiondictkeys):
 	jobskeys = jobs.keys(); jobskeys.sort();
 
 	for jk in jobskeys:
 		usetimes[jk][1] = time.time()
-		if os.path.isfile(''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], jk, '.txt','.done'])):
-			print 'Finished: ', ''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], jk, '.txt','.done']), len(jobs), finishedjob_times['N90']; 
+
+		if specifiedOptions['cluster']==0:
+			donefile = ''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], jk, '.txt','.done'])
+			beginfile = ''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], jk, '.txt','.begin'])
+		else: 
+			donefile  = ''.join([specifiedOptions['scanresfolder'], 'res_', commonOptions['firsthalf_analysis_file_id'], jk, commonOptions['secondhalf_analysis_file_id'], '.done'])
+			beginfile = ''.join([specifiedOptions['scanresfolder'], 'res_', commonOptions['firsthalf_analysis_file_id'], jk, commonOptions['secondhalf_analysis_file_id'], '.begin'])
+		if os.path.isfile(donefile):
+			print 'Finished: ', donefile, len(jobs), len(finishedjob_times['alltimes']), finishedjob_times['N90'], datetime.now().strftime('%Y/%m/%d %H:%M:%S');
 			finishedjobs[jk] = 1
 			finishedjob_times['alltimes'].append( usetimes[jk][1]- usetimes[jk][0])
-			p = jobs[jk]; 
-			if p.is_alive(): time.sleep(20);
-			p.terminate(); del p; del jobs[jk]; 
-			del usetimes[jk];
+			if specifiedOptions['cluster']==0:
+				p = jobs[jk]; 
+				if p.is_alive(): time.sleep(msleeptime);
+				p.terminate(); del p; 
+			del jobs[jk]; del usetimes[jk];
 		else:
+			if (not os.path.isfile(donefile)) and (not os.path.isfile(beginfile)):
+				usetimes[jk][0] = time.time()
 			cur_used_time = usetimes[jk][1]- usetimes[jk][0]
-			#print jobs[jk].name, cur_used_time, finishedjob_times['N90'], len(finishedjob_times['alltimes']), ';', 
 			if finishedjob_times['N90']>0 and cur_used_time>finishedjob_times['N90']*1.5:
-				print 'Try to kill', cur_used_time, finishedjob_times['N90']*1.5; sys.stdout.flush()
-				jobs[jk].terminate();
-				while jobs[jk].is_alive():
-					time.sleep(20);
-				if not jobs[jk].is_alive():
+				if specifiedOptions['cluster']==0:
+					if jobs[jk].is_alive():
+						print 'Try to kill', cur_used_time, finishedjob_times['N90']*1.5, 'unfinishedjobs=', len(unfinishedjobs); sys.stdout.flush()
+						jobs[jk].terminate();
+						while jobs[jk].is_alive():
+							time.sleep(msleeptime);
+						p = jobs[jk]; p.is_alive(); p.terminate(); del p;
+				else:
+					print 'qdel '+jk, cur_used_time, finishedjob_times['N90']*1.5, 'unfinishedjobs=', len(unfinishedjobs); sys.stdout.flush()
+					os.system('qdel '+jk)
+					time.sleep(msleeptime);
+					
+				unfinishedjobs2[jk] = partitiondict[jk]
+
+				if len(partitiondict[jk])>2 and commonOptions['StopFail']==0:
+					print 'add new part after spliting', jk, len(partitiondict), '--->',
+					ti, mi, chr, curavergnum = partitiondict[jk][-1]
+					newpkeys = splitTask(partitiondict[jk][:-1], curavergnum/10, partitiondict, jk+'_', {}, ti, mi, chr)
+					partitiondictkeys.extend(newpkeys)
+					print 'after_split', len(partitiondict); sys.stdout.flush()
+				else:
 					unfinishedjobs[jk] = partitiondict[jk]
-					p = jobs[jk]; p.is_alive(); p.terminate(); del p; del jobs[jk];
-					del usetimes[jk];
-				print 'kill'; sys.stdout.flush()
-	#print '\tcheckJobs', len(jobs)
+
+				del jobs[jk];
+				del usetimes[jk];
 	sys.stdout.flush()
 
 	jobskeys = jobs.keys();
-	if len(jobskeys)==0 and len(unfinishedjobs)==0: return True;
+	if len(jobskeys)==0: return True;
 	else: return False;
 
 def scan_part(commonOptions, specifiedOptions, moreOptions, pk):
@@ -341,6 +462,12 @@ def scan_part(commonOptions, specifiedOptions, moreOptions, pk):
 	mres = {}; mdetail = {}
 	moreOptions['mres'] = mres
 	moreOptions['mdetail'] = mdetail
+
+	scanresfolder = specifiedOptions['scanresfolder']
+	if not os.path.isdir(scanresfolder):
+		os.system('mkdir '+scanresfolder)
+	beginfile = ''.join([specifiedOptions['scanresfolder'], 'res_', specifiedOptions['analysis_file_id'], pk, '.txt','.begin'])
+	os.system('touch '+beginfile)
 
 	if ti==0:
 		for repk in curPartition[:-1]:	
@@ -361,24 +488,33 @@ def scan_part(commonOptions, specifiedOptions, moreOptions, pk):
 	if specifiedOptions['continue']==0:
 		myCommonFun.myWriteScanResults(specifiedOptions, moreOptions['mres'], moreOptions['mdetail'], pk)
 	else: myCommonFun.myWriteScanResults(specifiedOptions, moreOptions['mres'], moreOptions['mdetail'], pk, 'a')
+	os.system('rm '+beginfile)
 
 def splitTask(repkeys, avergnum, partitiondict, part_name_prefix, maxind, ti, mi, chr=None):
 	if avergnum<1: avergnum = 1;
 	old_pos = 0; curpart = 0;
 	if len(part_name_prefix)>0 and maxind.has_key(part_name_prefix[:-1]):
 		curpart = maxind[part_name_prefix[:-1]]+1
+	newpkeys = []
 	while old_pos<len(repkeys):
 		cur_part_name = part_name_prefix+('%09d' % curpart)
 		if old_pos+avergnum*1.5<len(repkeys):
 			partitiondict[cur_part_name] = repkeys[old_pos:(old_pos+avergnum)]
 		else:
 			partitiondict[cur_part_name] = repkeys[old_pos:]
-		partitiondict[cur_part_name].append([ti, mi, chr])
+		partitiondict[cur_part_name].append([ti, mi, chr, avergnum])
 		curpart = curpart + 1
 		old_pos = old_pos + avergnum
-
+		newpkeys.append(cur_part_name)
+	return newpkeys
 
 def scan(commonOptions, specifiedOptions):
+	scanresfolder = specifiedOptions['scanresfolder']
+	if not os.path.isdir(scanresfolder):
+		os.system('mkdir '+scanresfolder)
+	beginfile = scanresfolder + 'res_'+ specifiedOptions['analysis_file_id'] + '.txt'+'.begin'
+	os.system('touch '+beginfile)
+
 	moptions = getAllMicrosatellites(commonOptions, specifiedOptions)
 
 	mres = {}; mdetail = {}
@@ -390,7 +526,10 @@ def scan(commonOptions, specifiedOptions):
 	micronum = filterMicrosatellites(commonOptions, specifiedOptions, moreOptions)
 	allmicro = specifiedOptions['microsatellites']
 
-	print 'Total size', micronum, allmicro[1][0].keys()
+	print 'Total size', micronum, ;
+	if len(allmicro)>1 and len(allmicro[1])>0: allmicro[1][0].keys()
+	elif len(allmicro)>0 and len(allmicro[0])>0: allmicro[0][0].keys()
+	else: print 'Error: failed to load patterns'
 
 	handlei = 0; start_time = time.time();
 	for ti in range(len(allmicro)):
@@ -419,10 +558,16 @@ def scan(commonOptions, specifiedOptions):
 							detectRepCounts(commonOptions, specifiedOptions, moreOptions);
 							printProgress(handlei, micronum, start_time)
 
-	return [moreOptions['mres'], moreOptions['mdetail']]
+	myCommonFun.myWriteScanResults(specifiedOptions, moreOptions['mres'], moreOptions['mdetail'], procss_info='')
+
+	del moreOptions['mres']
+	del moreOptions['mdetail']
+	gc.collect()
+
+	os.system('rm '+beginfile)
+	#return [moreOptions['mres'], moreOptions['mdetail']]
 
 def addSumForAGene(p2, mstr, ind, commonOptions, specifiedOptions, moreOptions):
-	myBAMhandler.fixsize2(p2, ind)
 
 	repinfo1 = moreOptions['mgloc']
 	chr = repinfo1[0];
@@ -434,8 +579,14 @@ def addSumForAGene(p2, mstr, ind, commonOptions, specifiedOptions, moreOptions):
 		currepkey = ''.join([chr, ':', start_pos, ':', end_pos, ':', repele]);
 	else:
 		currepkey = moreOptions['repeatName']
-	detail = ''.join(['', ('%10s' % mstr), ' ', str(p2), '><']);
-	retstr = ''.join([str(p2[ind][0]), '/', str(p2[ind][1])]);
+
+	if p2==None:
+		detail = ''.join(['', ('%10s' % mstr), ' ', '><']);
+		retstr = '0/0'
+	else:
+		myBAMhandler.fixsize2(p2, ind)
+		detail = ''.join(['', ('%10s' % mstr), ' ', str(p2), '><']);
+		retstr = ''.join([str(p2[ind][0]), '/', str(p2[ind][1])]);
 
 	if not moreOptions['mres'].has_key(currepkey):
 		moreOptions['mres'][currepkey] = []
@@ -446,6 +597,7 @@ def addSumForAGene(p2, mstr, ind, commonOptions, specifiedOptions, moreOptions):
 	moreOptions['mdetail'][currepkey].append(detail)
 	
 	#print currepkey, retstr, detail
+
 
 def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 	retoptions = myBAMhandler.get_Loc1(moreOptions['mgloc'], commonOptions)
@@ -458,32 +610,50 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 	if not specifiedOptions["SepbamfileTemp"]==None:
 		specifiedOptions["bamfile"] = (specifiedOptions["SepbamfileTemp"] % moreOptions['chr'][3:])
 
+	#mtracker = tracker.SummaryTracker()
+	if not os.path.isfile(specifiedOptions["bamfile"]):
+		print 'Error!! not bam file', specifiedOptions["bamfile"]
+
 	if (commonOptions['SplitAndReAlign'] in [0,2]) or testall:
 		start_time = time.time();
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')): print 'p2bamhmm start'
-		p2bamhmm = myBAMhandler.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print 'p2bamhmm start'
+		if os.path.isfile(specifiedOptions["bamfile"]):
+			p2bamhmm = myBAMhandler.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
+		else: 
+			p2bamhmm = None
 		memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
 		if p2bamhmm==None:
-			print 'ERROR None detection', moreOptions['repeatName'], moreOptions['mgloc']
-			logging.error('ERROR None detection: ' + str( moreOptions['repeatName']) + ' ' + str(moreOptions['mgloc']))
-		else:
-			addSumForAGene(p2bamhmm, 'p2bamhmm', 2, commonOptions, specifiedOptions, moreOptions)
+			if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
+				print 'ERROR None detection', moreOptions['repeatName'], moreOptions['mgloc']
+				logging.error('ERROR None detection: ' + str( moreOptions['repeatName']) + ' ' + str(moreOptions['mgloc']))
+
+		addSumForAGene(p2bamhmm, 'p2bamhmm', 2, commonOptions, specifiedOptions, moreOptions)
 		end_time = time.time();
-		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread')): print ('p2bamhmm end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
-	if (commonOptions['SplitAndReAlign'] in [1,2]) or testall:
+		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+	
+	gc.collect()
+	#mtracker.print_diff()
+
+	if ((commonOptions['SplitAndReAlign'] in [1,2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
 		start_time = time.time();
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')): print 'p2sp start'
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print 'p2sp start'
 		moreOptions['fafqfile'] = specifiedOptions["bamfile"]
 		moreOptions['fafqtype'] = 'bam'
-		p2sp = myRepeatReAlignment.getRepeatCounts(commonOptions, specifiedOptions, moreOptions)
+		if os.path.isfile(specifiedOptions["bamfile"]):
+			p2sp = myRepeatReAlignment.getRepeatCounts(commonOptions, specifiedOptions, moreOptions)
+		else: p2sp = None
 		memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
 		if p2sp==None:
-			print 'ERROR None detection (sp)', moreOptions['repeatName'], moreOptions['mgloc']
-			logging.error('ERROR None detection (sp): ' + str( moreOptions['repeatName']) + ' ' + str(moreOptions['mgloc']))
-		else:
-			addSumForAGene(p2sp, 'p2sp', 2, commonOptions, specifiedOptions, moreOptions)
+			if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
+				print 'ERROR None detection (sp)', moreOptions['repeatName'], moreOptions['mgloc']
+				logging.error('ERROR None detection (sp): ' + str( moreOptions['repeatName']) + ' ' + str(moreOptions['mgloc']))
+
+		addSumForAGene(p2sp, 'p2sp', 2, commonOptions, specifiedOptions, moreOptions)
 		end_time = time.time();
-		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread')): print ('p2sp end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+
+	gc.collect()
+	#mtracker.print_diff()
 
 
 if __name__=="__main__":

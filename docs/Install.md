@@ -1,4 +1,24 @@
 
+## Quick preparation of running RepeatHMM using conda
+1. Download RepeatHMM
+
+`git clone https://github.com/WGLab/RepeatHMM`
+
+2. Create conda environment.
+```
+cd RepeatHMM
+conda env create -f environment.yml
+source activate repeathmmenv
+cd bin/scripts/UnsymmetricPairAlignment
+make
+cd ../../../
+```
+Then, you can use run RepeatHMM by `python bin/repeatHMM.py`
+
+If you have any error, please post them on [GitHub](https://github.com/WGLab/RepeatHMM/issues). They would also be helpful to other users.
+
+You can also prepare the environment using the guideline below.
+
 ## Prerequisites:
 	* Python 2.7
 	* GCC 4.4.7

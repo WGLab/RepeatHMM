@@ -10,10 +10,10 @@ def handletrf_line_sp(line, mdict, otherOpt):
 	#print lsp
 	chr, repstr, repend = lsp[:3];
 	repstr = int(repstr); repend = int(repend)
-	if not otherOpt['chr']==None:
+	if otherOpt.has_key('chr') and (not otherOpt['chr']==None):
 		if not chr==otherOpt['chr']:
 			return;
-	if not otherOpt['pos']==None:
+	if otherOpt.has_key('pos') and (not otherOpt['pos']==None):
 		if not ((otherOpt['pos'][0]==-1 or repstr>otherOpt['pos'][0]) and (otherOpt['pos'][1]==-1 or repend<otherOpt['pos'][1])):
 			return;
 
@@ -80,7 +80,7 @@ def handlerepeat_line_sp(line, mdict, otherOpt):
 
 	repname = repname.lower()
 	#                  0       1         2        3      4       5      6
-	mdict[repname] = [chr, start_pos, end_pos, reppat, strand, range, others]
+	mdict[repname] = [chr, start_pos, end_pos, reppat, strand, range, others, lsp]
 
 def getPredefinedMicrosatellites(moptions):
 	if moptions.has_key('pafile') and (not moptions['pafile']==None):

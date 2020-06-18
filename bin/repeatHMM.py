@@ -26,8 +26,7 @@ from scripts import myCommonFun
 parser = argparse.ArgumentParser(description="Determine microsatellite repeat of interests or for all microsatellites.", epilog="For example, \n \
 \tpython %(prog)s BAMinput: with a BAM file as input\n \
 \tpython %(prog)s FASTQinput: with a FASTQ file as input \n \
-", formatter_class=RawTextHelpFormatter);
-#\tpython %(prog)s Scan: for Scaning whole genome", formatter_class=RawTextHelpFormatter);
+\tpython %(prog)s Scan: for Scaning whole genome", formatter_class=RawTextHelpFormatter);
 
 
 originalError = '!!!Error: !!!!!! \n'
@@ -314,10 +313,6 @@ def getCommonOptions(margs, cominfo=None):
 
 
 def scan(margs):
-    print('This function is disenabled now.')
-    print('We will publish this function later.')
-    sys.exit(140)
-
     cominfo = {}
     cominfo['scan'] = 1
     # print margs;
@@ -338,6 +333,8 @@ def scan(margs):
 
     scan_region = margs.region
     specifiedOptions['scan_region'] = scan_region
+    specifiedOptions['max_len'] = margs.max_len
+    specifiedOptions['StopFail'] = margs.StopFail
     if scan_region is None:
         specifiedOptions['analysis_file_id'] = 'gmm' + analysis_file_id
     else:
@@ -347,6 +344,11 @@ def scan(margs):
             specifiedOptions['analysis_file_id'] = 'gmm_' + scan_region_rp + analysis_file_id
         else:
             specifiedOptions['analysis_file_id'] = 'gmm' + analysis_file_id
+
+    specifiedOptions['clusterOption'] = margs.clusterOption
+    specifiedOptions['cluster'] = margs.cluster
+    if not specifiedOptions['cluster']==0:
+        specifiedOptions['analysis_file_id'] = specifiedOptions['analysis_file_id'] + "_sub"
 
     specifiedOptions['unique_file_id'] = specifiedOptions['analysis_file_id']
 
@@ -367,7 +369,7 @@ def scan(margs):
     # if not os.path.isdir(margs.outFolder):
     #   os.system('mkdir '+margs.outFolder)
     commonOptions['outlog'] = M_WARNING
-    logfolder = 'logscan/'
+    logfolder = logscanfolder #'logscan/'
     if not os.path.isdir(logfolder):
         os.system('mkdir ' + logfolder)
     filename = logfolder + 'RepScan_' + specifiedOptions['analysis_file_id'] + '.log'
@@ -378,6 +380,12 @@ def scan(margs):
     print('The following options are used (included default):')
     printOptions(commonOptions)
     printOptions(specifiedOptions)
+
+    if not errorStr == originalError:
+        print(errorStr)  # BAMinput|FASTQinput|Scan
+        parser.print_help()
+        parser.parse_args(['Scan', '--help'])
+        sys.exit(140)
 
     specifiedOptions['thread'] = margs.thread
     specifiedOptions['continue'] = margs.conted
@@ -420,7 +428,7 @@ def FASTQinput(margs):
     specifiedOptions['unique_file_id'] = unique_file_id
     specifiedOptions['analysis_file_id'] = analysis_file_id
 
-    logfolder = 'logfq/'
+    logfolder = logfqfolder #'logfq/'
     if not os.path.isdir(logfolder):
         os.system('mkdir ' + logfolder)
     filename = logfolder + 'RepFQ_' + commonOptions['repeatName'] + unique_file_id + '.log'
@@ -475,7 +483,7 @@ def BAMinput(margs):
     specifiedOptions['analysis_file_id'] = analysis_file_id
     specifiedOptions['unique_file_id'] = unique_file_id
 
-    logfolder = 'logbam/'
+    logfolder = logbamfolder #'logbam/'
     if not os.path.isdir(logfolder):
         os.system('mkdir ' + logfolder)
     filename = logfolder + 'RepBAM_' + commonOptions['repeatName'] + unique_file_id + '.log'
@@ -667,6 +675,10 @@ parser_scan.add_argument("--thread", default=1, type=int,
 #parser_scan.add_argument("--outFolder", default='align/', help="How many additional threads are used. Default: 1");
 parser_scan.add_argument("--conted", default=0, type=int,
                          help="Whether continue the running last time. Default: 0")
+parser_scan.add_argument("--cluster", default=0, type=int, help="Whether cluster computing would be used. Default: 0");
+parser_scan.add_argument("--clusterOption", default="qsub -V -cwd -pe smp 1 -l h_vmem=8G -e %s -o %s -N %s", help="Options for job submission to cluter. Default: 'qsub -V -cwd -pe smp 1 -l h_vmem=8G -q all.q,bigmem -e %%s -o %%s -N %%s'");
+parser_scan.add_argument("--max_len", default=1000, type=int, help="The maximum length of repeat regions which will be detected. Default: 0");
+parser_scan.add_argument("--StopFail", default=0, type=int, help="Whether stop when a job failed. Default: 0(not stop)");
 
 bam2group = parser_scan.add_mutually_exclusive_group()  # required=True)
 bam2group.add_argument("--Onebamfile", default=None, help="A BAM file storing all alignments")

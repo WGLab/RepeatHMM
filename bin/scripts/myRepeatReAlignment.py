@@ -195,7 +195,7 @@ def runTRF(fafn, TRFOptions, minRepBWTSize, RepeatTimeThr, moreOptions, commonOp
 		if commonOptions['outlog'] <= M_INFO: print 'patset', patset
 		logging.info('patset ' + str(patset))
 
-	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')): print trf_cmd
+	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print trf_cmd
 	logging.info(trf_cmd)
 	os.system(trf_cmd);
 	
@@ -371,7 +371,7 @@ def splitFA(uniq_id, commonOptions, moreOptions, specifiedOptions):
 						curseqc = seqcont[pre_end_pos:cur_start_pos]
 						cur_id_suf = ''.join([seqname, '__', str(splitnum), '.', str(isp)]);
 						if splitInfo[seqk][2].has_key(cur_id_suf):
-							if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread')):
+							if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 								print 'Warning!!! duplciate key in split: '+cur_id_suf
 								logging.info(''.join(['Warning!!! duplciate key in split: ', cur_id_suf]))
 						splitInfo[seqk][2][cur_id_suf] = [pre_end_pos, cur_start_pos-1]
@@ -395,15 +395,15 @@ def splitFA(uniq_id, commonOptions, moreOptions, specifiedOptions):
 					splitInfo[seqk][2][cur_id_suf] = [pre_end_pos, pre_end_pos+len(curseqc)-1]
 				else:
 					short_repeat_id_list.append([seqk, upstreamsize, downstreamsize, len(seqcont)])
-					if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+					if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 						print 'Warning!!! cannot find non-repeat flanking region long enough for ', seqk, repInfo[seqk], upstreamsize, downstreamsize, len(seqcont)
 						logging.info(' '.join(['Warning!!! cannot find non-repeat flanking region long enough for ', seqk, str(repInfo[seqk]), str(upstreamsize), str(downstreamsize), str(len(seqcont))]))
 					if upstreamsize<0 or downstreamsize<0:
-						if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+						if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 							print 'Warning!!! negative streamsize: ', upstreamsize, downstreamsize, len(seqcont), repInfo[seqk][poskeys[-1]][0], ' for '+seqname
 							logging.info(' '.join(['Warning!!! negative streamsize: ', str(upstreamsize), str(downstreamsize), str(len(seqcont)), str(repInfo[seqk][poskeys[-1]][0]), ' for '+seqname]))
 			else:
-				if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+				if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 					print 'Info: No repeat information for '+seqname + ' in '+fafn, '>>>', seqcont
 					logging.info(' '.join(['Info: No repeat information for ',seqname , ' in ',fafn, '>>>', seqcont]))
 
@@ -438,7 +438,7 @@ def splitFA(uniq_id, commonOptions, moreOptions, specifiedOptions):
 		#for rep_id in repeat_id_list:
 		#	print '\t', rep_id
 	
-	if (not specifiedOptions.has_key('thread')):	
+	if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):	
 		logging.info(' '.join(['splitfn',splitfn]))
 		logging.info(' '.join(['spfnbam',spfnbam]))
 		logging.info(' '.join(['no_repeat_id_list', str(len(no_repeat_id_list))]))
@@ -489,9 +489,9 @@ def splitBAM(uniq_id, commonOptions, moreOptions, specifiedOptions):
 	moreOptions['samfile']=samfn
 	moreOptions['RemList']['samfile']=samfn
  
-	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 		print mview
-	if (not specifiedOptions.has_key('thread')): logging.info(' '.join(['splitBAM1=', mview]))
+	if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): logging.info(' '.join(['splitBAM1=', mview]))
 	os.system(mview)
 
 	if os.path.getsize(samfn)==0:
@@ -503,9 +503,9 @@ def splitBAM(uniq_id, commonOptions, moreOptions, specifiedOptions):
 			mview = ''.join(['samtools view ', bamfn, '>', samfn])
 		else:
 			 mview = ''.join(['samtools view ', bamfn, ' ', chr[3:], ':', str(startpos), '-', str(endpos), '>', samfn])
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 			print mview
-		if (not specifiedOptions.has_key('thread')): logging.info(' '.join(['splitBAM2=', mview]))
+		if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): logging.info(' '.join(['splitBAM2=', mview]))
 		os.system(mview)
 
 	if os.path.getsize(samfn)==0:
@@ -524,7 +524,7 @@ def reAlign(splitfn, hgfile, splitfn_sorted, moreOptions, commonOptions, specifi
 	cmd = (template_bwamem_cmd % (commonOptions['BWAMEMOptions'], '', hgfile, splitfn, splitfn_sorted))
 	#print 't1', cmd
 	
-	if (not specifiedOptions.has_key('thread')):
+	if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 		if commonOptions['outlog'] <= M_INFO:	print cmd
 		logging.info(' '.join(['reAlign', cmd]))
 	os.system(cmd);
@@ -571,21 +571,21 @@ def getRegioinInBAM(commonOptions, specifiedOptions, moreOptions):
 
 	alignfile = alignfolder + repeatName + unique_file_id +'.alignment.sam'
 	get_alg_cmd = 'samtools view '+spfnbam+' ' + chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+alignfile
-	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')): 
+	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): 
 		print get_alg_cmd
 		logging.info(' '.join(['getRegioinInBAM', get_alg_cmd]))
 		logging.info('Running '+get_alg_cmd)
 	os.system(get_alg_cmd);
 	if os.path.getsize(alignfile)==0:
-		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread')):
+		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 			logging.info('The file %s have zero size in the function of getRegioinInBAM.\nTry without chr' % alignfile)
 			#print ('The file %s have zero size\nTry without chr' % alignfile)
 		get_alg_cmd = 'samtools view '+spfnbam+' ' + chr[3:]+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+alignfile
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 			print get_alg_cmd
 			logging.info('Running '+get_alg_cmd)
 		os.system(get_alg_cmd);
-	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 		logging.info('Produced ' + alignfile + ' done!');
 
 	moreOptions['RemList']['spfnbam_sam_interest'] = alignfile
@@ -842,7 +842,7 @@ def getExpRegionInLongRead(commonOptions, specifiedOptions, moreOptions):
 
 			queryind = string.find(orig_seq[exp_pd_k], aainfo, cur_split_region_start_end[0], cur_split_region_start_end[1]);
 			if queryind==-1:
-				if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+				if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 					print ('Warning!!! cannot find tRegion')
 					if commonOptions['outlog'] <= M_DEBUG:
 						print ('Warning!!! cannot find tRegion %s in %s = orig_seq[exp_pd_k][%d, %d]' % (aainfo, orig_seq[exp_pd_k][cur_split_region_start_end[0]:cur_split_region_start_end[1]], cur_split_region_start_end[0], cur_split_region_start_end[1]) )
@@ -1046,7 +1046,7 @@ def findRepeatCountALongRead(commonOptions, specifiedOptions, moreOptions):
 			newstr = currep[1]
 
 			pre0 = 0; predstats=''
-			if len(newstr)<commonOptions['MaxRep']*len_repPat:
+			if len(newstr)<commonOptions['MaxRep']: #*len_repPat:
 				#print 'Realignment', repeat_start_end, chr
 				newstr, pre0, predstats = myBAMhandler.getUnsymAlignAndHMM(repPat, forw_rerv, repeatFlankLength, hmmoptions, currep[1], commonOptions, currep_key)
 			else: logging.warning('The sequence is too long: '+str(len(newstr))+' '+chr+' '+repeatName+' '+repPat+' '+str(currep[0])+' reads name:'+currep_key+" "+str(commonOptions['MaxRep'])+" "+str(commonOptions['MaxRep']*len_repPat))
@@ -1141,7 +1141,7 @@ def getNonRepeatAlignment(commonOptions, specifiedOptions, moreOptions):
 		#cmd = (template_bwamem_cmd2 % (hg_reference_and_index, commonOptions['hgfile'], split_norep_fn, nonRepeat_alignfn_bam))
 		cmd = (template_bwamem_cmd2 % ('', commonOptions['hgfile'], split_norep_fn, nonRepeat_alignfn_bam))
 		#print 't2', cmd
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 			print cmd;
 			logging.info('getNonRepeatAlignment: '+cmd)
 		os.system(cmd)
@@ -1162,7 +1162,7 @@ def getNonRepeatAlignment(commonOptions, specifiedOptions, moreOptions):
 		chr = moreOptions['chr']
 		nonRepeat_alignfn_bam_sp = ''.join([nonRepeat_alignfn_bam,'_sp.sam'])
 		mview = ''.join(['samtools view ', nonRepeat_alignfn_bam, ' ', chr, ':', str(gene_start_end[0]), '-', str(gene_start_end[1]), '>', nonRepeat_alignfn_bam_sp])
-		if (not specifiedOptions.has_key('thread')):
+		if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 			if commonOptions['outlog'] <= M_INFO: print 'getNonRepeatAlignment', mview
 			logging.info(''.join(['getNonRepeatAlignment', mview]))
 		os.system(mview)
@@ -1230,7 +1230,7 @@ def getNonRepeatinLongRead(commonOptions, specifiedOptions, moreOptions):
 			continue;
 	
 		if (pos_ref > repeat_start_end[0]-repeatFlankLength) and cur_start_pos_longread==-1:
-			if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+			if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 				print 'Info: Cannot cover upstream: ', pos_ref, repeat_start_end[0], repeatFlankLength, cur_start_pos_longread
 				logging.info(' '.join(['Info: Cannot cover upstream: ', str(pos_ref), str(repeat_start_end[0]), str(repeatFlankLength), str(cur_start_pos_longread)]))
 			wrongalign += 1;
@@ -1293,7 +1293,7 @@ def getNonRepeatinLongRead(commonOptions, specifiedOptions, moreOptions):
 				else:
 					nonRepeatinLongRead[exp_pd_k].append([longer, currepregion])
 			else:
-				if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread')):
+				if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 					print 'Warning!! Non-rep too short ', cur_start_pos_longread, cur_end_pos_longread, len(aainfo), currepregion
 		line = non_rep_reader.readline();
 	
@@ -1362,7 +1362,7 @@ def myrm(moreOptions, specifiedOptions, commonOptions):
 		rem_cmd = ''.join(['rm ', moreOptions['RemList'][remk]])
 		if os.path.isfile(moreOptions['RemList'][remk]):
 			os.system(rem_cmd)
-			if (not specifiedOptions.has_key('thread')):
+			if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
 				if commonOptions['outlog'] <= M_INFO: print remk, rem_cmd
 				logging.info(' '.join(['rm', remk, rem_cmd]))
 		del moreOptions[remk]
