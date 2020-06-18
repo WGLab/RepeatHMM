@@ -86,7 +86,7 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 					elif len(allmicro[ti][mi][repk][3])>max_unit_len:
 						#print '1.ele', repk, allmicro[ti][mi][repk], max_unit_len, micronum
 						del allmicro[ti][mi][repk]
-					elif int(allmicro[ti][mi][repk][2]) - int(allmicro[ti][mi][repk][1]) > commonOptions["max_len"]:
+					elif int(allmicro[ti][mi][repk][2]) - int(allmicro[ti][mi][repk][1]) > specifiedOptions["max_len"]:
 						del allmicro[ti][mi][repk]
 					else: 
 						#print 'keep', repk, allmicro[ti][mi][repk], max_unit_len, moptions['pos'], micronum
@@ -120,7 +120,7 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 								if commonOptions['outlog']<=M_WARNING:
 									print 'Warning end-pos del', chrk, sk, ek, allmicro[ti][mi][chrk][sk][ek]
 								del allmicro[ti][mi][chrk][sk][ek]
-							elif int(allmicro[ti][mi][chrk][sk][ek][2]) - int(allmicro[ti][mi][chrk][sk][ek][1]) > commonOptions["max_len"]:
+							elif int(allmicro[ti][mi][chrk][sk][ek][2]) - int(allmicro[ti][mi][chrk][sk][ek][1]) > specifiedOptions["max_len"]:
 								del allmicro[ti][mi][chrk][sk][ek]
 							else: micronum += 1
 						if len(allmicro[ti][mi][chrk][sk])==0:
@@ -209,8 +209,9 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 	avergnum = avergnum1
 	if avergnum>maxrepin1job: avergnum = maxrepin1job;
 	moreOptions['avergnum'] = avergnum
-   if commonOptions['avergnum']>0:
-      moreOptions['avergnum'] = commonOptions['avergnum']
+	if specifiedOptions['avergnum']>0:
+		moreOptions['avergnum'] = specifiedOptions['avergnum']
+		avergnum = specifiedOptions['avergnum']
 	minfostr = ('Average microsatellites per thread: %d(%d)=%d/%d' % (avergnum1, avergnum, micronum, specifiedOptions['thread']))
 	print minfostr
 	logging.info(minfostr)
@@ -356,13 +357,13 @@ def distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict,
 									fwpat.write(sep1.join(allmicro[ti][mi][chrk][sk][ek][-1])+'\n')
 						fwpat.close();
 						
-						if commonOptions['envset']=='':
-							optstr = ' '.join(['echo "python repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
+						if specifiedOptions['envset']=='':
+							optstr = ' '.join(['echo "python '+specifiedOptions['repeathmmPath']+'repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
 						else:
-							optstr = ' '.join(['echo "source activate', commonOptions['envset'], '&& python repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
+							optstr = ' '.join(['echo "source activate', specifiedOptions['envset'], '&& python '+specifiedOptions['repeathmmPath']+'repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
 						jobs[pk] = pk
 					
-						print 'submit job=', pk, optstr, datetime.now().strftime('%Y/%m/%d %H:%M:%S'),  'Current='+str(pk_ind) +'/' + str(len(partitiondictkeys)), 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90']
+						print 'submit job=', pk, optstr, 'at', datetime.now().strftime('%Y/%m/%d %H:%M:%S'),  'Current='+str(pk_ind) +'/' + str(len(partitiondictkeys)), 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90']
 						sys.stdout.flush() #exit(0)
 						os.system(optstr)
 
@@ -438,7 +439,7 @@ def checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, u
 					
 				unfinishedjobs2[jk] = partitiondict[jk]
 
-				if len(partitiondict[jk])>2 and commonOptions['StopFail']==0:
+				if len(partitiondict[jk])>2 and specifiedOptions['StopFail']==0:
 					print 'add new part after spliting', jk, len(partitiondict), '--->',
 					ti, mi, chr, curavergnum = partitiondict[jk][-1]
 					newpkeys = splitTask(partitiondict[jk][:-1], curavergnum/10, partitiondict, jk+'_', {}, ti, mi, chr)

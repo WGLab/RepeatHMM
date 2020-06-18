@@ -10,11 +10,11 @@ myDefaultsetting = {\
 							"hgfile": None, \
 							"GapCorrection": 1, \
 							"FlankLength": 30, \
-							"MatchInfo": None, \
+							#"MatchInfo": None, \
 							"outlog": M_WARNING, \
 							"Tolerate": None, \
 							"MinSup": 5, \
-							"MaxRepReg": 10000, \
+							"MaxRep": 10000, \
 							"CompRep": '0', \
 							"repeatName": None, \
 							#"UserDefinedUniqID": None, \
@@ -51,6 +51,9 @@ def getString(margs):
 			#retstr.append(str(curv))
 		else:
 			retstr.append('--'+df)
-			retstr.append(str(curv))
+			if isinstance(curv, str):
+				retstr.append('"'+str(curv)+'"')
+			else:
+				retstr.append(str(curv))
 	#print retstr
 	return ' '.join(retstr)
