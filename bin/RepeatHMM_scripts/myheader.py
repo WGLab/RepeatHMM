@@ -1,4 +1,6 @@
 
+import sys,os
+
 #fastq_Sanger_quality = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 
 M_DEBUG = 0;
@@ -24,7 +26,8 @@ FATAL_key = 'FATAL'
 min_flank_len = 10;
 
 hg_reference_and_index = 'mhgversion/'
-stsBasedFolder = 'reference_sts/'
+if os.path.isdir('reference_sts/'): stsBasedFolder = 'reference_sts/'
+else: stsBasedFolder = '{}/lib/python{}.{}/site-packages/RepeatHMM/reference_sts/'.format(sys.prefix,sys.version_info.major,sys.version_info.minor)
 UserDefinedRepeatdefault = "///////"
 
 hmm_random_rep_transit = 0.002;
