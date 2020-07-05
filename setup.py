@@ -3,11 +3,8 @@
 import os,sys
 if sys.version_info[:2] < (2, 7):
     raise Exception('This version of gensim needs Python 2.7 or later. ')
-elif sys.version_info[:2] < (3, 0):
+elif sys.version_info[:2] > (3, 0):
     raise Exception('This version of gensim might have errors in Python 3 or later. ')
-
-import ez_setup
-ez_setup.use_setuptools()
 
 import setuptools
 
@@ -23,12 +20,15 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/WGLab/RepeatHMM",
-    packages=setuptools.find_packages(),
+    #packages=setuptools.find_packages(),
+    packages=['RepeatHMM_scripts'],
+    package_dir={'RepeatHMM_scripts': 'bin/RepeatHMM_scripts'},
+    scripts=['bin/repeatHMM.py'],
+    #package_data={'scripts': ['bin/reference_sts', 'bin/scripts/UnsymmetricPairAlignment/*.so']},
     classifiers=[
         "Programming Language :: Python :: 2.7",
         'Intended Audience :: Science/Research',
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: OS Independent",
     ],
-    python_requires='2.7',
 )

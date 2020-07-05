@@ -15,13 +15,13 @@ import logging
 
 from argparse import RawTextHelpFormatter
 
-from scripts import myBAMhandler
-from scripts import myFASTQhandler
-from scripts.myheader import *
-from scripts import printHMMmatrix
-from scripts import myPredefinedPatternReader
-from scripts import myScanWholeGenome
-from scripts import myCommonFun
+from RepeatHMM_scripts import myBAMhandler
+from RepeatHMM_scripts import myFASTQhandler
+from RepeatHMM_scripts.myheader import *
+from RepeatHMM_scripts import printHMMmatrix
+from RepeatHMM_scripts import myPredefinedPatternReader
+from RepeatHMM_scripts import myScanWholeGenome
+from RepeatHMM_scripts import myCommonFun
 
 
 parser = argparse.ArgumentParser(description="Determine microsatellite repeat of interests or for all microsatellites.", epilog="For example, \n \
