@@ -7,9 +7,12 @@ import os,sys
 #    raise Exception('This version of gensim might have errors in Python 3 or later. ')
 
 import setuptools
+from distutils.core import Extension
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+extension_mod = Extension("_UnsymmetricPairAlignment", sources=["bin/RepeatHMM_scripts/UnsymmetricPairAlignment/UnsymmetricPairAlignment_wrap.c", "bin/RepeatHMM_scripts/UnsymmetricPairAlignment/UnsymmetricPairAlignment.c"], swig_opts=['-modern', '-I../include'])
 
 setuptools.setup(
     name="RepeatHMM", # Replace with your own username
@@ -28,6 +31,7 @@ setuptools.setup(
     package_dir={'RepeatHMM_scripts': 'bin/RepeatHMM_scripts', "UnsymmetricPairAlignment":'bin/RepeatHMM_scripts/UnsymmetricPairAlignment' },    
     package_data={'UnsymmetricPairAlignment': ['bin/RepeatHMM_scripts/UnsymmetricPairAlignment/_UnsymmetricPairAlignment.so']},
     scripts=['bin/repeatHMM.py'],
+    ext_modules=[extension_mod], py_modules=['UnsymmetricPairAlignment'],
     classifiers=[
         "Programming Language :: Python",
         'Intended Audience :: Science/Research',
