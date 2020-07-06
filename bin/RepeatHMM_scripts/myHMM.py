@@ -6,10 +6,10 @@ from hmmlearn import hmm
 
 import logging
 
-from myheader import *
-
-import getTransition_start_emission_prob_x
-import printHMMmatrix
+#from .myheader import *
+from . import myheader
+from . import getTransition_start_emission_prob_x
+from . import printHMMmatrix
 
 def getBasePair():
         bp = {}
@@ -58,7 +58,7 @@ def produce_for_repPat(commonOptions, moreOptions):
 					repplist[-1] = ck
 		moreOptions['repPat'] = ''.join(repplist)
 
-	if commonOptions['outlog'] <= M_INFO:
+	if commonOptions['outlog'] <= myheader.M_INFO:
 		print ('produce_for_repPat', moreOptions['repPat'], commonOptions['CompRep'])
 		logging.info('produce_for_repPat ' + str(moreOptions['repPat']) +' ' + str(commonOptions['CompRep']))
 
@@ -105,11 +105,11 @@ def getPred(predstats, obs_seq, state3class, patlen):
 					if del_str<0: del_str = 0
 					del_end = stind_ind+3
 					if del_end>=len(predstats): del_end = len(predstats)-1
-					if cur_M_STAT <= M_INFO: print ('mutiple deletion: ', stind_ind, pre_stind, stind, predstats[del_str:del_end], obs_seq[del_str:del_end])
+					if myheader.cur_M_STAT <= myheader.M_INFO: print ('mutiple deletion: ', stind_ind, pre_stind, stind, predstats[del_str:del_end], obs_seq[del_str:del_end])
 			#
 			newstr[-1].append(obs_seq[stind_ind])
 		else:
-			if cur_M_STAT <= M_WARNING: print ('Warning!!! in hmm Wrong state '+str(stind))
+			if myheader.cur_M_STAT <= myheader.M_WARNING: print ('Warning!!! in hmm Wrong state '+str(stind))
 
 
 	#remove isolated regions
@@ -152,7 +152,7 @@ def add_start(large_start_ind, large_end_ind, newstr, predstats, patlen, stategr
 	if large_start_ind+1<large_end_ind:
 		cur_rep_len = len(newstr[large_start_ind])
 		if not stategrouplist[large_start_ind+1]==0:
-			if cur_M_STAT <= M_WARNING: print ('In hmm Wrong split f', predstats, newstr, large_start_ind, large_start_ind+1, large_end_ind)
+			if myheader.cur_M_STAT <= myheader.M_WARNING: print ('In hmm Wrong split f', predstats, newstr, large_start_ind, large_start_ind+1, large_end_ind)
 		next_0_len = len(newstr[large_start_ind+1])
 		if cur_rep_len/float(next_0_len)<repover0 and cur_rep_len/float(patlen)<len_isolated_repeat:
 			large_start_ind += 2;
@@ -164,7 +164,7 @@ def add_end(large_start_ind, large_end_ind, newstr, predstats, patlen, stategrou
 	if large_start_ind<large_end_ind-1:
 		cur_rep_len = len(newstr[large_end_ind])
 		if not stategrouplist[large_end_ind-1]==0:
-			if cur_M_STAT <= M_WARNING: print ('In hmm Wrong split b', predstats, newstr, large_start_ind, large_end_ind-1, large_end_ind)
+			if myheader.cur_M_STAT <= myheader.M_WARNING: print ('In hmm Wrong split b', predstats, newstr, large_start_ind, large_end_ind-1, large_end_ind)
 		next_0_len = len(newstr[large_end_ind-1])
 		if cur_rep_len/float(next_0_len)<repover0 and cur_rep_len/float(patlen)<len_isolated_repeat:
 			large_end_ind -= 2
@@ -192,7 +192,7 @@ def hmmpred(obs_seq, na3, forw_rerv, hmmoptions, commonOptions):
 	logprob, predstats = hmmmodel.decode(np.array([myobs]).T, algorithm="viterbi")
 
 	newstr, ststar, pre0 = getPred(predstats, obs_seq, state3class, len_repPat)
-	if cur_M_STAT <= M_DEBUG: #int(len(newstr)/float(len_repPat)+0.5)<14: #False: #True: #False: #int(len(newstr)/float(len_repPat)) in [8,13]:
+	if myheader.cur_M_STAT <= myheader.M_DEBUG: #int(len(newstr)/float(len_repPat)+0.5)<14: #False: #True: #False: #int(len(newstr)/float(len_repPat)) in [8,13]:
 		print ('hmmB:', obs_seq, int(len(newstr)/float(len_repPat)+0.5))
 		psstr = []
 		for ps in predstats: psstr.append(str(ps))

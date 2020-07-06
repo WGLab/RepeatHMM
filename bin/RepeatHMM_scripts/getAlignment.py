@@ -7,8 +7,8 @@ import sys
 from UnsymmetricPairAlignment import UnsymmetricPairAlignment
 #from UnsymmetricPairAlignment import *
 
-from myheader import *
-
+#from .myheader import *
+from . import myheader
 
 def getBasePair():
     bp = {}

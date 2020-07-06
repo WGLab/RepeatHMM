@@ -11,12 +11,13 @@ import numpy;
 
 import logging
 
-import myBAMhandler
-import getAlignment
-from myheader import *
-import myHMM
-import printHMMmatrix
-import myRepeatReAlignment
+from . import myBAMhandler
+from . import getAlignment
+#from .myheader import *
+from . import myheader
+from . import myHMM
+from . import printHMMmatrix
+from . import myRepeatReAlignment
 
 def get3part(mgloc, gene_start_end, repeat_start_end, repeatName, unique_file_id, analysis_file_id, hgfn, specifiedOptions): #
    logging.info('The region is %s from %d to %d' % (mgloc[0], gene_start_end[0], gene_start_end[1]))
@@ -81,7 +82,7 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 	myret = {}; myretdetail = {}
 
 	#cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t '+mthreads+' -v 2 '+hg_reference_and_index+'/'+hgfile+' '+ fastafile +' | samtools view -S -b | samtools sort > '+bamfile
-	cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t '+mthreads+' -v 2 '+hgfile+' '+ fastafile +' | samtools view -S -b | samtools sort > '+bamfile
+	cmd = 'bwa mem -k17 -w'+str(bwamem_w_option)+' -W40 -r10 -A1 -B1 -O1 -E1 -L1 -t '+myheader.mthreads+' -v 2 '+hgfile+' '+ fastafile +' | samtools view -S -b | samtools sort > '+bamfile
 	logging.info(cmd);
 	os.system(cmd);
 		
@@ -91,7 +92,7 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 
 	if (commonOptions['SplitAndReAlign'] in [0,2]) or testall:
 		start_time = time.time();	
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm start'); sys.stdout.flush()
+		if commonOptions['outlog'] <= myheader.M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm start'); sys.stdout.flush()
 		p2bamhmm = myBAMhandler.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
 		memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
 		if p2bamhmm==None:
@@ -101,11 +102,11 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 		
 		myBAMhandler.addSumForAGene(p2bamhmm, myret, myretdetail, 'p2bamhmm', 2)
 		end_time = time.time();
-		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+		if commonOptions['outlog'] <= myheader.M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
 
 	if ((commonOptions['SplitAndReAlign'] in [1,2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
 		start_time = time.time();
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('start p2sp'); sys.stdout.flush()
+		if commonOptions['outlog'] <= myheader.M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('start p2sp'); sys.stdout.flush()
 
 		#moreOptions['fafqfile'] = specifiedOptions['fastafile']
 		#moreOptions['fafqtype'] = 'fq'
@@ -121,7 +122,7 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 		
 		myBAMhandler.addSumForAGene(p2sp, myret, myretdetail, 'p2sp', 2)
 		end_time = time.time();
-		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+		if commonOptions['outlog'] <= myheader.M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
 	
 	os.system('rm '+bamfile);
 	os.system('rm '+bamfile+'.bai');

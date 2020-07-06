@@ -3,7 +3,8 @@ import os;
 import sys;
 import string;
 
-from myheader import *
+#from .myheader import *
+from . import myheader
 
 def handletrf_line_sp(line, mdict, otherOpt):
 	lsp = line.split()
@@ -26,7 +27,7 @@ def handletrf_line_sp(line, mdict, otherOpt):
 		mdict[chr][repstr] = {}
 	else:
 		if mdict[chr][repstr].has_key(repele):
-			if cur_M_STAT <= M_INFO:
+			if myheader.cur_M_STAT <= myheader.M_INFO:
 				print ('Warning!!! duplciate repeat', lsp)
 				print (chr, repstr, repele, mdict[chr][repstr][repele][:-1])
 				print ('                           ', mdict[chr][repstr][repele][-1])
@@ -37,7 +38,7 @@ def handletrf_line_sp(line, mdict, otherOpt):
 
 def readDict(fn, mdict, handle_line, handleoptions=None):
 	if not os.path.isfile(fn):
-		if cur_M_STAT <= M_ERROR: print ('Error !!! no file', fn)
+		if myheader.cur_M_STAT <= myheader.M_ERROR: print ('Error !!! no file', fn)
 		return ;
 
 	fr = open(fn, 'r')
@@ -66,7 +67,7 @@ def getTRF(moptions):
 	if os.path.isfile(bedfile):
 		readDict(bedfile, trfdict, handletrf_line_sp, moptions)
 	else:
-		if cur_M_STAT <= M_ERROR: 
+		if myheader.cur_M_STAT <= myheader.M_ERROR: 
 			print ('No trf.bed file', bedfile)
 	#print 'len(trfdict[0])', len(trfdict[trfdict.keys()[0]])
 	return trfdict
@@ -96,7 +97,7 @@ def getPredefinedMicrosatellites(moptions):
 	if os.path.isfile(pafile):
 		readDict(pafile, trfdict, handlerepeat_line_sp, moptions)
 	else:
-		if cur_M_STAT <= M_ERROR: print ('No pa file ', pafile)
+		if myheader.cur_M_STAT <= myheader.M_ERROR: print ('No pa file ', pafile)
 
 	#print 'len(trfdict)', len(trfdict)
 	return trfdict

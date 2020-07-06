@@ -6,9 +6,10 @@ import string
 import logging
 import numpy as np;
 
-import printHMMmatrix
+from . import printHMMmatrix
 
-from myheader import *
+#from .myheader import *
+from . import myheader
 
 def getMajor(commonOptions):
 	repplist = []
@@ -47,7 +48,7 @@ def produce_tolerate_mismatch(repPat, commonOptions):
 							#	end_ind = j;
 							#else: af_1 = False;
 					if start_ind==0 and end_ind==0: 
-						if commonOptions['outlog'] <= M_WARNING: print ('Warning!!! both 0 {} {} {} {}'.format( repPat, commonOptions, i, ck))
+						if commonOptions['outlog'] <= myheader.M_WARNING: print ('Warning!!! both 0 {} {} {} {}'.format( repPat, commonOptions, i, ck))
 					else:
 						rpstr = ''
 						tlstrlist = ['']
@@ -65,7 +66,7 @@ def produce_tolerate_mismatch(repPat, commonOptions):
 										newtlstrlist.append(tlstrlist[k]+ack)
 								tlstrlist = newtlstrlist
 							else:
-								if commonOptions['outlog'] <= M_WARNING: print ('Fatal error zero comprep {} {} {} {}'.format( j, i+j, commonOptions['CompRep'][i+j], commonOptions['CompRep']))
+								if commonOptions['outlog'] <= myheader.M_WARNING: print ('Fatal error zero comprep {} {} {} {}'.format( j, i+j, commonOptions['CompRep'][i+j], commonOptions['CompRep']))
 						for atl in tlstrlist:
 							mismatchstr.append(('%s:%s:%d:%d;' % (rpstr, atl, start_ind, end_ind)))
 
@@ -88,11 +89,11 @@ def getTransition_start_emission_prob_x(repPat, commonOptions, forprint=False):
 	else: CompRepPat = commonOptions['CompRep']
 
 	tol_info = produce_tolerate_mismatch(repPat, commonOptions)
-	if commonOptions['outlog'] <= M_INFO: print ('tol_info={}'.format( tol_info))
+	if commonOptions['outlog'] <= myheader.M_INFO: print ('tol_info={}'.format( tol_info))
 	logging.info('tol_info=' + str(tol_info))
 
 	avgsub = 0.0005
-	avgsub = hmm_random_rep_transit/len_repPat
+	avgsub = myheader.hmm_random_rep_transit/len_repPat
 	avgsub = 1e-9
 	
 	typeOfRepEle = ['', 'I', 'D'];
@@ -216,7 +217,7 @@ def getTransition_start_emission_prob_x(repPat, commonOptions, forprint=False):
 				emisionmat[naind+1+len_repPat*2][emind] += (1-commonOptions['hmm_sub_rate'])*CompRepPat[afterd][k2]
 
 	if forprint:
-		if commonOptions['outlog'] <= M_INFO: 
+		if commonOptions['outlog'] <= myheader.M_INFO: 
 			print ('HMMmatrix1')
 			printHMMmatrix.printHMMmatrix(states, obs_symbols, trainsmat, emisionmat, startprob)
 

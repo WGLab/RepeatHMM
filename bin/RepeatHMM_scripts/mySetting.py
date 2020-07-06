@@ -2,8 +2,8 @@
 import os;
 import sys;
 
-from myheader import *
-
+#from .myheader import *
+from . import myheader
 
 myDefaultsetting = {\
 							"hg": 'hg38', \
@@ -11,7 +11,7 @@ myDefaultsetting = {\
 							"GapCorrection": 1, \
 							"FlankLength": 30, \
 							#"MatchInfo": None, \
-							"outlog": M_WARNING, \
+							"outlog": myheader.M_WARNING, \
 							"Tolerate": None, \
 							"MinSup": 5, \
 							"MaxRep": 10000, \
@@ -19,7 +19,7 @@ myDefaultsetting = {\
 							"repeatName": None, \
 							#"UserDefinedUniqID": None, \
 							#"Patternfile": None, \
-							"UserDefinedRepeat": UserDefinedRepeatdefault, \
+							"UserDefinedRepeat": myheader.UserDefinedRepeatdefault, \
 							"SplitAndReAlign": 0, \
 							"TRFOptions": "2_7_4_80_10_100", \
 							"minTailSize": 70, \

@@ -11,17 +11,17 @@ import gc
 
 #from pympler import tracker
 
-from myheader import *
+#from .myheader import *
+from . import myheader
+from . import myPredefinedPatternReader
+from . import myBAMhandler
+from . import myHMM
+from . import myRepeatReAlignment
 
-import myPredefinedPatternReader
-import myBAMhandler
-import myHMM
-import myRepeatReAlignment
-
-import myCommonFun
+from . import myCommonFun
 
 import multiprocessing
-import mySetting
+from . import mySetting
 
 def getAllMicrosatellites(commonOptions, specifiedOptions):
 	moptions = {}
@@ -66,7 +66,7 @@ def getAllMicrosatellites(commonOptions, specifiedOptions):
 def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 	allmicro = specifiedOptions['microsatellites']
 	moptions = moreOptions['moptions']
-	if commonOptions['outlog'] == M_DEBUG: print ('moptions in filterMicrosatellites', moptions)
+	if commonOptions['outlog'] == myheader.M_DEBUG: print ('moptions in filterMicrosatellites', moptions)
 	max_unit_len = 10;
 
 	micronum = 0; #mtotal = 0
@@ -97,7 +97,7 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 					#mtotal = mtotal + len(allmicro[ti][mi][chrk])
 					#print ti, mi, chrk, moptions.has_key('chr'), (not moptions['chr']==None), (not moptions['chr']==chrk), moptions['chr']
 					if moptions.has_key('chr') and (not moptions['chr']==None) and (not moptions['chr']==chrk):
-						if commonOptions['outlog']<=M_WARNING:
+						if commonOptions['outlog']<=myheader.M_WARNING:
 							print ('Warning chr del', chrk, chrkeys)
 						del allmicro[ti][mi][chrk]
 						continue;
@@ -105,7 +105,7 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 					for sk in startkeys:
 						if moptions.has_key('pos') and (not moptions['pos']==None) and \
 							(moptions['pos'][0]>-1 and sk<moptions['pos'][0]):
-							if commonOptions['outlog']<=M_WARNING:
+							if commonOptions['outlog']<=myheader.M_WARNING:
 								print ('Warning start-pos del', chrk, sk, allmicro[ti][mi][chrk][sk])
 							del allmicro[ti][mi][chrk][sk];
 							continue;
@@ -117,7 +117,7 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 							if moptions.has_key('pos') and (not moptions['pos']==None) and \
 								(moptions['pos'][1]>-1 and allmicro[ti][mi][chrk][sk][ek][2]>moptions['pos'][1]):
 
-								if commonOptions['outlog']<=M_WARNING:
+								if commonOptions['outlog']<=myheader.M_WARNING:
 									print ('Warning end-pos del', chrk, sk, ek, allmicro[ti][mi][chrk][sk][ek])
 								del allmicro[ti][mi][chrk][sk][ek]
 							elif int(allmicro[ti][mi][chrk][sk][ek][2]) - int(allmicro[ti][mi][chrk][sk][ek][1]) > specifiedOptions["max_len"]:
@@ -229,7 +229,7 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 					startkeys = allmicro[ti][mi][chrk].keys(); startkeys.sort()
 					splitTask(startkeys, avergnum, partitiondict, chrk+'_', maxind, ti, mi, chrk)
 
-	print ('split taks done', len(partitiondict); sys.stdout.flush())
+	print ('split taks done', len(partitiondict)); sys.stdout.flush()
 	unfinishedjobs, unfinishedjobs2, finishedjobs, finishedjob_times = distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict, allmicro)
 
 	os.system('grep "Failed to allocate" '+specifiedOptions['outFolder']+'/*.e')
@@ -281,7 +281,7 @@ def handle_rest(finishedjobs, specifiedOptions, commonOptions):
 			curresfilename = scanresfolder + 'res_'+ commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id']
 			curdetailfilename = scanresfolder + 'detail_'+ commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id']
 			curresfilenamedone = scanresfolder + 'res_'+ commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id'] + '.done'
-			curlogfile = logscanfolder + 'RepScan_' + commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id'][:-len('.txt')]+ '.log'
+			curlogfile = myheader.logscanfolder + 'RepScan_' + commonOptions['firsthalf_analysis_file_id'] + fjk + commonOptions['secondhalf_analysis_file_id'][:-len('.txt')]+ '.log'
 			rmfiles = [curresfilename, curdetailfilename, curresfilenamedone, curlogfile]
 
 		for rmf in rmfiles:
@@ -607,7 +607,7 @@ def addSumForAGene(p2, mstr, ind, commonOptions, specifiedOptions, moreOptions):
 
 def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 	retoptions = myBAMhandler.get_Loc1(moreOptions['mgloc'], commonOptions)
-	if commonOptions['outlog'] <= M_INFO: print ('mgloc', moreOptions['mgloc'])
+	if commonOptions['outlog'] <= myheader.M_INFO: print ('mgloc', moreOptions['mgloc'])
 	#print moreOptions['mgloc'][:5]
 
 	moreOptions.update(retoptions)
@@ -622,7 +622,7 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 
 	if (commonOptions['SplitAndReAlign'] in [0,2]) or testall:
 		start_time = time.time();
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm start')
+		if commonOptions['outlog'] <= myheader.M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm start')
 		if os.path.isfile(specifiedOptions["bamfile"]):
 			p2bamhmm = myBAMhandler.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
 		else: 
@@ -635,14 +635,14 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 
 		addSumForAGene(p2bamhmm, 'p2bamhmm', 2, commonOptions, specifiedOptions, moreOptions)
 		end_time = time.time();
-		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+		if commonOptions['outlog'] <= myheader.M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
 	
 	gc.collect()
 	#mtracker.print_diff()
 
 	if ((commonOptions['SplitAndReAlign'] in [1,2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
 		start_time = time.time();
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp start')
+		if commonOptions['outlog'] <= myheader.M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp start')
 		moreOptions['fafqfile'] = specifiedOptions["bamfile"]
 		moreOptions['fafqtype'] = 'bam'
 		if os.path.isfile(specifiedOptions["bamfile"]):
@@ -656,7 +656,7 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 
 		addSumForAGene(p2sp, 'p2sp', 2, commonOptions, specifiedOptions, moreOptions)
 		end_time = time.time();
-		if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
+		if commonOptions['outlog'] <= myheader.M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
 
 	gc.collect()
 	#mtracker.print_diff()
@@ -668,7 +668,7 @@ if __name__=="__main__":
 
 	commonOptions['hg'] = 'hg38'
 	commonOptions['stsBasedFolder'] = '../reference_sts/'
-	commonOptions['outlog'] = M_DEBUG
+	commonOptions['outlog'] = myheader.M_DEBUG
 	commonOptions['Patternfile'] = None
 	specifiedOptions['scan_region'] = 'chr22:17551367-19651400'
 

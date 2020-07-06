@@ -21,14 +21,14 @@ import heapq
 from Bio import pairwise2
 import Bio
 
-import getAlignment
-import myHMM
-import myGaussianMixtureModel
-import printHMMmatrix
-import myRepeatReAlignment
+from . import getAlignment
+from . import myHMM
+from . import myGaussianMixtureModel
+from . import printHMMmatrix
+#from . import myRepeatReAlignment
 
-from myheader import *
-
+#from .myheader import *
+from . import myheader
 
 def myReadTxtFile(filename):
     f = open(filename, 'r')
@@ -82,7 +82,7 @@ def get_gLoc(repeatname, commonOptions):
             errorstr += ('Error no information for %d\n' % i)
     if not errorstr == '':
         logging.error(errorstr)
-        if commonOptions['outlog'] <= M_WARNING:
+        if commonOptions['outlog'] <= myheader.M_WARNING:
             print(errorstr, curloc, repeatname)
         sys.exit(102)
 
@@ -147,10 +147,10 @@ def insert_n_for_flanking(oldstr, rep_predata, rep_sufdata, repeatFlankLength, r
             p, q, s, b, e = a
             if score < s:
                 seq1, seq2, score, abegin, aend = p, q, s, b, e
-        if cur_M_STAT <= M_INFO:
+        if myheader.cur_M_STAT <= myheader.M_INFO:
             print('Fatal not equal', seq1, curp[0])
             print('Fatal not equal', seq2, curp[1])
-        if cur_M_STAT <= M_INFO:
+        if myheader.cur_M_STAT <= myheader.M_INFO:
             print(seq1, curp[0])
             print(seq2, curp[1])
 
@@ -158,12 +158,12 @@ def insert_n_for_flanking(oldstr, rep_predata, rep_sufdata, repeatFlankLength, r
         align_len = len(curp[0])
         if align_len == 0 and len(curp[1]) > 0:
             align_len = len(curp[1])
-        elif align_len > len(curp[1]) and len(curp[1]) > min_flank_len:
+        elif align_len > len(curp[1]) and len(curp[1]) > myheader.min_flank_len:
             align_len = len(curp[1])
-        if align_len < min_flank_len:
-            align_len = min_flank_len
+        if align_len < myheader.min_flank_len:
+            align_len = myheader.min_flank_len
 
-        if cur_M_STAT <= M_INFO:
+        if myheader.cur_M_STAT <= myheader.M_INFO:
             print(seq1, '<', curp[0])
             print(seq2, '<', curp[1])
             print(abegin, aend, len(seq1), len(seq2))
@@ -189,28 +189,28 @@ def insert_n_for_flanking(oldstr, rep_predata, rep_sufdata, repeatFlankLength, r
                     numnot += 1
             else:
                 if seq2[ai] == '-':
-                    if cur_M_STAT <= M_ERROR:
+                    if myheader.cur_M_STAT <= myheader.M_ERROR:
                         print('Fatal!!! both gap', seq1, seq2)
                 else:
                     numgap += 1
         identical_fraction = 0
         if align_len > 0:
             identical_fraction = numsame / float(align_len)
-        if align_len > min_flank_len and identical_fraction > 0.75:
+        if align_len > myheader.min_flank_len and identical_fraction > 0.75:
             detectpos.append([query_start, query_end])
         else:
-            if cur_M_STAT <= M_INFO:
+            if myheader.cur_M_STAT <= myheader.M_INFO:
                 print('xxxxxxxxxx', oldstr)
             detectpos.append([None, None])
             #detail2.append(('Identical(%d) of %d bps(per=%.2f) for two sequences with len(%d, %d)' % (numsame, align_len, identical_fraction, len(seq1), len(seq2))))
             detail2.append(('%d/%d=%.2f for len(%d, %d)' %
                             (numsame, align_len, identical_fraction, len(curp[0]), len(curp[1]))))
             if align_len == 0:
-                if cur_M_STAT <= M_ERROR:
+                if myheader.cur_M_STAT <= myheader.M_ERROR:
                     print('Error!!! zero alignment ', curp, aend, abegin)
                     logging.error('Error!!! zero alignment ' + str(curp) +
                                   ' ' + str(aend) + ' ' + str(abegin))
-        if cur_M_STAT <= M_INFO:
+        if myheader.cur_M_STAT <= myheader.M_INFO:
             print('info', seq1, detectpos[-1])
             print('    ', seq2, numsame, len(curp[1]), align_len,)
             if align_len > 0:
@@ -218,26 +218,26 @@ def insert_n_for_flanking(oldstr, rep_predata, rep_sufdata, repeatFlankLength, r
             else:
                 print('')
 
-    if cur_M_STAT <= M_INFO:
+    if myheader.cur_M_STAT <= myheader.M_INFO:
         print('seq', oldstr)
     if (detectpos[1][0] is not None and detectpos[0][1] is None):
-        if cur_M_STAT <= M_INFO:
+        if myheader.cur_M_STAT <= myheader.M_INFO:
             print(detectpos)
     else:
-        if cur_M_STAT <= M_INFO:
+        if myheader.cur_M_STAT <= myheader.M_INFO:
             print('NO flank', detectpos, otherinfo, detail2)
     num_n = 10
     if detectpos[1][0] is not None:
         curpos = -len(query_pre_suf[1]) + detectpos[1][0]
-        if cur_M_STAT <= M_INFO:
+        if myheader.cur_M_STAT <= myheader.M_INFO:
             print('suf', oldstr[curpos:], detectpos[1])
         oldstr = oldstr[:curpos] + ('N' * (num_n * len(repPat))) + oldstr[curpos:]
     if detectpos[0][1] is not None:
         curpos = detectpos[0][1]
-        if cur_M_STAT <= M_INFO:
+        if myheader.cur_M_STAT <= myheader.M_INFO:
             print('pre', oldstr[:(curpos + 1)], detectpos[0])
         oldstr = oldstr[:(curpos)] + ('N' * (num_n * len(repPat))) + oldstr[(curpos):]
-    if cur_M_STAT <= M_INFO:
+    if myheader.cur_M_STAT <= myheader.M_INFO:
         print('n-seq', oldstr)
     return oldstr
 
@@ -290,8 +290,8 @@ def getGene(repeatName, chr, gene_start_end, unique_file_id, analysis_file_id, h
 
     #flanking_len = 30;
     #if flanking_len<7: flanking_len = 7
-    if flanking_len < min_flank_len:
-        flanking_len = min_flank_len
+    if flanking_len < myheader.min_flank_len:
+        flanking_len = myheader.min_flank_len
     interest_region_pos = [[gene_start_end[0] - flanking_len, gene_start_end[0] - 1], [
         gene_start_end[0], gene_start_end[1]], [gene_start_end[1] + 1, gene_start_end[1] + flanking_len]]
     my_interest_region = []
@@ -365,21 +365,21 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
         logging.info('Running ' + get_alg_cmd)
     os.system(get_alg_cmd)
     if os.path.getsize(alignfile) == 0:
-        if commonOptions['outlog'] <= M_WARNING:
+        if commonOptions['outlog'] <= myheader.M_WARNING:
             logging.info(get_alg_cmd + '\n')
             logging.info('The file %s have zero size in the function of getRepeatForGivenGene.\nTry without chr' % alignfile)
             #print ('The file %s have zero size\nTry without chr' % alignfile)
         get_alg_cmd = 'samtools view ' + bamfile + ' ' + \
             chr[3:] + ':' + str(gene_start_end[0]) + '-' + \
             str(gene_start_end[1]) + ' > ' + alignfile
-        if commonOptions['outlog'] <= M_INFO and ('thread' not in specifiedOptions):
+        if commonOptions['outlog'] <= myheader.M_INFO and ('thread' not in specifiedOptions):
             logging.info('Running ' + get_alg_cmd)
         os.system(get_alg_cmd)
-    if commonOptions['outlog'] <= M_INFO:
+    if commonOptions['outlog'] <= myheader.M_INFO:
         logging.info('Produced ' + alignfile + ' done!')
 
     if (not os.path.isfile(alignfile)) or os.path.getsize(alignfile) == 0:
-        if commonOptions['outlog'] <= M_FATAL:
+        if commonOptions['outlog'] <= myheader.M_FATAL:
             logging.error('!!!!Cannot produce ' + alignfile + ' for ' + repeatName)
             # sys.exit(1)
             os.system('rm ' + alignfile)
@@ -509,7 +509,7 @@ def getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions):
                                     [repeats_dict[rk][0]:(repeats_dict[rk][1] + 1)], rk])
                     ids.append(rk)
                 else:
-                    if commonOptions['outlog'] <= M_WARNING:
+                    if commonOptions['outlog'] <= myheader.M_WARNING:
                         print('Warning!!! negative ', rk, repeats_dict[rk][:2])
                     repeats.append([False, str(repeats_dict[rk][0]) +
                                     '-to-' + str(repeats_dict[rk][1]), rk])
@@ -613,7 +613,7 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
 
     retoptions = get_gLoc(repeatName, commonOptions)
     mgloc = retoptions['mgloc']
-    if commonOptions['outlog'] <= M_INFO:
+    if commonOptions['outlog'] <= myheader.M_INFO:
         print('mgloc', mgloc)
 
     moreOptions.update(retoptions)
@@ -626,7 +626,7 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
     myretdetail = {}
     if (commonOptions['SplitAndReAlign'] in [0, 2]) or testall:
         start_time = time.time()
-        if commonOptions['outlog'] <= M_INFO and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
+        if commonOptions['outlog'] <= myheader.M_INFO and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2bamhmm start')
         p2bamhmm = getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
         memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
@@ -638,12 +638,13 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
         
         addSumForAGene(p2bamhmm, myret, myretdetail, 'p2bamhmm', 2)
         end_time = time.time()
-        if commonOptions['outlog'] <= M_WARNING and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
+        if commonOptions['outlog'] <= myheader.M_WARNING and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2bamhmm end---running time%.0f mem%d' % (end_time - start_time, memres))
             sys.stdout.flush()
     if ((commonOptions['SplitAndReAlign'] in [1, 2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
+        from . import myRepeatReAlignment
         start_time = time.time()
-        if commonOptions['outlog'] <= M_INFO and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
+        if commonOptions['outlog'] <= myheader.M_INFO and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2sp start')
         moreOptions['fafqfile'] = specifiedOptions["bamfile"]
         moreOptions['fafqtype'] = 'bam'
@@ -657,7 +658,7 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
         
         addSumForAGene(p2sp, myret, myretdetail, 'p2sp', 2)
         end_time = time.time()
-        if commonOptions['outlog'] <= M_WARNING and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
+        if commonOptions['outlog'] <= myheader.M_WARNING and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2sp end---running time%.0f mem%d' % (end_time - start_time, memres))
             sys.stdout.flush()
 

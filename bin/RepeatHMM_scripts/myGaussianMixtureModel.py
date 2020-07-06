@@ -9,7 +9,8 @@ import logging
 import numpy as np
 from sklearn.mixture import GaussianMixture as GM #GMM
 
-from myheader import *
+#from .myheader import *
+from . import myheader
 
 def getLargerOverSmallRatio(p1, p2):
 	mp = [int(p1),int(p2)]; #
@@ -138,8 +139,8 @@ def getNewRepeatForIllumina(lendict, MinSup, commonoptions, oldp2):
 				if lendict[nrkey]>max2[1]:
 					max2 = [nrkey, lendict[nrkey]]
 	if max1[1]<MinSup:
-		if commonoptions['outlog'] <= M_WARNING: print ('Warning!!! less than '+str(MinSup), max1, max2)
-	if commonOptions['outlog'] <= M_INFO: print (max1, max2, max2[1]/float(max1[1]), (max2[1]+max1[1])/float(allreads))
+		if commonoptions['outlog'] <= myheader.M_WARNING: print ('Warning!!! less than '+str(MinSup), max1, max2)
+	if commonOptions['outlog'] <= myheader.M_INFO: print (max1, max2, max2[1]/float(max1[1]), (max2[1]+max1[1])/float(allreads))
 	if max2[1]==0:
 		newrepeats = [max1[0], max1[0]]
 	else:
@@ -150,7 +151,7 @@ def getNewRepeatForIllumina(lendict, MinSup, commonoptions, oldp2):
 	newrepeats.sort()
 
 	if len(oldp2)>0 and (oldp2[0] not in newrepeats):
-		if commonoptions['outlog'] <= M_WARNING: print ('Warning!!! not in ', oldp2, newrepeats)
+		if commonoptions['outlog'] <= myheader.M_WARNING: print ('Warning!!! not in ', oldp2, newrepeats)
 
 	return newrepeats
 
@@ -171,7 +172,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 	for ldk in ldkeys:
 		allocr += ('%d:%d, ' % (ldk, lendict[ldk]))
 	logging.info(allocr)
-	if commonoptions['outlog'] <= M_INFO: print (allocr, minreads, MinSup)
+	if commonoptions['outlog'] <= myheader.M_INFO: print (allocr, minreads, MinSup)
 
 	minrepcount = 5;
 	for ldk in ldkeys:
@@ -272,7 +273,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 
 			mbest = models[np.argmin(AIC)]
 
-			if commonoptions['outlog'] <= M_DEBUG:
+			if commonoptions['outlog'] <= myheader.M_DEBUG:
 				print ('aic', np.argmin(AIC)),
 				for aic in range(len(AIC)):
 					if aic==np.argmin(AIC):
@@ -298,7 +299,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 		#if (not has_too_small_std) and (not atedge): break;
 		if (not atedge): break;
 		elif cur_n_component_ind==len(default_n_components)-1:
-			if commonoptions['outlog'] <= M_WARNING:
+			if commonoptions['outlog'] <= myheader.M_WARNING:
 				print ('Warning!!!! could not find optimized model')
 				logging.info('Warning!!!! could not find optimized model')
 			
@@ -307,7 +308,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 	for i in range(len(mbest.means_)):
 		curk = int(mbest.means_[i,0]+0.5) #75)
 		if lendict.has_key(curk):
-			if commonoptions['outlog'] <= M_DEBUG: print ('>>', i, ('%9.3fm' % (mbest.means_[i,0])), ('%6d' % (lendict[curk])), ('%20.9fst' % (mbest.covariances_[i,0][0])))
+			if commonoptions['outlog'] <= myheader.M_DEBUG: print ('>>', i, ('%9.3fm' % (mbest.means_[i,0])), ('%6d' % (lendict[curk])), ('%20.9fst' % (mbest.covariances_[i,0][0])))
 			mean_covars.append([curk, mbest.means_[i,0], lendict[curk], mbest.covariances_[i,0][0]])
 		else:
 			closedif = sys.maxint; closekey = -1;
@@ -315,7 +316,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 				if closedif>abs(mk-curk):
 					closedif=abs(mk-curk)
 					closekey = mk
-			if commonoptions['outlog'] <= M_DEBUG: print ('>>', i, ('%9.3fm' % (mbest.means_[i,0])), ('%6d' % (lendict[closekey])), ('%20.9fst' % (mbest.covariances_[i,0][0])), closekey)
+			if commonoptions['outlog'] <= myheader.M_DEBUG: print ('>>', i, ('%9.3fm' % (mbest.means_[i,0])), ('%6d' % (lendict[closekey])), ('%20.9fst' % (mbest.covariances_[i,0][0])), closekey)
 			mean_covars.append([closekey, mbest.means_[i,0], lendict[closekey], mbest.covariances_[i,0][0]])
 
 	fixed_boundarywidth = 50; close_ratio_threhold = 0.8
@@ -338,14 +339,14 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 				else:
 					cur_window_i = getWindowForCounts(mean_covars[i][0]) #int(mean_covars[i][0]/200.0+0.75)
 					cur_window_j = getWindowForCounts(mean_covars[j][0]) #int(mean_covars[j][0]/200.0+0.75)
-					if commonoptions['outlog'] <= M_INFO: print (should_remove, mean_covars[i][0], mean_covars[j][0], cur_window_i, cur_window_j, mean_covars[i][0], mean_covars[j][0], mean_covars[i][4], mean_covars[j][4], mean_covars[j][4]*close_ratio_threhold, abs(cur_window_i-cur_window_j)==1, mean_covars[i][4]<mean_covars[j][4]*close_ratio_threhold)
+					if commonoptions['outlog'] <= myheader.M_INFO: print (should_remove, mean_covars[i][0], mean_covars[j][0], cur_window_i, cur_window_j, mean_covars[i][0], mean_covars[j][0], mean_covars[i][4], mean_covars[j][4], mean_covars[j][4]*close_ratio_threhold, abs(cur_window_i-cur_window_j)==1, mean_covars[i][4]<mean_covars[j][4]*close_ratio_threhold)
 					
 					if abs(cur_window_i-cur_window_j)==1 and abs(mean_covars[i][0]-mean_covars[j][0])<fixed_boundarywidth:
 						newneighbors = getNeighbors_reads_fixed(lendict, mean_covars[i][0], cur_window_j)
 						if newneighbors[0]<mean_covars[j][4]*close_ratio_threhold: should_remove = True;
 					elif mean_covars[i][4]<mean_covars[j][4]*close_ratio_threhold:
 						should_remove = True;
-					if commonoptions['outlog'] <= M_INFO: print (should_remove)
+					if commonoptions['outlog'] <= myheader.M_INFO: print (should_remove)
 		if not should_remove:
 			remove_larger_covar_smaller_means.append(mean_covars[i])
 
@@ -374,7 +375,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 
 	remove_larger_covar_smaller_means, furtherremove = furtherremove, remove_larger_covar_smaller_means
 
-	if commonoptions['outlog'] <= M_DEBUG:
+	if commonoptions['outlog'] <= myheader.M_DEBUG:
 		print ('keep')
 		for i in range(len(remove_larger_covar_smaller_means)):
 			print ('>>', i, ('%9.3fm' % (remove_larger_covar_smaller_means[i][1])), ('%6d' % (remove_larger_covar_smaller_means[i][2])), ('%20.9fst' % (remove_larger_covar_smaller_means[i][3])), mean_covars[i][4])
@@ -383,7 +384,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 	for i in range(len(remove_larger_covar_smaller_means)):
 		cur_window_i = getWindowForCounts(remove_larger_covar_smaller_means[i][0]) #int(remove_larger_covar_smaller_means[i][0]/200.0+0.75)
 		cur_window_max = getWindowForCounts(max_p1) #int(max_p1/200.0+0.75)
-		if commonoptions['outlog'] <= M_INFO: print (max_p1, max_p1_reads, cur_window_i, cur_window_max, remove_larger_covar_smaller_means[i][0],max_p1, '<', abs(cur_window_i-cur_window_max)==1, '>', remove_larger_covar_smaller_means[i][4]>max_p1_reads)
+		if commonoptions['outlog'] <= myheader.M_INFO: print (max_p1, max_p1_reads, cur_window_i, cur_window_max, remove_larger_covar_smaller_means[i][0],max_p1, '<', abs(cur_window_i-cur_window_max)==1, '>', remove_larger_covar_smaller_means[i][4]>max_p1_reads)
 		if abs(cur_window_i-cur_window_max)==1 and abs(remove_larger_covar_smaller_means[i][0]-max_p1)<fixed_boundarywidth:
 			newneighbors = getNeighbors_reads_fixed(lendict, remove_larger_covar_smaller_means[i][0], cur_window_max) 
 			if newneighbors[0] > max_p1_reads:
@@ -403,7 +404,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 			if remove_larger_covar_smaller_means[i][0]<max_p1 and remove_larger_covar_smaller_means[i][4]>max_p1_reads*close_ratio_threhold:
 				secondpeak[remove_larger_covar_smaller_means[i][0]] = []
 
-	if commonoptions['outlog'] <= M_INFO: print ('peak2', peak2, secondpeak)
+	if commonoptions['outlog'] <= myheader.M_INFO: print ('peak2', peak2, secondpeak)
 	secondpeakkeys = secondpeak.keys();
 	for spk in secondpeakkeys:
 		for spkj in secondpeakkeys:	
@@ -417,7 +418,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 		if  len(secondpeak[spk])==0: 
 			peak2.append(spk)
 
-	if commonoptions['outlog'] <= M_INFO: print( 'peak2', peak2, secondpeak)
+	if commonoptions['outlog'] <= myheader.M_INFO: print( 'peak2', peak2, secondpeak)
 	if len(secondpeakkeys)>0 and len(peak2)<2:
 		max_p2 = 0; max_p2_reads = 0;
 		for i in range(len(remove_larger_covar_smaller_means)):
@@ -427,9 +428,9 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 					max_p2 = remove_larger_covar_smaller_means[i][0]
 
 		peak2.append(max_p2)
-	if commonoptions['outlog'] <= M_DEBUG: print ('peak2', peak2)
+	if commonoptions['outlog'] <= myheader.M_DEBUG: print ('peak2', peak2)
 	peak2 = checkSmallSupport(peak2, lendict, minreads)
-	if commonoptions['outlog'] <= M_DEBUG: print ('peak2', peak2)
+	if commonoptions['outlog'] <= myheader.M_DEBUG: print ('peak2', peak2)
 	
 	if len(peak2)==2:
 		if peak2[0]==0 and (not peak2[1]==0): peak2[0] = peak2[1]
@@ -457,7 +458,7 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 
 	if not truecounts==None:
 		if abs(truecounts[0]-peak2[0])>5 or abs(truecounts[1]-peak2[1])>5:
-			if commonoptions['outlog'] <= M_INFO: print ('Big dif, please check', peak2, truecounts)
+			if commonoptions['outlog'] <= myheader.M_INFO: print ('Big dif, please check', peak2, truecounts)
 
 	return [peak2, allocr[:-1]]
 
@@ -527,7 +528,7 @@ if __name__=='__main__':
 		lendict = {6:2, 7:3, 8:2, 9:5, 10:8, 11:13, 12:4, 13:7, 14:11, 15:8, 16:1, 19:1}
 
 		commonoptions = {}
-		commonoptions['outlog'] = M_DEBUG
+		commonoptions['outlog'] = myheader.M_DEBUG
 
 		lendict = {15:1, 16:1, 17:1, 22:1, 27:1, 31:1, 34:1, 35:1, 38:1, 41:1, 47:1, 48:1, 49:1, 51:2, 52:2, 53:2, 54:3, 55:2, 56:2, 58:3, 59:2, 60:3, 61:4, 62:1, 63:2, 64:2, 65:3, 66:1, 68:2, 69:1, 70:1, 71:1, 72:2, 73:2, 75:4, 76:1, 78:2, 79:4, 80:1, 81:1, 82:2, 83:1, 84:1, 87:2, 89:1, 90:1, 94:2, 95:1, 96:1, 97:1, 100:1, 101:1, 103:1, 107:1, 1318:1}
 		lendict = {0:8, 1:2, 2:14, 3:23, 4:19, 5:29, 6:31, 7:40, 8:52, 9:41, 10:8, 16:2, 19:1, 24:1, 26:1}
