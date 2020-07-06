@@ -27,9 +27,9 @@ def handletrf_line_sp(line, mdict, otherOpt):
 	else:
 		if mdict[chr][repstr].has_key(repele):
 			if cur_M_STAT <= M_INFO:
-				print 'Warning!!! duplciate repeat', lsp
-				print chr, repstr, repele, mdict[chr][repstr][repele][:-1]
-				print '                           ', mdict[chr][repstr][repele][-1]
+				print ('Warning!!! duplciate repeat', lsp)
+				print (chr, repstr, repele, mdict[chr][repstr][repele][:-1])
+				print ('                           ', mdict[chr][repstr][repele][-1])
 
 	#									 	 0	    1		   2		  3		  4		    5   6
 	mdict[chr][repstr][repele] = [chr, repstr, repend, repele, '+'+copynum, '', lsp]
@@ -37,7 +37,7 @@ def handletrf_line_sp(line, mdict, otherOpt):
 
 def readDict(fn, mdict, handle_line, handleoptions=None):
 	if not os.path.isfile(fn):
-		if cur_M_STAT <= M_ERROR: print 'Error !!! no file', fn
+		if cur_M_STAT <= M_ERROR: print ('Error !!! no file', fn)
 		return ;
 
 	fr = open(fn, 'r')
@@ -67,7 +67,7 @@ def getTRF(moptions):
 		readDict(bedfile, trfdict, handletrf_line_sp, moptions)
 	else:
 		if cur_M_STAT <= M_ERROR: 
-			print 'No trf.bed file', bedfile
+			print ('No trf.bed file', bedfile)
 	#print 'len(trfdict[0])', len(trfdict[trfdict.keys()[0]])
 	return trfdict
 
@@ -96,7 +96,7 @@ def getPredefinedMicrosatellites(moptions):
 	if os.path.isfile(pafile):
 		readDict(pafile, trfdict, handlerepeat_line_sp, moptions)
 	else:
-		if cur_M_STAT <= M_ERROR: print 'No pa file ', pafile
+		if cur_M_STAT <= M_ERROR: print ('No pa file ', pafile)
 
 	#print 'len(trfdict)', len(trfdict)
 	return trfdict
@@ -123,13 +123,13 @@ if __name__=='__main__':
 		for pk in poskeys:
 			elekeys = trfdict[ck][pk].keys(); elekeys.sort();
 			for ek in elekeys:
-				print ck, pk, ek, trfdict[ck][pk][ek][:-1]
+				print (ck, pk, ek, trfdict[ck][pk][ek][:-1])
 
 
-	print ''
+	print ('')
 	mdict = getPredefinedMicrosatellites(moptions)
 	rnkeys = mdict.keys(); rnkeys.sort();
 	for rk in rnkeys:
-		print rk, mdict[rk][:5];
+		print (rk, mdict[rk][:5]);
 
 	

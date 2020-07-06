@@ -17,7 +17,7 @@ def myWriteScanResultsCluster(specifiedOptions, mres, mdetail, commonOptions, pr
    if not os.path.isdir(scanresfolder):
       os.system('mkdir '+scanresfolder)
    curresfilename = scanresfolder + 'res_'+ commonOptions['firsthalf_analysis_file_id'] + procss_info + commonOptions['secondhalf_analysis_file_id']
-   print curresfilename
+   print (curresfilename)
    curdetailfilename = scanresfolder + 'detail_'+ commonOptions['firsthalf_analysis_file_id'] + procss_info + commonOptions['secondhalf_analysis_file_id']
    mywrite(mres, mdetail, curresfilename, curdetailfilename, awdefault)
 
@@ -40,7 +40,7 @@ def mywrite(mres, mdetail, curresfilename, curdetailfilename, awdefault):
 
    if awdefault=='w':
       os.system('touch '+curresfilename+'.done')
-   print 'mywrite', curresfilename+'.done'
+   print ('mywrite', curresfilename+'.done')
 
 def myReadScanResults(specifiedOptions, mres, mdetail, procss_info='', defsuf='.txt'):
    scanresfolder = specifiedOptions['scanresfolder']
@@ -69,7 +69,7 @@ def myread(mres, mdetail, curresfilename, curdetailfilename):
          curv = curline[space1ind+1:]
 
          if cursaveres.has_key(curkey):
-            print 'duplicate', curkey, cursavefn
+            print ('duplicate', curkey, cursavefn)
          cursaveres[curkey] = curv
 
          curline = freader.readline();

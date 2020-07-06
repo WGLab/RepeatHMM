@@ -91,12 +91,12 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 
 	if (commonOptions['SplitAndReAlign'] in [0,2]) or testall:
 		start_time = time.time();	
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print 'p2bamhmm start'; sys.stdout.flush()
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm start'); sys.stdout.flush()
 		p2bamhmm = myBAMhandler.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
 		memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
 		if p2bamhmm==None:
 			if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-				print 'ERROR None detection', moreOptions['repeatName'], mgloc
+				print ('ERROR None detection', moreOptions['repeatName'], mgloc)
 				logging.error('ERROR None detection: ' + str( moreOptions['repeatName']) + ' ' + str(mgloc))
 		
 		myBAMhandler.addSumForAGene(p2bamhmm, myret, myretdetail, 'p2bamhmm', 2)
@@ -105,7 +105,7 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 
 	if ((commonOptions['SplitAndReAlign'] in [1,2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
 		start_time = time.time();
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print 'start p2sp'; sys.stdout.flush()
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('start p2sp'); sys.stdout.flush()
 
 		#moreOptions['fafqfile'] = specifiedOptions['fastafile']
 		#moreOptions['fafqtype'] = 'fq'
@@ -116,7 +116,7 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 		memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
 		if p2sp==None:
 			if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-				print 'ERROR None detection (sp)', moreOptions['repeatName'], mgloc
+				print ('ERROR None detection (sp)', moreOptions['repeatName'], mgloc)
 				logging.error('ERROR None detection (sp): ' + str( moreOptions['repeatName']) + ' ' + str(mgloc))
 		
 		myBAMhandler.addSumForAGene(p2sp, myret, myretdetail, 'p2sp', 2)

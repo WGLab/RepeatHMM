@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import os,sys
-if sys.version_info[:2] < (2, 7):
-    raise Exception('This version of gensim needs Python 2.7 or later. ')
-elif sys.version_info[:2] > (3, 0):
-    raise Exception('This version of gensim might have errors in Python 3 or later. ')
+#if sys.version_info[:2] < (2, 7):
+#    raise Exception('This version of gensim needs Python 2.7 or later. ')
+#elif sys.version_info[:2] > (3, 0):
+#    raise Exception('This version of gensim might have errors in Python 3 or later. ')
 
 import setuptools
 

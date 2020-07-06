@@ -66,7 +66,7 @@ def getAllMicrosatellites(commonOptions, specifiedOptions):
 def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 	allmicro = specifiedOptions['microsatellites']
 	moptions = moreOptions['moptions']
-	if commonOptions['outlog'] == M_DEBUG: print 'moptions in filterMicrosatellites', moptions
+	if commonOptions['outlog'] == M_DEBUG: print ('moptions in filterMicrosatellites', moptions)
 	max_unit_len = 10;
 
 	micronum = 0; #mtotal = 0
@@ -98,7 +98,7 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 					#print ti, mi, chrk, moptions.has_key('chr'), (not moptions['chr']==None), (not moptions['chr']==chrk), moptions['chr']
 					if moptions.has_key('chr') and (not moptions['chr']==None) and (not moptions['chr']==chrk):
 						if commonOptions['outlog']<=M_WARNING:
-							print 'Warning chr del', chrk, chrkeys
+							print ('Warning chr del', chrk, chrkeys)
 						del allmicro[ti][mi][chrk]
 						continue;
 					startkeys = allmicro[ti][mi][chrk].keys(); startkeys.sort()
@@ -106,7 +106,7 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 						if moptions.has_key('pos') and (not moptions['pos']==None) and \
 							(moptions['pos'][0]>-1 and sk<moptions['pos'][0]):
 							if commonOptions['outlog']<=M_WARNING:
-								print 'Warning start-pos del', chrk, sk, allmicro[ti][mi][chrk][sk]
+								print ('Warning start-pos del', chrk, sk, allmicro[ti][mi][chrk][sk])
 							del allmicro[ti][mi][chrk][sk];
 							continue;
 						elekeys = allmicro[ti][mi][chrk][sk].keys();
@@ -118,7 +118,7 @@ def filterMicrosatellites(commonOptions, specifiedOptions, moreOptions):
 								(moptions['pos'][1]>-1 and allmicro[ti][mi][chrk][sk][ek][2]>moptions['pos'][1]):
 
 								if commonOptions['outlog']<=M_WARNING:
-									print 'Warning end-pos del', chrk, sk, ek, allmicro[ti][mi][chrk][sk][ek]
+									print ('Warning end-pos del', chrk, sk, ek, allmicro[ti][mi][chrk][sk][ek])
 								del allmicro[ti][mi][chrk][sk][ek]
 							elif int(allmicro[ti][mi][chrk][sk][ek][2]) - int(allmicro[ti][mi][chrk][sk][ek][1]) > specifiedOptions["max_len"]:
 								del allmicro[ti][mi][chrk][sk][ek]
@@ -148,8 +148,8 @@ def remove_finished(specifiedOptions, commonOptions):
 	secondhalf = (''.join([specifiedOptions['analysis_file_id'][uid_endpos:], '.txt','.done'])).replace('_sub.txt','.txt')
 	commonOptions['firsthalf_analysis_file_id'] = specifiedOptions['analysis_file_id'][:uid_endpos]
 	commonOptions['secondhalf_analysis_file_id'] = ''.join([specifiedOptions['analysis_file_id'][uid_endpos:], '.txt']).replace('_sub.txt','.txt')
-	print 'firsthalf_analysis_file_id', commonOptions['firsthalf_analysis_file_id']
-	print 'secondhalf_analysis_file_id', commonOptions['secondhalf_analysis_file_id']
+	print ('firsthalf_analysis_file_id', commonOptions['firsthalf_analysis_file_id'])
+	print ('secondhalf_analysis_file_id', commonOptions['secondhalf_analysis_file_id'])
 
 	if not specifiedOptions['continue']==0:
 		allmicro = specifiedOptions['microsatellites']
@@ -201,7 +201,7 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 	micronum = filterMicrosatellites(commonOptions, specifiedOptions, moreOptions)
 	allmicro = specifiedOptions['microsatellites']
 	maxind = remove_finished(specifiedOptions, commonOptions)
-	print 'maxind', maxind
+	print ('maxind', maxind)
 	del specifiedOptions['microsatellites']
 	
 	avergnum1 = micronum/specifiedOptions['thread']; 
@@ -213,7 +213,7 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 		moreOptions['avergnum'] = specifiedOptions['avergnum']
 		avergnum = specifiedOptions['avergnum']
 	minfostr = ('Average microsatellites per thread: %d(%d)=%d/%d' % (avergnum1, avergnum, micronum, specifiedOptions['thread']))
-	print minfostr
+	print (minfostr)
 	logging.info(minfostr)
 
 	partitiondict = {};
@@ -229,7 +229,7 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 					startkeys = allmicro[ti][mi][chrk].keys(); startkeys.sort()
 					splitTask(startkeys, avergnum, partitiondict, chrk+'_', maxind, ti, mi, chrk)
 
-	print 'split taks done', len(partitiondict); sys.stdout.flush()
+	print ('split taks done', len(partitiondict); sys.stdout.flush())
 	unfinishedjobs, unfinishedjobs2, finishedjobs, finishedjob_times = distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict, allmicro)
 
 	os.system('grep "Failed to allocate" '+specifiedOptions['outFolder']+'/*.e')
@@ -237,13 +237,13 @@ def scan_multiprocess(commonOptions, specifiedOptions):
 
 	rem_temp(unfinishedjobs, unfinishedjobs2, finishedjobs, specifiedOptions)
 
-	print 'unfinishedjobs2', len(unfinishedjobs2), unfinishedjobs2; sys.stdout.flush()
-	print 'unfinishedjobs', len(unfinishedjobs), unfinishedjobs; sys.stdout.flush()
+	print ('unfinishedjobs2', len(unfinishedjobs2), unfinishedjobs2); sys.stdout.flush()
+	print ('unfinishedjobs', len(unfinishedjobs), unfinishedjobs); sys.stdout.flush()
 	if len(unfinishedjobs)>0:
 		unfinishedjobskeys = unfinishedjobs.keys()
-		print 'Unfinished:!!!!!!!!!!!!!!!!!!!'
+		print ('Unfinished:!!!!!!!!!!!!!!!!!!!')
 		for unf in unfinishedjobskeys:
-			print '\t', unf, unfinishedjobs[unf]
+			print ('\t', unf, unfinishedjobs[unf])
 
 	handle_rest(finishedjobs, specifiedOptions, commonOptions)
 
@@ -363,7 +363,7 @@ def distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict,
 							optstr = ' '.join(['echo "source activate', specifiedOptions['envset'], '&& python '+specifiedOptions['repeathmmPath']+'repeatHMM.py Scan', optstr, '--UserDefinedUniqID', commonOptions['UserDefinedUniqID']+pk, '--Patternfile', temppatfile, '"|', clusterOption])
 						jobs[pk] = pk
 					
-						print 'submit job=', pk, optstr, 'at', datetime.now().strftime('%Y/%m/%d %H:%M:%S'),  'Current='+str(pk_ind) +'/' + str(len(partitiondictkeys)), 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90']
+						print ('submit job=', pk, optstr, 'at', datetime.now().strftime('%Y/%m/%d %H:%M:%S'),  'Current='+str(pk_ind) +'/' + str(len(partitiondictkeys)), 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90'])
 						sys.stdout.flush() #exit(0)
 						os.system(optstr)
 
@@ -379,14 +379,14 @@ def distribute_jobs(commonOptions, specifiedOptions, moreOptions, partitiondict,
 						perc = len(finishedjobs)/float(len(partitiondictkeys))
 						tot_time = used_time/perc
 						memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
-						print ('running time=%.0f (%d%%=%d/%d). Total estimation: %d. Mem=%d' % (used_time, int(perc*100), len(finishedjobs), len(partitiondictkeys), tot_time, memres)), datetime.now().strftime('%Y/%m/%d %H:%M:%S');
+						print (('running time=%.0f (%d%%=%d/%d). Total estimation: %d. Mem=%d' % (used_time, int(perc*100), len(finishedjobs), len(partitiondictkeys), tot_time, memres)), datetime.now().strftime('%Y/%m/%d %H:%M:%S'));
 						preprint = len(finishedjobs)/msp
 						sys.stdout.flush()
 
 
 			#msleeptime = 10; printfre = 100; curfre = 0;
 			if curfre==printfre:
-				print 'jobs', len(jobs), specifiedOptions['thread'], 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90'], datetime.now().strftime('%Y/%m/%d %H:%M:%S'); sys.stdout.flush()
+				print ('jobs', len(jobs), specifiedOptions['thread'], 'times:', len(finishedjob_times['alltimes']), finishedjob_times['N90'], datetime.now().strftime('%Y/%m/%d %H:%M:%S')); sys.stdout.flush()
 				curfre = 0
 			if checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, unfinishedjobs2, partitiondict, specifiedOptions, commonOptions, msleeptime, partitiondictkeys):
 				if (not pk_ind<len(partitiondictkeys)): break;
@@ -412,7 +412,7 @@ def checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, u
 			donefile  = ''.join([specifiedOptions['scanresfolder'], 'res_', commonOptions['firsthalf_analysis_file_id'], jk, commonOptions['secondhalf_analysis_file_id'], '.done'])
 			beginfile = ''.join([specifiedOptions['scanresfolder'], 'res_', commonOptions['firsthalf_analysis_file_id'], jk, commonOptions['secondhalf_analysis_file_id'], '.begin'])
 		if os.path.isfile(donefile):
-			print 'Finished: ', donefile, len(jobs), len(finishedjob_times['alltimes']), finishedjob_times['N90'], datetime.now().strftime('%Y/%m/%d %H:%M:%S');
+			print ('Finished: ', donefile, len(jobs), len(finishedjob_times['alltimes']), finishedjob_times['N90'], datetime.now().strftime('%Y/%m/%d %H:%M:%S'));
 			finishedjobs[jk] = 1
 			finishedjob_times['alltimes'].append( usetimes[jk][1]- usetimes[jk][0])
 			if specifiedOptions['cluster']==0:
@@ -427,24 +427,24 @@ def checkJobs(jobs, usetimes, finishedjobs, finishedjob_times, unfinishedjobs, u
 			if finishedjob_times['N90']>0 and cur_used_time>finishedjob_times['N90']*1.5:
 				if specifiedOptions['cluster']==0:
 					if jobs[jk].is_alive():
-						print 'Try to kill', cur_used_time, finishedjob_times['N90']*1.5, 'unfinishedjobs=', len(unfinishedjobs); sys.stdout.flush()
+						print ('Try to kill', cur_used_time, finishedjob_times['N90']*1.5, 'unfinishedjobs=', len(unfinishedjobs)); sys.stdout.flush()
 						jobs[jk].terminate();
 						while jobs[jk].is_alive():
 							time.sleep(msleeptime);
 						p = jobs[jk]; p.is_alive(); p.terminate(); del p;
 				else:
-					print 'qdel '+jk, cur_used_time, finishedjob_times['N90']*1.5, 'unfinishedjobs=', len(unfinishedjobs); sys.stdout.flush()
+					print ('qdel '+jk, cur_used_time, finishedjob_times['N90']*1.5, 'unfinishedjobs=', len(unfinishedjobs)); sys.stdout.flush()
 					os.system('qdel '+jk)
 					time.sleep(msleeptime);
 					
 				unfinishedjobs2[jk] = partitiondict[jk]
 
 				if len(partitiondict[jk])>2 and specifiedOptions['StopFail']==0:
-					print 'add new part after spliting', jk, len(partitiondict), '--->',
+					print ('add new part after spliting', jk, len(partitiondict), '--->')
 					ti, mi, chr, curavergnum = partitiondict[jk][-1]
 					newpkeys = splitTask(partitiondict[jk][:-1], curavergnum/10, partitiondict, jk+'_', {}, ti, mi, chr)
 					partitiondictkeys.extend(newpkeys)
-					print 'after_split', len(partitiondict); sys.stdout.flush()
+					print ('after_split', len(partitiondict)); sys.stdout.flush()
 				else:
 					unfinishedjobs[jk] = partitiondict[jk]
 
@@ -532,10 +532,10 @@ def scan(commonOptions, specifiedOptions):
 	micronum = filterMicrosatellites(commonOptions, specifiedOptions, moreOptions)
 	allmicro = specifiedOptions['microsatellites']
 
-	print 'Total size', micronum, ;
+	print ('Total size', micronum);
 	if len(allmicro)>1 and len(allmicro[1])>0: allmicro[1][0].keys()
 	elif len(allmicro)>0 and len(allmicro[0])>0: allmicro[0][0].keys()
-	else: print 'Error: failed to load patterns'
+	else: print ('Error: failed to load patterns')
 
 	handlei = 0; start_time = time.time();
 	for ti in range(len(allmicro)):
@@ -607,7 +607,7 @@ def addSumForAGene(p2, mstr, ind, commonOptions, specifiedOptions, moreOptions):
 
 def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 	retoptions = myBAMhandler.get_Loc1(moreOptions['mgloc'], commonOptions)
-	if commonOptions['outlog'] <= M_INFO: print 'mgloc', moreOptions['mgloc']
+	if commonOptions['outlog'] <= M_INFO: print ('mgloc', moreOptions['mgloc'])
 	#print moreOptions['mgloc'][:5]
 
 	moreOptions.update(retoptions)
@@ -618,11 +618,11 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 
 	#mtracker = tracker.SummaryTracker()
 	if not os.path.isfile(specifiedOptions["bamfile"]):
-		print 'Error!! not bam file', specifiedOptions["bamfile"]
+		print ('Error!! not bam file', specifiedOptions["bamfile"])
 
 	if (commonOptions['SplitAndReAlign'] in [0,2]) or testall:
 		start_time = time.time();
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print 'p2bamhmm start'
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm start')
 		if os.path.isfile(specifiedOptions["bamfile"]):
 			p2bamhmm = myBAMhandler.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
 		else: 
@@ -630,7 +630,7 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 		memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
 		if p2bamhmm==None:
 			if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-				print 'ERROR None detection', moreOptions['repeatName'], moreOptions['mgloc']
+				print ('ERROR None detection', moreOptions['repeatName'], moreOptions['mgloc'])
 				logging.error('ERROR None detection: ' + str( moreOptions['repeatName']) + ' ' + str(moreOptions['mgloc']))
 
 		addSumForAGene(p2bamhmm, 'p2bamhmm', 2, commonOptions, specifiedOptions, moreOptions)
@@ -642,7 +642,7 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 
 	if ((commonOptions['SplitAndReAlign'] in [1,2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
 		start_time = time.time();
-		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print 'p2sp start'
+		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp start')
 		moreOptions['fafqfile'] = specifiedOptions["bamfile"]
 		moreOptions['fafqtype'] = 'bam'
 		if os.path.isfile(specifiedOptions["bamfile"]):
@@ -651,7 +651,7 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 		memres = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024
 		if p2sp==None:
 			if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-				print 'ERROR None detection (sp)', moreOptions['repeatName'], moreOptions['mgloc']
+				print ('ERROR None detection (sp)', moreOptions['repeatName'], moreOptions['mgloc'])
 				logging.error('ERROR None detection (sp): ' + str( moreOptions['repeatName']) + ' ' + str(moreOptions['mgloc']))
 
 		addSumForAGene(p2sp, 'p2sp', 2, commonOptions, specifiedOptions, moreOptions)
@@ -683,6 +683,6 @@ if __name__=="__main__":
 	micronum = filterMicrosatellites(commonOptions, specifiedOptions, moreOptions)
 	allmicro = specifiedOptions['microsatellites']
 
-	print 'Total size', micronum, allmicro[1][0].keys()
+	print ('Total size', micronum, allmicro[1][0].keys())
 
 

@@ -46,7 +46,7 @@ def getNewFileName(oldfn, uniq_id, mlist, specifiedOptions):
 	cur_final_fname = ''.join(mlist)
 	if os.path.isfile(cur_final_fname):
 		if cur_M_STAT <= M_INFO:  
-			print 'Warning!!! filename exist '+cur_final_fname
+			print ('Warning!!! filename exist '+cur_final_fname)
 			logging.warning('Warning!!! filename exist '+cur_final_fname)
 	
 	return cur_final_fname;
@@ -56,7 +56,7 @@ def obtainFAFromSAM(samfn, uniq_id, specifiedOptions):
 	fr = open(samfn, 'r')
 	fw = open(resfn, 'w');
 	if cur_M_STAT <= M_DEBUG: 
-		print 'obtainFAFromSAM', samfn, resfn
+		print ('obtainFAFromSAM', samfn, resfn)
 		logging.info('obtainFAFromSAM from '+samfn +' to '+ resfn)
 
 	bamseq = {}
@@ -86,7 +86,7 @@ def obtainFAFromSAM(samfn, uniq_id, specifiedOptions):
 
 	if not os.path.isfile(resfn):
 		if cur_M_STAT <= M_INFO:
-			print 'Error!!! There is no result file for '+samfn+'. The result file name is '+resfn
+			print ('Error!!! There is no result file for '+samfn+'. The result file name is '+resfn)
 			logging.info('Error!!! There is no result file for '+samfn+'. The result file name is '+resfn)
 
 	return resfn
@@ -97,7 +97,7 @@ def obtainFAFromFQ(fqfn, uniq_id, specifiedOptions):
 	fw = open(resfn, 'w');
 
 	if cur_M_STAT <= M_DEBUG: 
-		print 'obtainFAFromFQ', fqfn, resfn
+		print ('obtainFAFromFQ', fqfn, resfn)
 		logging.info(''.join(['obtainFAFromFQ from ', fqfn, ' to ', resfn]))
 	
 	line = fr.readline();
@@ -120,7 +120,7 @@ def obtainFAFromFQ(fqfn, uniq_id, specifiedOptions):
 
 	if not os.path.isfile(resfn):
 		if cur_M_STAT <= M_INFO:
-			print 'Error!!! There is no result file for '+fqfn+'. The result file name is '+resfn
+			print ('Error!!! There is no result file for '+fqfn+'. The result file name is '+resfn)
 			logging.info(''.join(['Error!!! There is no result file for ', fqfn, '. The result file name is ', resfn]))
 	
 	return resfn
@@ -192,10 +192,10 @@ def runTRF(fafn, TRFOptions, minRepBWTSize, RepeatTimeThr, moreOptions, commonOp
 
 	patset = getSamePattern(moreOptions, commonOptions)
 	if commonOptions['outlog'] <= M_WARNING:
-		if commonOptions['outlog'] <= M_INFO: print 'patset', patset
+		if commonOptions['outlog'] <= M_INFO: print ('patset', patset)
 		logging.info('patset ' + str(patset))
 
-	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print trf_cmd
+	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print (trf_cmd)
 	logging.info(trf_cmd)
 	os.system(trf_cmd);
 	
@@ -203,7 +203,7 @@ def runTRF(fafn, TRFOptions, minRepBWTSize, RepeatTimeThr, moreOptions, commonOp
 	
 	if not os.path.isfile(resfn):
 		if commonOptions['outlog'] <= M_WARNING:
-			print 'Warning!!!! there is no TRF resutls for '+fafn+'. And the result file is '+resfn
+			print ('Warning!!!! there is no TRF resutls for '+fafn+'. And the result file is '+resfn)
 			logging.info(''.join(['Warning!!!! there is no TRF resutls for ',fafn,'. And the result file is ',resfn]))
 	else:
 		fr = open(resfn,'r')
@@ -216,7 +216,7 @@ def runTRF(fafn, TRFOptions, minRepBWTSize, RepeatTimeThr, moreOptions, commonOp
 				curkey = formatOriginalSeqId(string.strip(line[1:]));
 				if repInfo.has_key(curkey):
 					if commonOptions['outlog'] <= M_WARNING:
-						print 'Warning!!!! Duplicate key: '+curkey
+						print ('Warning!!!! Duplicate key: '+curkey)
 						logging.info(''.join(['Warning!!!! Duplicate key: ', curkey]))
 				else:
 					repInfo[curkey] = {}
@@ -283,11 +283,11 @@ def checkRepInfo(repInfo, minRepBWTSize):
 			existkyes = findCloseKeys(repInfo, seqk, minRepBWTSize, posk, repInfo[seqk][posk][0])
 			if len(existkyes)==0 or (posk not in existkyes):
 				if cur_M_STAT <= M_WARNING:
-					print ('Error!!! the current key (%d) is not in the list for %s' % (posk, seqk)), existkyes
+					print (('Error!!! the current key (%d) is not in the list for %s' % (posk, seqk)), existkyes)
 					logging.info(''.join([('Error!!! the current key (%d) is not in the list for %s' % (posk, seqk)), existkyes]))
 			if len(existkyes)>1:
 				if cur_M_STAT <= M_WARNING:
-					print 'Waring!!!! two keys are two close for '+seqk+': ', posk, existkyes
+					print ('Waring!!!! two keys are two close for '+seqk+': ', posk, existkyes)
 					logging.info(''.join(['Waring!!!! two keys are two close for ',seqk,': ', posk, existkyes]))
 
 def findCloseKeys(repInfo, curkey, minRepBWTSize, startLoc, endLoc):
@@ -372,7 +372,7 @@ def splitFA(uniq_id, commonOptions, moreOptions, specifiedOptions):
 						cur_id_suf = ''.join([seqname, '__', str(splitnum), '.', str(isp)]);
 						if splitInfo[seqk][2].has_key(cur_id_suf):
 							if commonOptions['outlog'] <= M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-								print 'Warning!!! duplciate key in split: '+cur_id_suf
+								print ('Warning!!! duplciate key in split: '+cur_id_suf)
 								logging.info(''.join(['Warning!!! duplciate key in split: ', cur_id_suf]))
 						splitInfo[seqk][2][cur_id_suf] = [pre_end_pos, cur_start_pos-1]
 						splitfnfw.write(cur_id_suf+'\n')
@@ -390,26 +390,26 @@ def splitFA(uniq_id, commonOptions, moreOptions, specifiedOptions):
 					splitfnfw.write(curseqc+'\n')
 					if splitInfo[seqk][2].has_key(cur_id_suf):
 						if commonOptions['outlog'] <= M_WARNING:
-							print 'Warning!!! duplciate key in split: '+cur_id_suf
+							print ('Warning!!! duplciate key in split: '+cur_id_suf)
 							logging.info(''.join(['Warning!!! duplciate key in splitl: ', cur_id_suf]))
 					splitInfo[seqk][2][cur_id_suf] = [pre_end_pos, pre_end_pos+len(curseqc)-1]
 				else:
 					short_repeat_id_list.append([seqk, upstreamsize, downstreamsize, len(seqcont)])
 					if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-						print 'Warning!!! cannot find non-repeat flanking region long enough for ', seqk, repInfo[seqk], upstreamsize, downstreamsize, len(seqcont)
+						print ('Warning!!! cannot find non-repeat flanking region long enough for ', seqk, repInfo[seqk], upstreamsize, downstreamsize, len(seqcont))
 						logging.info(' '.join(['Warning!!! cannot find non-repeat flanking region long enough for ', seqk, str(repInfo[seqk]), str(upstreamsize), str(downstreamsize), str(len(seqcont))]))
 					if upstreamsize<0 or downstreamsize<0:
 						if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-							print 'Warning!!! negative streamsize: ', upstreamsize, downstreamsize, len(seqcont), repInfo[seqk][poskeys[-1]][0], ' for '+seqname
+							print ('Warning!!! negative streamsize: ', upstreamsize, downstreamsize, len(seqcont), repInfo[seqk][poskeys[-1]][0], ' for '+seqname)
 							logging.info(' '.join(['Warning!!! negative streamsize: ', str(upstreamsize), str(downstreamsize), str(len(seqcont)), str(repInfo[seqk][poskeys[-1]][0]), ' for '+seqname]))
 			else:
 				if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-					print 'Info: No repeat information for '+seqname + ' in '+fafn, '>>>', seqcont
+					print ('Info: No repeat information for '+seqname + ' in '+fafn, '>>>', seqcont)
 					logging.info(' '.join(['Info: No repeat information for ',seqname , ' in ',fafn, '>>>', seqcont]))
 
 			if not haveRep:
 				if seqk in no_repeat_id_list:
-					if commonOptions['outlog'] <= M_WARNING: print 'Warning!!! Duplicate no_repeat_id_list(split)', seqk;
+					if commonOptions['outlog'] <= M_WARNING: print ('Warning!!! Duplicate no_repeat_id_list(split)', seqk);
 				else:
 					no_repeat_id_list.append(seqk)
 
@@ -424,17 +424,17 @@ def splitFA(uniq_id, commonOptions, moreOptions, specifiedOptions):
 	splitfnfw.close();
 
 	if commonOptions['outlog'] <= M_DEBUG:
-		print 'splitfn',splitfn 
-		print 'spfnbam',spfnbam
+		print ('splitfn',splitfn)
+		print ('spfnbam',spfnbam)
 		#print 'splitInfo',len(splitInfo)
 		#splitInfo_keys = splitInfo.keys(); 
 		#for sp_k in splitInfo_keys:
 		#	print '\t', sp_k, splitInfo[sp_k]
-		print 'no_repeat_id_list', len(no_repeat_id_list), '\n', no_repeat_id_list
-		print 'short_repeat_id_list', len(short_repeat_id_list)
+		print ('no_repeat_id_list', len(no_repeat_id_list), '\n', no_repeat_id_list)
+		print ('short_repeat_id_list', len(short_repeat_id_list))
 		#for short_id in short_repeat_id_list:
 		#	print '\t', short_id
-		print 'repeat_id_list', len(repeat_id_list)
+		print ('repeat_id_list', len(repeat_id_list))
 		#for rep_id in repeat_id_list:
 		#	print '\t', rep_id
 	
@@ -477,7 +477,7 @@ def splitBAM(uniq_id, commonOptions, moreOptions, specifiedOptions):
 	bamfn_ind = ''.join([bamfn,'.bai'])
 	if not os.path.isfile(bamfn_ind):
 		if commonOptions['outlog'] <= M_WARNING:
-			print 'Warning!!!!!!!! the input BAM file not indexed', bamfn
+			print ('Warning!!!!!!!! the input BAM file not indexed', bamfn)
 			logging.info(''.join(['Warning!!!!!!!! the input BAM file not indexed', bamfn]))
 
 	samfn = getNewFileName(bamfn, uniq_id, [bamfn, '.sam'], specifiedOptions)
@@ -490,7 +490,7 @@ def splitBAM(uniq_id, commonOptions, moreOptions, specifiedOptions):
 	moreOptions['RemList']['samfile']=samfn
  
 	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-		print mview
+		print (mview)
 	if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): logging.info(' '.join(['splitBAM1=', mview]))
 	os.system(mview)
 
@@ -504,7 +504,7 @@ def splitBAM(uniq_id, commonOptions, moreOptions, specifiedOptions):
 		else:
 			 mview = ''.join(['samtools view ', bamfn, ' ', chr[3:], ':', str(startpos), '-', str(endpos), '>', samfn])
 		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-			print mview
+			print (mview)
 		if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): logging.info(' '.join(['splitBAM2=', mview]))
 		os.system(mview)
 
@@ -525,13 +525,13 @@ def reAlign(splitfn, hgfile, splitfn_sorted, moreOptions, commonOptions, specifi
 	#print 't1', cmd
 	
 	if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-		if commonOptions['outlog'] <= M_INFO:	print cmd
+		if commonOptions['outlog'] <= M_INFO:	print (cmd)
 		logging.info(' '.join(['reAlign', cmd]))
 	os.system(cmd);
 
 	if not os.path.isfile(splitfn_sorted):
 		if commonOptions['outlog'] <= M_WARNING:
-			print 'Warning!!! no file for '+splitfn_sorted
+			print ('Warning!!! no file for '+splitfn_sorted)
 			logging.info(' '.join(['Warning!!! no file for ', splitfn_sorted]))
 	else:
 		moreOptions['RemList']['spfnbam'] = splitfn_sorted
@@ -541,7 +541,7 @@ def reAlign(splitfn, hgfile, splitfn_sorted, moreOptions, commonOptions, specifi
 	os.system(cmd)
 	if not os.path.isfile(splitfn_sorted+'.bai'):
 		if commonOptions['outlog'] <= M_WARNING:
-			print 'Warning!!! no bai file for '+splitfn_sorted
+			print ('Warning!!! no bai file for '+splitfn_sorted)
 			logging.info(' '.join(['Warning!!! no bai file for ', splitfn_sorted]))
 	else:
 		moreOptions['RemList']['spfnbam_bai'] = splitfn_sorted+'.bai'
@@ -549,7 +549,7 @@ def reAlign(splitfn, hgfile, splitfn_sorted, moreOptions, commonOptions, specifi
 
 	if commonOptions['outlog'] <= M_DEBUG:
 		mview = ''.join(['samtools view ', splitfn_sorted, '>', splitfn_sorted, '.sam'])
-		print mview
+		print (mview)
 		os.system(mview)
 		moreOptions['RemList']['spfnbam_sam'] = splitfn_sorted+'.sam'
 		moreOptions['spfnbam_sam'] = splitfn_sorted+'.sam'
@@ -572,7 +572,7 @@ def getRegioinInBAM(commonOptions, specifiedOptions, moreOptions):
 	alignfile = alignfolder + repeatName + unique_file_id +'.alignment.sam'
 	get_alg_cmd = 'samtools view '+spfnbam+' ' + chr+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+alignfile
 	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): 
-		print get_alg_cmd
+		print (get_alg_cmd)
 		logging.info(' '.join(['getRegioinInBAM', get_alg_cmd]))
 		logging.info('Running '+get_alg_cmd)
 	os.system(get_alg_cmd);
@@ -582,7 +582,7 @@ def getRegioinInBAM(commonOptions, specifiedOptions, moreOptions):
 			#print ('The file %s have zero size\nTry without chr' % alignfile)
 		get_alg_cmd = 'samtools view '+spfnbam+' ' + chr[3:]+':'+str(gene_start_end[0])+'-'+str(gene_start_end[1])+' > '+alignfile
 		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-			print get_alg_cmd
+			print (get_alg_cmd)
 			logging.info('Running '+get_alg_cmd)
 		os.system(get_alg_cmd);
 	if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
@@ -642,9 +642,9 @@ def getPosOfInterest(alignfile, commonOptions, specifiedOptions, moreOptions):
 			qnameDict[qname] = [lsp[2], int(lsp[3]), lsp[5],     lsp[9], int(lsp[1])]
 		else:
 			if cur_M_STAT <= M_INFO:
-				print 'Duplicate qname: '+qname, line
-				print '\t\tposDict=', posDict[qname_basic][qname_id]
-				print '\t\tqnameDict=', qnameDict[qname]
+				print ('Duplicate qname: '+qname, line)
+				print ('\t\tposDict=', posDict[qname_basic][qname_id])
+				print ('\t\tqnameDict=', qnameDict[qname])
 				logging.info(' '.join(['Duplicate qname: ', qname, line]))
 				logging.info(' '.join(['\t\tposDict=', str(posDict[qname_basic][qname_id])]))
 				logging.info(' '.join(['\t\tqnameDict=', str(qnameDict[qname])]))
@@ -656,10 +656,10 @@ def getPosOfInterest(alignfile, commonOptions, specifiedOptions, moreOptions):
 	alignReader.close()
 
 	if cur_M_STAT <= M_DEBUG:
-		print 'cflagDict'
+		print ('cflagDict')
 		cflagDictkeys = cflagDict.keys(); cflagDictkeys.sort()
 		for cdk in cflagDictkeys:
-			print '\t', cdk, cflagDict[cdk]
+			print ('\t', cdk, cflagDict[cdk])
 
 	return [posDict, qnameDict]
 
@@ -686,7 +686,7 @@ def getExpectedPosDict(posDict, mchr, qnameDict, splitInfo, moreOptions):
 					if not pos_ordered.has_key(cur_pos):
 						pos_ordered[cur_pos] = [cid]
 					else: pos_ordered[cur_pos].append(cid);
-		if cur_M_STAT <= M_DEBUG: print 'pos_ordered=', pos_ordered, qk, posDict[qk], mchr
+		if cur_M_STAT <= M_DEBUG: print ('pos_ordered=', pos_ordered, qk, posDict[qk], mchr)
 		forward_list = []; forw_list_cflag = []
 		backward_list = []; back_list_cflag = []
 
@@ -698,7 +698,7 @@ def getExpectedPosDict(posDict, mchr, qnameDict, splitInfo, moreOptions):
 				for f_ind in range(len(forward_list)):
 					fl = forward_list[f_ind]
 					if len(fl)>0 and fl[-1][0]+1==cid:
-						if cur_M_STAT <= M_DEBUG: print '\t forw', fl, cid, posk, posDict[qk][cid][1], '<', len(qnameDict[posDict[qk][fl[-1][0]][1]][3]), fl[-1][1]+len(qnameDict[posDict[qk][fl[-1][0]][1]][3])
+						if cur_M_STAT <= M_DEBUG: print ('\t forw', fl, cid, posk, posDict[qk][cid][1], '<', len(qnameDict[posDict[qk][fl[-1][0]][1]][3]), fl[-1][1]+len(qnameDict[posDict[qk][fl[-1][0]][1]][3]))
 						if fl[-1][1]<posk:
 							existf = forw_list_cflag[f_ind]
 							if curf==existf:
@@ -712,7 +712,7 @@ def getExpectedPosDict(posDict, mchr, qnameDict, splitInfo, moreOptions):
 				for r_ind in range(len(backward_list)):
 					rl = backward_list[r_ind]
 					if len(rl)>0 and rl[-1][0]-1==cid: 
-						if cur_M_STAT <= M_DEBUG: print '\t back', rl, cid, posk, posDict[qk][cid][1], '<', len(qnameDict[posDict[qk][rl[-1][0]][1]][3]), rl[-1][1] + len(qnameDict[posDict[qk][rl[-1][0]][1]][3])
+						if cur_M_STAT <= M_DEBUG: print ('\t back', rl, cid, posk, posDict[qk][cid][1], '<', len(qnameDict[posDict[qk][rl[-1][0]][1]][3]), rl[-1][1] + len(qnameDict[posDict[qk][rl[-1][0]][1]][3]))
 						if rl[-1][1]<posk:
 							existf = back_list_cflag[r_ind]
 							if curf==existf:
@@ -722,8 +722,8 @@ def getExpectedPosDict(posDict, mchr, qnameDict, splitInfo, moreOptions):
 					backward_list.append([[cid, posk, posDict[qk][cid][1]]])
 					back_list_cflag.append(curf)
 		
-		if cur_M_STAT <= M_DEBUG: print 'forward_list=',forward_list
-		if cur_M_STAT <= M_DEBUG: print 'backward_list=', backward_list
+		if cur_M_STAT <= M_DEBUG: print ('forward_list=',forward_list)
+		if cur_M_STAT <= M_DEBUG: print ('backward_list=', backward_list)
 
 		larg_forward_ind=0;
 		larg_backward_ind = 0;
@@ -747,27 +747,27 @@ def getExpectedPosDict(posDict, mchr, qnameDict, splitInfo, moreOptions):
 				expectedPosDict[qk] = [backward_list[larg_backward_ind], -1]; findexp=-1
 		if findexp==0:
 			if cur_M_STAT <= M_INFO:
-				print 'Warning!!! Cannot find expectedPosDict for '+qk, posDict[qk], pos_ordered
+				print ('Warning!!! Cannot find expectedPosDict for '+qk, posDict[qk], pos_ordered)
 				logging.info(' '.join(['Warning!!! Cannot find expectedPosDict for ', qk, 'posDict=', str(posDict[qk]),'pos_ordered=', str(pos_ordered), 'splitInfo=', str(splitInfo[qk])]))
 
 			if qk in moreOptions['no_repeat_id_list']:
 				if cur_M_STAT <= M_INFO:
-					print 'Warning!!! Duplicate no_repeat_id_list', qk
+					print ('Warning!!! Duplicate no_repeat_id_list', qk)
 					logging.info(' '.join(['Warning!!! Duplicate no_repeat_id_list(pos)', qk]))
 			else:
 				moreOptions['no_repeat_id_list'].append(qk)
 				norep_split_fw.write('>'+qk+'\n');
 				norep_split_fw.write(splitInfo[qk][3]+'\n');
 		else:
-			if cur_M_STAT <= M_INFO: print 'expectedPosDict['+qk+']=', expectedPosDict[qk]
+			if cur_M_STAT <= M_INFO: print ('expectedPosDict['+qk+']=', expectedPosDict[qk])
 
 	norep_split_fw.close()
 
 	if cur_M_STAT <= M_DEBUG:
-		print 'expectedPosDict=' 
+		print ('expectedPosDict=') 
 		expectedPosDict_keys = expectedPosDict.keys();
 		for exp_pd_k in expectedPosDict_keys:
-			print '\t', exp_pd_k, expectedPosDict[exp_pd_k]
+			print ('\t', exp_pd_k, expectedPosDict[exp_pd_k])
 
 	return expectedPosDict
 
@@ -809,7 +809,7 @@ def getExpRegionInLongRead(commonOptions, specifiedOptions, moreOptions):
 			if not reg_info[1]==qnameDict[cur_qname][1]:
 				if commonOptions['outlog'] <= M_WARNING: 
 					print ('Error pos does not match!!! %d=!=%d' % (reg_info[1], qnameDict[cur_qname][1]))
-					print '\t', reg_info, qnameDict[cur_qname][:2], cur_qname
+					print ('\t', reg_info, qnameDict[cur_qname][:2], cur_qname)
 					logging.info(' '.join([('Error pos does not match!!! %d=!=%d' % (reg_info[1], qnameDict[cur_qname][1]))]))
 					logging.info(' '.join(['\t', str(reg_info), str(qnameDict[cur_qname][:2]), cur_qname]))
 			
@@ -846,14 +846,14 @@ def getExpRegionInLongRead(commonOptions, specifiedOptions, moreOptions):
 					print ('Warning!!! cannot find tRegion')
 					if commonOptions['outlog'] <= M_DEBUG:
 						print ('Warning!!! cannot find tRegion %s in %s = orig_seq[exp_pd_k][%d, %d]' % (aainfo, orig_seq[exp_pd_k][cur_split_region_start_end[0]:cur_split_region_start_end[1]], cur_split_region_start_end[0], cur_split_region_start_end[1]) )
-					print ('\texpPosDict[%s]' % exp_pd_k ), expPosDict[exp_pd_k]
-					print ('\tsplitInfo[%s][2]' % exp_pd_k), splitInfo[exp_pd_k][2]
-					print 'treg_info=', reg_info
-					print ('qnameDict[%s]' % cur_qname), qnameDict[cur_qname][:2]
-					print '\t', string.find(orig_seq[exp_pd_k], aainfo, splitInfo[exp_pd_k][2]['>'+cur_qname][0], splitInfo[exp_pd_k][2]['>'+cur_qname][1]), cur_split_region_start_end, cur_qname, exp_pd_k, string.find(getComplementary(myHMM.getBasePair(), orig_seq[exp_pd_k]), aainfo, splitInfo[exp_pd_k][2]['>'+cur_qname][0], splitInfo[exp_pd_k][2]['>'+cur_qname][1])
-					print '\taainfo=', aainfo
-					print '\taainfo=', getComplementary(myHMM.getBasePair(),aainfo)
-					print '\t', orig_seq[exp_pd_k][splitInfo[exp_pd_k][2]['>'+cur_qname][0]:splitInfo[exp_pd_k][2]['>'+cur_qname][1]]
+					print (('\texpPosDict[%s]' % exp_pd_k ), expPosDict[exp_pd_k])
+					print (('\tsplitInfo[%s][2]' % exp_pd_k), splitInfo[exp_pd_k][2])
+					print ('treg_info=', reg_info)
+					print (('qnameDict[%s]' % cur_qname), qnameDict[cur_qname][:2])
+					print ('\t', string.find(orig_seq[exp_pd_k], aainfo, splitInfo[exp_pd_k][2]['>'+cur_qname][0], splitInfo[exp_pd_k][2]['>'+cur_qname][1]), cur_split_region_start_end, cur_qname, exp_pd_k, string.find(getComplementary(myHMM.getBasePair(), orig_seq[exp_pd_k]), aainfo, splitInfo[exp_pd_k][2]['>'+cur_qname][0], splitInfo[exp_pd_k][2]['>'+cur_qname][1]))
+					print ('\taainfo=', aainfo)
+					print ('\taainfo=', getComplementary(myHMM.getBasePair(),aainfo))
+					print ('\t', orig_seq[exp_pd_k][splitInfo[exp_pd_k][2]['>'+cur_qname][0]:splitInfo[exp_pd_k][2]['>'+cur_qname][1]])
 				
 					logging.info(' '.join([('Warning!!! cannot find tRegion %s in %s = orig_seq[exp_pd_k][%d, %d]' % (aainfo, orig_seq[exp_pd_k][cur_split_region_start_end[0]:cur_split_region_start_end[1]], cur_split_region_start_end[0], cur_split_region_start_end[1]) )]))
 					logging.info(' '.join([('\texpPosDict[%s]' % exp_pd_k ), str(expPosDict[exp_pd_k])]))
@@ -886,7 +886,7 @@ def getExpRegionInLongRead(commonOptions, specifiedOptions, moreOptions):
 					else:
 						if commonOptions['outlog'] <= M_WARNING:
 							logging.warning('Warning unknown CIGAR element ' + str(n1) + ' ' + mdi)
-							print 'Warning unknown CIGAR element ' + str(n1) + ' ' + mdi
+							print ('Warning unknown CIGAR element ' + str(n1) + ' ' + mdi)
 
 					if pos_ref-1 < repeat_start_end[0]-repeatFlankLength:
 						cur_start_pos_longread = queryind-1
@@ -918,7 +918,7 @@ def getExpRegionInLongRead(commonOptions, specifiedOptions, moreOptions):
 					print ('Error!!!! cur_end_pos_longread%d greater than %d for %s' % (cur_end_pos_longread, len(orig_seq[exp_pd_k]), exp_pd_k))
 			if exp_pd_k in moreOptions['no_repeat_id_list']:
 				if commonOptions['outlog'] <= M_WARNING:
-					print 'Warning!!! Duplicate no_repeat_id_list', qk
+					print ('Warning!!! Duplicate no_repeat_id_list', qk)
 					logging.info(' '.join(['Warning!!! Duplicate no_repeat_id_list(longer)', qk]))
 			else:
 				moreOptions['no_repeat_id_list'].append(exp_pd_k)
@@ -933,7 +933,7 @@ def getExpRegionInLongRead(commonOptions, specifiedOptions, moreOptions):
 		expRegionInLongRead_keys = expRegionInLongRead.keys();
 		expRegionInLongRead_keys.sort()
 		for epk in expRegionInLongRead_keys:
-			print 'ReLongRe=', epk, expRegionInLongRead[epk]
+			print ('ReLongRe=', epk, expRegionInLongRead[epk])
 
 	return [expRegionInLongRead, wrongalign]
 
@@ -967,7 +967,7 @@ def readRepFASeq(moreOptions):
 			if expPosDict.has_key(curkey):
 				if orig_seq.has_key(curkey):
 					if cur_M_STAT <= M_INFO:
-						print 'Duplicate seq key '+curkey
+						print ('Duplicate seq key '+curkey)
 						logging.info(' '.join(['Duplicate seq key ', curkey]))
 				else:
 					if expPosDict[curkey][1]==-1:
@@ -1052,16 +1052,16 @@ def findRepeatCountALongRead(commonOptions, specifiedOptions, moreOptions):
 			else: logging.warning('The sequence is too long: '+str(len(newstr))+' '+chr+' '+repeatName+' '+repPat+' '+str(currep[0])+' reads name:'+currep_key+" "+str(commonOptions['MaxRep'])+" "+str(commonOptions['MaxRep']*len_repPat))
 			orignial.append([currep[1], pre0, predstats]);
 			if currep[0] and commonOptions['outlog'] <= M_DEBUG: #int(len(newstr)/float(len_repPat)) in [8, 13]: #currep[0] and isTest:
-				print currep_key, ('pred_rep=%.3f' % (len(newstr)/float(len_repPat))),
-				if len(newstr)/float(len_repPat)>80: print 'more than 80'
-				else: print ''
-				print 'HMM1:', 
+				print (currep_key, ('pred_rep=%.3f' % (len(newstr)/float(len_repPat))))
+				if len(newstr)/float(len_repPat)>80: print ('more than 80')
+				else: print ('')
+				print ('HMM1:') 
 				prst = []
 				for i in range(pre0): prst.append('-')
 				prst.append(newstr)
-				print ''.join(prst)
-				print 'HMM2:', predstats
-				print 'HMM3:', currep[1]
+				print (''.join(prst))
+				print ('HMM2:', predstats)
+				print ('HMM3:', currep[1])
 			
 			currep[1] = newstr
 			if currep[0]: #
@@ -1117,7 +1117,7 @@ def detectRepRegion(commonOptions, specifiedOptions, moreOptions):
 		splitfn, spfnbam, splitInfo = splitSAM(uniq_id, commonOptions, moreOptions, specifiedOptions)
 	else: 
 		if commonOptions['outlog'] <= M_ERROR:
-			print 'Wrong type of fafaq '+fafqtype
+			print ('Wrong type of fafaq '+fafqtype)
 			logging.info(' '.join(['Wrong type of fafaq ', str(fafqtype)])) 
 		return repAllesInfo
 		
@@ -1142,7 +1142,7 @@ def getNonRepeatAlignment(commonOptions, specifiedOptions, moreOptions):
 		cmd = (template_bwamem_cmd2 % ('', commonOptions['hgfile'], split_norep_fn, nonRepeat_alignfn_bam))
 		#print 't2', cmd
 		if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-			print cmd;
+			print (cmd);
 			logging.info('getNonRepeatAlignment: '+cmd)
 		os.system(cmd)
 		moreOptions['RemList']['nonRepeat_alignfn_bam'] = nonRepeat_alignfn_bam
@@ -1152,7 +1152,7 @@ def getNonRepeatAlignment(commonOptions, specifiedOptions, moreOptions):
 		os.system(cmd)
 		if not os.path.isfile(nonRepeat_alignfn_bam+'.bai'):
 			if commonOptions['outlog'] <= M_WARNING:
-				print 'Warning!!! no bai file for '+nonRepeat_alignfn_bam
+				print ('Warning!!! no bai file for '+nonRepeat_alignfn_bam)
 				logging.info(' '.join(['Warning!!! no bai file for ', nonRepeat_alignfn_bam]))
 		else:
 			moreOptions['RemList']['nonRepeat_alignfn_bam_bai'] = nonRepeat_alignfn_bam+'.bai'
@@ -1163,7 +1163,7 @@ def getNonRepeatAlignment(commonOptions, specifiedOptions, moreOptions):
 		nonRepeat_alignfn_bam_sp = ''.join([nonRepeat_alignfn_bam,'_sp.sam'])
 		mview = ''.join(['samtools view ', nonRepeat_alignfn_bam, ' ', chr, ':', str(gene_start_end[0]), '-', str(gene_start_end[1]), '>', nonRepeat_alignfn_bam_sp])
 		if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-			if commonOptions['outlog'] <= M_INFO: print 'getNonRepeatAlignment', mview
+			if commonOptions['outlog'] <= M_INFO: print ('getNonRepeatAlignment', mview)
 			logging.info(''.join(['getNonRepeatAlignment', mview]))
 		os.system(mview)
 
@@ -1225,13 +1225,13 @@ def getNonRepeatinLongRead(commonOptions, specifiedOptions, moreOptions):
 		if not (cchr==chr or cchr==chr[3:]):  
 			if commonOptions['outlog'] <= M_WARNING:
 				logging.error('Not same ' + cchr +' ' + chr);
-				print 'Error!!! Not same ' + cchr +' ' + chr
+				print ('Error!!! Not same ' + cchr +' ' + chr)
 			line = non_rep_reader.readline();
 			continue;
 	
 		if (pos_ref > repeat_start_end[0]-repeatFlankLength) and cur_start_pos_longread==-1:
 			if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-				print 'Info: Cannot cover upstream: ', pos_ref, repeat_start_end[0], repeatFlankLength, cur_start_pos_longread
+				print ('Info: Cannot cover upstream: ', pos_ref, repeat_start_end[0], repeatFlankLength, cur_start_pos_longread)
 				logging.info(' '.join(['Info: Cannot cover upstream: ', str(pos_ref), str(repeat_start_end[0]), str(repeatFlankLength), str(cur_start_pos_longread)]))
 			wrongalign += 1;
 			line = non_rep_reader.readline();
@@ -1245,7 +1245,7 @@ def getNonRepeatinLongRead(commonOptions, specifiedOptions, moreOptions):
 		if not len(numinfo)==len(mdiinfo):
 			if commonOptions['outlog'] <= M_INFO:
 				logging.error('Num is equal to mid' +str(len(numinfo)) + ' '+ str(len(mdiinfo)));
-				print 'Num is equal to mid' +str(len(numinfo)) + ' '+ str(len(mdiinfo))
+				print ('Num is equal to mid' +str(len(numinfo)) + ' '+ str(len(mdiinfo)))
 			wrongalign += 1;
 			line = non_rep_reader.readline();
 			continue;
@@ -1271,7 +1271,7 @@ def getNonRepeatinLongRead(commonOptions, specifiedOptions, moreOptions):
 				else:
 					if commonOptions['outlog'] <= M_WARNING:
 						logging.warning('Warning unknown CIGAR element ' + str(n1) + ' ' + mdi)
-						print 'Warning unknown CIGAR element ' + str(n1) + ' ' + mdi
+						print ('Warning unknown CIGAR element ' + str(n1) + ' ' + mdi)
 
 				if pos_ref-1 < repeat_start_end[0]-repeatFlankLength:
 					cur_start_pos_longread = queryind-1;
@@ -1294,7 +1294,7 @@ def getNonRepeatinLongRead(commonOptions, specifiedOptions, moreOptions):
 					nonRepeatinLongRead[exp_pd_k].append([longer, currepregion])
 			else:
 				if commonOptions['outlog'] <= M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-					print 'Warning!! Non-rep too short ', cur_start_pos_longread, cur_end_pos_longread, len(aainfo), currepregion
+					print ('Warning!! Non-rep too short ', cur_start_pos_longread, cur_end_pos_longread, len(aainfo), currepregion)
 		line = non_rep_reader.readline();
 	
 	non_rep_reader.close()
@@ -1309,7 +1309,7 @@ def getRepeatCounts(commonOptions, specifiedOptions, moreOptions):
 		if periodOfinterest - len_repPat>50: periodOfinterest = len_repPat + 50
 		commonOptions['TRFOptions'] = commonOptions['TRFOptions']+'_'+str(periodOfinterest)
 
-	if commonOptions['outlog']<=M_INFO: print 'rep patterns', moreOptions['repPat'], commonOptions['CompRep']
+	if commonOptions['outlog']<=M_INFO: print ('rep patterns', moreOptions['repPat'], commonOptions['CompRep'])
 	logging.info(moreOptions['chr']+' '+str(moreOptions['repeat_start_end']))
 	
 	moreOptions['startpos'] = moreOptions['gene_start_end'][0]
@@ -1333,8 +1333,8 @@ def getRepeatCounts(commonOptions, specifiedOptions, moreOptions):
 	nonRepeatinLongRead = getNonRepeatAlignment(commonOptions, specifiedOptions, moreOptions)
 
 	if commonOptions['outlog'] <= M_INFO:
-		print 'expRegionInLongRead=', str(len(expRegionInLongRead[0])), str(expRegionInLongRead[1]);
-		print 'nonRepeatinLongRead=', str(len(nonRepeatinLongRead[0])), str(nonRepeatinLongRead[1]);
+		print ('expRegionInLongRead=', str(len(expRegionInLongRead[0])), str(expRegionInLongRead[1]));
+		print ('nonRepeatinLongRead=', str(len(nonRepeatinLongRead[0])), str(nonRepeatinLongRead[1]))
 	logging.info(' '.join(['expRegionInLongRead=', str(len(expRegionInLongRead[0])), str(expRegionInLongRead[1])]))
 	logging.info(' '.join(['nonRepeatinLongRead=', str(len(nonRepeatinLongRead[0])), str(nonRepeatinLongRead[1])]))
 	
@@ -1343,7 +1343,7 @@ def getRepeatCounts(commonOptions, specifiedOptions, moreOptions):
 	for nork in norepeatkeys:
 		if expRegionInLongRead[0].has_key(nork):
 			if commonOptions['outlog'] <= M_INFO:
-				print 'Duplicate key in non-repeat:', nork
+				print ('Duplicate key in non-repeat:', nork)
 				logging.info(''.join(['Duplicate key:', nork]));
 		else:
 			expRegionInLongRead[0][nork] = nonRepeatinLongRead[0][nork]
@@ -1363,7 +1363,7 @@ def myrm(moreOptions, specifiedOptions, commonOptions):
 		if os.path.isfile(moreOptions['RemList'][remk]):
 			os.system(rem_cmd)
 			if (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2):
-				if commonOptions['outlog'] <= M_INFO: print remk, rem_cmd
+				if commonOptions['outlog'] <= M_INFO: print (remk, rem_cmd)
 				logging.info(' '.join(['rm', remk, rem_cmd]))
 		del moreOptions[remk]
 	del moreOptions['RemList']
@@ -1432,6 +1432,6 @@ if __name__=='__main__':
 	repcount = getRepeatCounts(commonOptions, specifiedOptions, moreOptions)
 	#detectRepRegion(commonOptions, specifiedOptions, moreOptions)
 	
-	print repcount
+	print (repcount)
 
 

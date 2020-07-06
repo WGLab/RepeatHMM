@@ -47,7 +47,7 @@ def produce_tolerate_mismatch(repPat, commonOptions):
 							#	end_ind = j;
 							#else: af_1 = False;
 					if start_ind==0 and end_ind==0: 
-						if commonOptions['outlog'] <= M_WARNING: print 'Warning!!! both 0', repPat, commonOptions, i, ck
+						if commonOptions['outlog'] <= M_WARNING: print ('Warning!!! both 0 {} {} {} {}'.format( repPat, commonOptions, i, ck))
 					else:
 						rpstr = ''
 						tlstrlist = ['']
@@ -65,7 +65,7 @@ def produce_tolerate_mismatch(repPat, commonOptions):
 										newtlstrlist.append(tlstrlist[k]+ack)
 								tlstrlist = newtlstrlist
 							else:
-								if commonOptions['outlog'] <= M_WARNING: print 'Fatal error zero comprep', j, i+j, commonOptions['CompRep'][i+j], commonOptions['CompRep']
+								if commonOptions['outlog'] <= M_WARNING: print ('Fatal error zero comprep {} {} {} {}'.format( j, i+j, commonOptions['CompRep'][i+j], commonOptions['CompRep']))
 						for atl in tlstrlist:
 							mismatchstr.append(('%s:%s:%d:%d;' % (rpstr, atl, start_ind, end_ind)))
 
@@ -88,7 +88,7 @@ def getTransition_start_emission_prob_x(repPat, commonOptions, forprint=False):
 	else: CompRepPat = commonOptions['CompRep']
 
 	tol_info = produce_tolerate_mismatch(repPat, commonOptions)
-	if commonOptions['outlog'] <= M_INFO: print 'tol_info', tol_info
+	if commonOptions['outlog'] <= M_INFO: print ('tol_info={}'.format( tol_info))
 	logging.info('tol_info=' + str(tol_info))
 
 	avgsub = 0.0005
@@ -217,7 +217,7 @@ def getTransition_start_emission_prob_x(repPat, commonOptions, forprint=False):
 
 	if forprint:
 		if commonOptions['outlog'] <= M_INFO: 
-			print 'HMMmatrix1'
+			print ('HMMmatrix1')
 			printHMMmatrix.printHMMmatrix(states, obs_symbols, trainsmat, emisionmat, startprob)
 
 	state3class = [range(1, len_repPat+1), range(len_repPat+1, 2*len_repPat+1), range(2*len_repPat+1, 3*len_repPat+1)]
@@ -270,7 +270,7 @@ def CompareTwoNumpyArrays(matnames, matindex, fun, matorg, matx):
 		a1 = matorg[matindex[mid]];  a2 = matx[matindex[mid]]
 		print matnames[mid],
 		if fun(a1, a2):
-			print ': Same'
+			print (': Same')
 
 def compareMat(matorg, matx):
 	matnames = ['trainsmat', 'emisionmat']
@@ -283,14 +283,14 @@ def compareMat(matorg, matx):
 
 	CompareTwoNumpyArrays(['states'], [4], compareTwoMat1, matorg, matx)
 
-	if matorg[5]==matx[5]: print 'state_num is same'
+	if matorg[5]==matx[5]: print ('state_num is same')
 	else: print ('state_num is not same: %d, %d' % (matorg[5], matx[5]))
-	if matorg[6]==matx[6]: print 'state_num is same'
+	if matorg[6]==matx[6]: print ('state_num is same')
 	else: print ('symbols_num is not same: %d, %d' % (matorg[6], matx[6]))
 	
-	print 'state3class',
+	print ('state3class')
 	if compareTwoMat(matorg[7], matx[7]):
-		print ': Same'
+		print ('\t: Same')
 	
 
 if __name__=='__main__':
@@ -302,17 +302,17 @@ if __name__=='__main__':
 	commonOptions['hmm_del_rate'] = 0.02
 	commonOptions['hmm_insert_rate'] = 0.11
 	
-	print 'len(Pattern) = 4'
+	print ('len(Pattern) = 4')
 	matx4   = getTransition_start_emission_prob_x('TATC', commonOptions, wouldprint);
-	print '\nlen(Pattern) = 3'
+	print ('\nlen(Pattern) = 3')
 	matx3   = getTransition_start_emission_prob_x('CAG', commonOptions, wouldprint);
-	print '\nlen(Pattern) = 2'
+	print ('\nlen(Pattern) = 2')
 	matx2   = getTransition_start_emission_prob_x('CG', commonOptions, wouldprint);
 	
-	print '\nlen(Pattern) = 5'
+	print ('\nlen(Pattern) = 5')
 	matx5   = getTransition_start_emission_prob_x('TATCG', commonOptions, wouldprint);
 
-	print '\nlen(Pattern) = 6'
+	print ('\nlen(Pattern) = 6')
 	matx6   = getTransition_start_emission_prob_x('TATCGG', commonOptions, wouldprint);
 
 	wouldprint = True; wouldprint = False;
@@ -323,23 +323,23 @@ if __name__=='__main__':
 	commonOptions['CompRep'] = printHMMmatrix.getCompRep(commonOptions['CompRep'])
 	matxy = getTransition_start_emission_prob_x('ATTCT', commonOptions, wouldprint)
 	
-	print '\n\ncomplex'
+	print ('\n\ncomplex')
 	matxy = getTransition_start_emission_prob_x('', commonOptions, wouldprint)
 
 	commonOptions['CompRep'] = '0'
 	matx1   = getTransition_start_emission_prob_x('CG', commonOptions, wouldprint);
 	matx6   = getTransition_start_emission_prob_x('TATCGG', commonOptions, wouldprint)
-	print matx6[0][-1]
+	print (matx6[0][-1])
 
 
 	wouldprint = True; wouldprint = False; 
 	commonOptions['CompRep'] = 'AlTlT40/C50/A10lClT/C'
 	commonOptions['CompRep'] = printHMMmatrix.getCompRep(commonOptions['CompRep'])
 	matxy = getTransition_start_emission_prob_x('', commonOptions, wouldprint)
-	print matxy[-1]
+	print (matxy[-1])
 
 	commonOptions['CompRep'] = 'ClAlA40/G60'
 	commonOptions['CompRep'] = printHMMmatrix.getCompRep(commonOptions['CompRep'])
 	matxy = getTransition_start_emission_prob_x('', commonOptions, wouldprint)
-	print matxy[-1]
+	print (matxy[-1])
 
