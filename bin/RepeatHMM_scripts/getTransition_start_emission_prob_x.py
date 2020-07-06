@@ -269,7 +269,7 @@ def compareTwoMat1(a1, a2):
 def CompareTwoNumpyArrays(matnames, matindex, fun, matorg, matx):
 	for mid in range(len(matnames)):
 		a1 = matorg[matindex[mid]];  a2 = matx[matindex[mid]]
-		print matnames[mid],
+		print (matnames[mid]),;
 		if fun(a1, a2):
 			print (': Same')
 

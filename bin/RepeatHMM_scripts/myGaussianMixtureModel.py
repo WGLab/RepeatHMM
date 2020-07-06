@@ -279,14 +279,14 @@ def myGMM(lendict, MinSup=2, mparameters=None, commonoptions=None):
 					if aic==np.argmin(AIC):
 						print ('<%.3f>' % (AIC[aic])),
 					else:	print (' %.3f ' % (AIC[aic])),
-				print ''
+				print ('')
 				if calbic:
 					print ('bic', np.argmin(BIC)),
 					for bic in range(len(BIC)):
 						if bic==np.argmin(BIC):
 							print ('<%.3f>' % (BIC[bic])),
 						else: print (' %.3f ' % (BIC[bic])),
-					print ''
+					print ('')
 			
 			if 0<np.argmin(AIC)<len(AIC)-1: 
 				atedge = False;
