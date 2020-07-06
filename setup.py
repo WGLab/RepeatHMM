@@ -22,7 +22,7 @@ setuptools.setup(
     url="https://github.com/WGLab/RepeatHMM",
     #packages=setuptools.find_packages(),
     packages=['RepeatHMM_scripts', 'RepeatHMM_scripts.UnsymmetricPairAlignment'],
-    #package_dir={'RepeatHMM_scripts': 'bin/RepeatHMM_scripts' },
+    package_dir={'RepeatHMM_scripts': 'bin/RepeatHMM_scripts'; "RepeatHMM_scripts.UnsymmetricPairAlignment":'bin/RepeatHMM_scripts/UnsymmetricPairAlignment' },
     scripts=['bin/repeatHMM.py'],
     package_data={'RepeatHMM_scripts.UnsymmetricPairAlignment': ['bin/RepeatHMM_scripts/UnsymmetricPairAlignment/_UnsymmetricPairAlignment.so']},
     classifiers=[
