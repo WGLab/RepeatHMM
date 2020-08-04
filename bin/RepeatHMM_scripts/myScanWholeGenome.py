@@ -620,7 +620,7 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 	if not os.path.isfile(specifiedOptions["bamfile"]):
 		print ('Error!! not bam file', specifiedOptions["bamfile"])
 
-	if (commonOptions['SplitAndReAlign'] in [0,2]) or testall:
+	if (commonOptions['SplitAndReAlign'] in [0,2]) or myheader.testall:
 		start_time = time.time();
 		if commonOptions['outlog'] <= myheader.M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm start')
 		if os.path.isfile(specifiedOptions["bamfile"]):
@@ -640,7 +640,7 @@ def detectRepCounts(commonOptions, specifiedOptions, moreOptions):
 	gc.collect()
 	#mtracker.print_diff()
 
-	if ((commonOptions['SplitAndReAlign'] in [1,2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
+	if ((commonOptions['SplitAndReAlign'] in [1,2]) or myheader.testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
 		start_time = time.time();
 		if commonOptions['outlog'] <= myheader.M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2sp start')
 		moreOptions['fafqfile'] = specifiedOptions["bamfile"]

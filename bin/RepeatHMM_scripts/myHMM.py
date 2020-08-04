@@ -154,7 +154,7 @@ def add_start(large_start_ind, large_end_ind, newstr, predstats, patlen, stategr
 		if not stategrouplist[large_start_ind+1]==0:
 			if myheader.cur_M_STAT <= myheader.M_WARNING: print ('In hmm Wrong split f', predstats, newstr, large_start_ind, large_start_ind+1, large_end_ind)
 		next_0_len = len(newstr[large_start_ind+1])
-		if cur_rep_len/float(next_0_len)<repover0 and cur_rep_len/float(patlen)<len_isolated_repeat:
+		if cur_rep_len/float(next_0_len)<repover0 and cur_rep_len/float(patlen)<myheader.len_isolated_repeat:
 			large_start_ind += 2;
 			rem = True;
 	return [large_start_ind, large_end_ind, rem]
@@ -166,7 +166,7 @@ def add_end(large_start_ind, large_end_ind, newstr, predstats, patlen, stategrou
 		if not stategrouplist[large_end_ind-1]==0:
 			if myheader.cur_M_STAT <= myheader.M_WARNING: print ('In hmm Wrong split b', predstats, newstr, large_start_ind, large_end_ind-1, large_end_ind)
 		next_0_len = len(newstr[large_end_ind-1])
-		if cur_rep_len/float(next_0_len)<repover0 and cur_rep_len/float(patlen)<len_isolated_repeat:
+		if cur_rep_len/float(next_0_len)<repover0 and cur_rep_len/float(patlen)<myheader.len_isolated_repeat:
 			large_end_ind -= 2
 			rem = True;
 	return [large_start_ind, large_end_ind, rem]

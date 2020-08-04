@@ -624,7 +624,7 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
 
     myret = {}
     myretdetail = {}
-    if (commonOptions['SplitAndReAlign'] in [0, 2]) or testall:
+    if (commonOptions['SplitAndReAlign'] in [0, 2]) or myheader.testall:
         start_time = time.time()
         if commonOptions['outlog'] <= myheader.M_INFO and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2bamhmm start')
@@ -641,7 +641,7 @@ def getRepeatForKnownGene(commonOptions, specifiedOptions, moreOptions={}):
         if commonOptions['outlog'] <= myheader.M_WARNING and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):
             print('p2bamhmm end---running time%.0f mem%d' % (end_time - start_time, memres))
             sys.stdout.flush()
-    if ((commonOptions['SplitAndReAlign'] in [1, 2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
+    if ((commonOptions['SplitAndReAlign'] in [1, 2]) or myheader.testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
         from . import myRepeatReAlignment
         start_time = time.time()
         if commonOptions['outlog'] <= myheader.M_INFO and ('thread' not in specifiedOptions or specifiedOptions['thread']<2):

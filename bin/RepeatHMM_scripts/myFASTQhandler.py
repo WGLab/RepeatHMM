@@ -90,7 +90,7 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 	logging.info(cmd);
 	os.system(cmd)
 
-	if (commonOptions['SplitAndReAlign'] in [0,2]) or testall:
+	if (commonOptions['SplitAndReAlign'] in [0,2]) or myheader.testall:
 		start_time = time.time();	
 		if commonOptions['outlog'] <= myheader.M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm start'); sys.stdout.flush()
 		p2bamhmm = myBAMhandler.getRepeatForGivenGene(commonOptions, specifiedOptions, moreOptions)
@@ -104,7 +104,7 @@ def getSCA3ForGivenGene(commonOptions, specifiedOptions, moreOptions):
 		end_time = time.time();
 		if commonOptions['outlog'] <= myheader.M_WARNING and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('p2bamhmm end---running time%.0f mem%d' % (end_time-start_time, memres)); sys.stdout.flush()
 
-	if ((commonOptions['SplitAndReAlign'] in [1,2]) or testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
+	if ((commonOptions['SplitAndReAlign'] in [1,2]) or myheader.testall) and (commonOptions['SeqTech'] not in ["Illumina"]):
 		start_time = time.time();
 		if commonOptions['outlog'] <= myheader.M_INFO and (not specifiedOptions.has_key('thread') or specifiedOptions['thread']<2): print ('start p2sp'); sys.stdout.flush()
 
