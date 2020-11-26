@@ -39,7 +39,7 @@ You can also prepare the environment using the guideline below.
 	* git clone https://github.com/WGLab/RepeatHMM
 
 ## Step 2:
-	* go to bin/scripts/UnsymmetricPairAlignment
+	* go to bin/RepeatHMM_scripts/UnsymmetricPairAlignment
 	* type "make" and then enter
 
 ## Usage:
