@@ -9,7 +9,7 @@
 cd RepeatHMM
 conda env create -f environment.yml
 source activate repeathmmenv
-cd bin/scripts/UnsymmetricPairAlignment
+cd bin/RepeatHMM_scripts/UnsymmetricPairAlignment
 make
 cd ../../../
 ```
