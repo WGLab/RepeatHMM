@@ -45,7 +45,7 @@ Users can try other installation options at [here](https://github.com/WGLab/Repe
 
 Please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md) for how to use RepeatHMM.
 
-A simple testing is given below
+A simple example to run is given below
 ```
 wget https://github.com/WGLab/RepeatHMM/releases/download/v2.0.3/SRR5363632.fastq.tar.gz
 tar -xvf SRR5363632.fastq.tar.gz
