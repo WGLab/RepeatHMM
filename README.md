@@ -26,6 +26,13 @@ RepeatHMM takes long reads from a subject as input, and can also take a BAM file
 
 Please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md) for how to use RepeatHMM.
 
+A simple testing is given below
+```
+wget https://github.com/WGLab/RepeatHMM/releases/download/v2.0.3/SRR5363632.fastq.tar.gz
+tar -xvf SRR5363632.fastq.tar.gz
+python RepeatHMM/bin/repeatHMM.py FASTQinput --repeatName atxn3 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID sca3_pcr25_raw_test --fastq SRR5363632.fastq --outFolder logfq --Patternfile RepeatHMM/bin/reference_sts/hg38/hg38.predefined.pa --hgfile hg38/hg38.fa --hg hg38 
+```
+
 ## Revision History
 
 For release history, please visit [here](https://github.com/WGLab/RepeatHMM/releases). For details, please go [here](https://github.com/WGLab/RepeatHMM/blob/master/README.md).
