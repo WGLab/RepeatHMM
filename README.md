@@ -22,6 +22,25 @@ RepeatHMM was evaluated on both random simulation and PCR-based simulation for l
 
 RepeatHMM takes long reads from a subject as input, and can also take a BAM file as input to find more than 10 predefined trinucleotide repeats or a gene given by users, after all reads were well aligned to a reference genome. 
 
+## Quick installation
+
+1. Download RepeatHMM
+
+`git clone https://github.com/WGLab/RepeatHMM`
+
+2. Create conda environment.
+```
+cd RepeatHMM
+conda env create -f environment.yml
+source activate repeathmmenv
+cd bin/RepeatHMM_scripts/UnsymmetricPairAlignment
+make
+cd ../../../
+```
+Then, you can use run RepeatHMM by `python bin/repeatHMM.py`.
+
+Users can try other installation options at [here](https://github.com/WGLab/RepeatHMM/blob/master/docs/Install.md) if they have issues in the installation process above.
+
 ## Usage
 
 Please refer to [Usage](https://github.com/WGLab/RepeatHMM/blob/master/docs/Usage.md) for how to use RepeatHMM.
@@ -30,6 +49,7 @@ A simple testing is given below
 ```
 wget https://github.com/WGLab/RepeatHMM/releases/download/v2.0.3/SRR5363632.fastq.tar.gz
 tar -xvf SRR5363632.fastq.tar.gz
+source activate repeathmmenv
 python RepeatHMM/bin/repeatHMM.py FASTQinput --repeatName atxn3 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID sca3_pcr25_raw_test --fastq SRR5363632.fastq --outFolder logfq --Patternfile RepeatHMM/bin/reference_sts/hg38/hg38.predefined.pa --hgfile hg38/hg38.fa --hg hg38 
 ```
 
