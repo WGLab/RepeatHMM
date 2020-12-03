@@ -122,7 +122,7 @@ For example,
      python RepeatHMM/bin/repeatHMM.py FASTQinput --fastq XXX.fq --repeatName HTT --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID PCR1;
      python RepeatHMM/bin/repeatHMM.py FASTQinput --repeatName atxn3 --GapCorrection 1 --FlankLength 30 --UserDefinedUniqID sca3_pcr25_raw_test --fastq SRR5363632.fastq --outFolder logfq --Patternfile RepeatHMM/bin/reference_sts/hg38/hg38.predefined.pa --hgfile hg38/hg38.fa --hg hg38 
 ```
-where `hg38/hg38.fa` is the hg38 human reference genome. To run the example above, users need to install `fastq-dump` and then use `fastq-dump SRR5363632` to download fastq file to `SRR5363632.fastq` , or users can download it using `wge https://github.com/WGLab/RepeatHMM/releases/download/v2.0.3/SRR5363632.fastq.tar.gz` and then untar and unzip it. 
+where `hg38/hg38.fa` is the hg38 human reference genome. To run the example above, users need to install `fastq-dump` and then use `fastq-dump SRR5363632` to download fastq file to `SRR5363632.fastq` , or users can download it using `wget https://github.com/WGLab/RepeatHMM/releases/download/v2.0.3/SRR5363632.fastq.tar.gz` and then untar and unzip it. 
 
 ### Where to find the result:
 Final results was stored in logfq/RepFQ_*.log
