@@ -63,5 +63,7 @@ If you have any questions/issues/bugs, please post them on [GitHub](https://gith
 
 ## Reference
 **Please cite the publication below if you use our tool:**
-
+### Use the general function in RepeathMM, please cite:
 Qian Liu, Peng Zhang, Depeng Wang, Weihong Gu and Kai Wang. Interrogating the "unsequenceable" genomic trinucleotide repeat disorders by long-read sequencing. Genome Med. 9(1):65, 2017. doi: 10.1186/s13073-017-0456-7.
+### Use the scan function and RepeatHMM-DB, please cite:
+Qian Liu, Yao Tong and Kai Wang. Genome-wide detection of short tandem repeat expansions by long-read sequencing. BMC Bioinformatics 21:542 (2020)
